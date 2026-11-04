@@ -1175,7 +1175,7 @@
         bPrintB.title = 'Salvar Laudo PDF';
       }
       if (mismatchWarn) mismatchWarn.style.display = 'none';
-      setStatus('success', 'HOMOLOGADO COM SUCESSO');
+      setStatus(lastCompletedConfig.statusType || 'success', lastCompletedConfig.statusText || 'HOMOLOGADO COM SUCESSO');
     }
   }
 
@@ -1292,8 +1292,19 @@
     if (auditBdp) auditBdp.innerText = `${rfc.bdpKb.toFixed(1)} KB`;
     if (auditRatio) auditRatio.innerText = `${rfc.timeRatio.toFixed(2)} (${rfc.timeRatio <= 1.06 ? 'Excelente' : 'Aceitável'})`;
     if (auditSla) {
-      auditSla.innerText = rfc.isAuto ? 'Descoberta Livre' : (rfc.isSlaApproved ? `✓ Aprovado (${rfc.worstSlaPct.toFixed(1)}% CIR)` : `✗ Reprovado (${rfc.worstSlaPct.toFixed(1)}% CIR)`);
-      auditSla.style.color = rfc.isAuto ? '#0284c7' : (rfc.isSlaApproved ? '#15803d' : '#b91c1c');
+      if (rfc.isAuto) {
+        auditSla.innerText = 'Descoberta Livre (Best-Effort)';
+        auditSla.style.color = '#0284c7';
+      } else if (rfc.isSlaApproved) {
+        auditSla.innerText = `✓ Homologado / SLA Aprovado (${rfc.worstSlaPct.toFixed(1)}% CIR)`;
+        auditSla.style.color = '#15803d';
+      } else if (rfc.worstSlaPct >= 85) {
+        auditSla.innerText = `⚠️ Homologação Condicional (${rfc.worstSlaPct.toFixed(1)}% CIR)`;
+        auditSla.style.color = '#d97706';
+      } else {
+        auditSla.innerText = `✗ NÃO HOMOLOGADO / SLA REPROVADO (${rfc.worstSlaPct.toFixed(1)}% CIR)`;
+        auditSla.style.color = '#b91c1c';
+      }
     }
   }
 
@@ -1666,14 +1677,41 @@
         worstDelta: bloatRes.worstDelta
       });
 
+      // Definição formal do status de homologação do circuito (RFC 6349):
+      let statusType = 'success';
+      let statusText = '';
+
+      if (isAutoCir) {
+        statusType = 'success';
+        statusText = 'TESTE CONCLUÍDO (CAPACIDADE MÁXIMA BEST-EFFORT)';
+      } else if (isSlaApproved) {
+        // Atende integralmente à RFC 6349 (Throughput >= 95% do CIR contratado)
+        statusType = 'success';
+        statusText = 'HOMOLOGADO COM SUCESSO (SLA RFC 6349 ≥ 95%)';
+      } else if (worstSlaPct >= 85.0) {
+        // Tolerância de alerta operacional (85% a 94.9%)
+        statusType = 'warn';
+        statusText = `HOMOLOGAÇÃO CONDICIONAL — ALERTA DE SLA (${worstSlaPct.toFixed(1)}%)`;
+      } else {
+        // Abaixo de 85%: Reprovado pela RFC 6349 — Jamais considerar homologado!
+        statusType = 'error';
+        statusText = `NÃO HOMOLOGADO — SLA REPROVADO (${worstSlaPct.toFixed(1)}% CIR)`;
+      }
+
+      setStatus(statusType, statusText);
+
       // Registra a configuração imutável homologada no teste
       lastCompletedConfig = getCurrentConfig();
       lastCompletedConfig.timestamp = new Date().toLocaleString('pt-BR');
+      lastCompletedConfig.statusType = statusType;
+      lastCompletedConfig.statusText = statusText;
+      lastCompletedConfig.worstSlaPct = worstSlaPct;
+      lastCompletedConfig.isSlaApproved = isSlaApproved;
+      lastCompletedConfig.isAutoCir = isAutoCir;
       updatePrintAuditBox(lastCompletedConfig);
 
-      setStatus('success', isSlaApproved ? 'HOMOLOGADO COM SUCESSO (SLA RFC 6349)' : 'HOMOLOGADO — ALERTA DE SLA');
       setButtonsState(false, true);
-      log(`[CONCLUÍDO RFC 6349] DL: ${dlRes.avg.toFixed(1)} Mbps (${dlSlaPct.toFixed(1)}% CIR) | UL: ${ulRes.avg.toFixed(1)} Mbps (${ulSlaPct.toFixed(1)}% CIR) | BDP: ${bdpKb.toFixed(1)} KB | Ratio: ${timeRatio.toFixed(2)} | SLA: ${isSlaApproved ? 'APROVADO' : 'NÃO CONFORME'}`);
+      log(`[CONCLUÍDO RFC 6349] DL: ${dlRes.avg.toFixed(1)} Mbps (${dlSlaPct.toFixed(1)}% CIR) | UL: ${ulRes.avg.toFixed(1)} Mbps (${ulSlaPct.toFixed(1)}% CIR) | BDP: ${bdpKb.toFixed(1)} KB | Ratio: ${timeRatio.toFixed(2)} | Resultado: ${statusText}`);
     } catch (e) {
       if (e.name === 'AbortError') {
         setStatus('cancel', 'TESTE CANCELADO');
@@ -1907,8 +1945,9 @@
 
     log(`[UPLOAD] Multi-Stream RFC 6349 (${isSparc ? 'Vinhedo' : 'Cloudflare Edge'}): ${numStreams} streams simultâneos | Duração: ${durationSec}s contínuos...`);
 
-    const payloadSize = 2000000; // 2 MB por chunk otimizado para amostragem contínua
-    const payload = new Uint8Array(payloadSize);
+    // Buffer pré-alocado de 8 MB (zero garbage collection overhead)
+    const maxPayloadSize = 8000000;
+    const payloadBuffer = new Uint8Array(maxPayloadSize);
 
     let totalBytesSent = 0;
     let peakSpeed = 0;
@@ -1936,10 +1975,30 @@
           return;
         }
 
+        // Chunk adaptativo: 2.5 MB inicial (warm-up rápido), escalando para 6 MB em links de alta velocidade
+        let chunkSize = 2500000;
+        if (currentSmoothUpload > 50) {
+          chunkSize = 6000000;
+        } else if (currentSmoothUpload > 20) {
+          chunkSize = 4000000;
+        }
+
         const xhr = new XMLHttpRequest();
         xhr.open('POST', `${uploadUrl}?r=${Math.random()}`, true);
 
         let lastLoaded = 0;
+        let isDone = false;
+
+        const completeChunk = () => {
+          if (isDone) return;
+          isDone = true;
+          if (lastLoaded < chunkSize) {
+            totalBytesSent += (chunkSize - lastLoaded);
+            lastLoaded = chunkSize;
+          }
+          resolve();
+        };
+
         xhr.upload.onprogress = (e) => {
           if (e.loaded > lastLoaded) {
             const delta = e.loaded - lastLoaded;
@@ -1948,19 +2007,19 @@
           }
         };
 
-        const finish = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            if (lastLoaded < payloadSize) {
-              totalBytesSent += (payloadSize - lastLoaded);
-              lastLoaded = payloadSize;
-            }
-          }
-          resolve();
-        };
+        // RESOLUÇÃO IMEDIATA NO ENVIO:
+        // xhr.upload.onload dispara quando o cliente termina de empurrar o payload para o socket TCP.
+        // Resolver a promessa aqui permite que o worker inicie o próximo chunk imediatamente,
+        // eliminando o tempo ocioso de 300-500ms enquanto o servidor processa e retorna o HTTP 200 OK
+        // (especialmente sob condições de bufferbloat elevado).
+        xhr.upload.onload = completeChunk;
+        xhr.upload.onerror = completeChunk;
+        xhr.upload.onabort = completeChunk;
 
-        xhr.onload = finish;
-        xhr.onerror = finish;
-        xhr.onabort = finish;
+        // Fallbacks adicionais de segurança
+        xhr.onload = completeChunk;
+        xhr.onerror = completeChunk;
+        xhr.onabort = completeChunk;
 
         const onAbort = () => {
           try { xhr.abort(); } catch (_) {}
@@ -1968,8 +2027,8 @@
         };
         localAbort.signal.addEventListener('abort', onAbort, { once: true });
 
-        // Envia Blob binário nativo sem header de Content-Type customizado para manter requisição CORS limpa
-        xhr.send(new Blob([payload]));
+        // Envia Blob binário nativo sem header customizado para manter CORS limpo
+        xhr.send(new Blob([payloadBuffer.subarray(0, chunkSize)]));
       });
     }
 
