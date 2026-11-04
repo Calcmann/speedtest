@@ -513,22 +513,47 @@
           <option value="all">🔬 Modo Diagnóstico Completo (Imprimir Todos)</option>
         </select>
       </div>
+
+      <!-- ARBITRAGEM DE BANDA / CIR (RFC 6349) -->
+      <div>
+        <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">🎯 Banda Contratada / CIR (SLA RFC 6349):</label>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <select id="cbCirPreset" onchange="onCirPresetChange()" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; flex: 1; cursor: pointer;">
+            <option value="auto">⭐ [AUTO] Descoberta Livre (Best-Effort)</option>
+            <option value="10">10 Mbps (Link Legado / E1)</option>
+            <option value="20">20 Mbps (Link Corporativo)</option>
+            <option value="50">50 Mbps (Banda Básica)</option>
+            <option value="100" selected>100 Mbps (Padrão Telecom)</option>
+            <option value="200">200 Mbps (Média Escala)</option>
+            <option value="300">300 Mbps (Fibra Alta Vazão)</option>
+            <option value="500">500 Mbps (Ultra Banda Larga)</option>
+            <option value="1000">1.0 Gbps (Gigabit Carrier-Grade)</option>
+            <option value="custom">✏️ Personalizado (Arbitrar Valor...)</option>
+          </select>
+          <div id="boxCustomCir" style="display: none; align-items: center; gap: 3px;">
+            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 72px; background: #0f172a; border: 1.5px solid var(--cyan); color: #fff; padding: 7px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
+            <span style="font-size: 10px; font-weight: 700; color: var(--text-muted);">Mbps</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- AUDITORIA DE PARÂMETROS HOMOLOGADOS (EXIBIDO EXCLUSIVAMENTE NO LAUDO PDF/IMPRESSÃO) -->
+  <!-- AUDITORIA DE PARÂMETROS & SLA HOMOLOGADOS (EXIBIDO EXCLUSIVAMENTE NO LAUDO PDF/IMPRESSÃO) -->
   <div id="printAuditSummary" style="display: none; margin-bottom: 14px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 16px; font-size: 11px; background: #f8fafc; color: #0f172a;">
     <div style="font-weight: 800; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; color: #1e293b; border-bottom: 1.5px solid #94a3b8; padding-bottom: 4px; display: flex; justify-content: space-between;">
-      <span>📋 LAUDO OFICIAL DE TELEMETRIA RFC 6349 — PARÂMETROS HOMOLOGADOS</span>
+      <span>📋 LAUDO OFICIAL DE TELEMETRIA RFC 6349 — AUDITORIA DE CIRCUITO & SLA</span>
       <span id="auditTimestamp" style="color: #475569; font-weight: 600;">—</span>
     </div>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; line-height: 1.4;">
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; line-height: 1.4;">
       <div><strong>Provedor / Motor:</strong> <span id="auditProvider">—</span></div>
       <div><strong>Servidor Alvo:</strong> <span id="auditServer">—</span></div>
       <div><strong>Conexões Concorrentes:</strong> <span id="auditStreams">—</span></div>
       <div><strong>Duração da Saturação:</strong> <span id="auditDuration">—</span></div>
-      <div><strong>Métrica Bufferbloat:</strong> <span id="auditBloat">—</span></div>
-      <div><strong>Autenticidade do Teste:</strong> <span style="color: #10b981; font-weight: 800;">✓ 100% Invariável / Auditado</span></div>
+      <div><strong>Banda Contratada (CIR):</strong> <span id="auditCir" style="font-weight: 800; color: #0f172a;">—</span></div>
+      <div><strong>BDP Teórico (Janela TCP):</strong> <span id="auditBdp" style="font-weight: 800; color: #0284c7;">—</span></div>
+      <div><strong>TCP Transfer Ratio:</strong> <span id="auditRatio" style="font-weight: 800;">—</span></div>
+      <div><strong>Status SLA RFC 6349:</strong> <span id="auditSlaStatus" style="font-weight: 900;">—</span></div>
     </div>
   </div>
 
@@ -629,6 +654,50 @@
     </div>
   </div>
 
+  <!-- PAINEL OFICIAL DE AUDITORIA DE SLA RFC 6349 -->
+  <div class="rfc6349-card" id="rfc6349Card" style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #3b82f6, #06b6d4, #10b981);"></div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 14px;">🎯</span>
+        <span style="font-size: 12px; font-weight: 800; color: #fff; letter-spacing: 0.5px;">AUDITORIA DE CIRCUITO & HOMOLOGAÇÃO DE SLA (RFC 6349)</span>
+      </div>
+      <div id="rfcSlaBadge" style="background: #1e293b; border: 1px solid #334155; color: #94a3b8; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">
+        Aguardando Início do Teste
+      </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; font-size: 11.5px;">
+      <!-- CIR e Atingimento SLA -->
+      <div style="background: #090d16; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 12px;">
+        <div style="color: var(--text-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 3px;">Banda Contratada (CIR)</div>
+        <div style="font-size: 16px; font-weight: 900; color: #fff;" id="rfcCirVal">—</div>
+        <div style="font-size: 10.5px; font-weight: 700; margin-top: 3px; color: var(--text-muted);" id="rfcSlaPct">SLA Target: ≥95%</div>
+      </div>
+
+      <!-- BDP (Bandwidth-Delay Product) -->
+      <div style="background: #090d16; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 12px;">
+        <div style="color: var(--text-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 3px;">BDP (Janela TCP Teórica)</div>
+        <div style="font-size: 16px; font-weight: 900; color: var(--cyan);" id="rfcBdpVal">—</div>
+        <div style="font-size: 10px; color: var(--text-muted); margin-top: 3px;" id="rfcBdpSub">Buffer ideal em trânsito</div>
+      </div>
+
+      <!-- TCP Transfer Time Ratio -->
+      <div style="background: #090d16; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 12px;">
+        <div style="color: var(--text-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 3px;">Transfer Time Ratio</div>
+        <div style="font-size: 16px; font-weight: 900; color: #fff;" id="rfcRatioVal">—</div>
+        <div style="font-size: 10px; color: var(--text-muted); margin-top: 3px;" id="rfcRatioSub">Ideal: ≤ 1.05 (T_real / T_ideal)</div>
+      </div>
+
+      <!-- Buffer Delay (%) -->
+      <div style="background: #090d16; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 12px;">
+        <div style="color: var(--text-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 3px;">Buffer Delay RFC 6349</div>
+        <div style="font-size: 16px; font-weight: 900; color: var(--green);" id="rfcBufferDelayVal">—</div>
+        <div style="font-size: 10px; color: var(--text-muted); margin-top: 3px;" id="rfcBufferDelaySub">Incremento RTT sob estresse</div>
+      </div>
+    </div>
+  </div>
+
   <!-- CANVAS GRÁFICO -->
   <div class="chart-card">
     <div class="chart-header">
@@ -715,6 +784,9 @@
     logBox.innerHTML += `\n[${time}] ${msg}`;
     logBox.scrollTop = logBox.scrollHeight;
   }
+
+  const PARAM_INPUT_IDS = ['cbProvider', 'cbServers', 'cbStreams', 'cbTestDuration', 'cbBloatMetric', 'cbCirPreset', 'txtCustomCir'];
+  let lastCompletedConfig = null;
 
   // Inicialização e Descoberta Geodésica
   window.addEventListener('DOMContentLoaded', async () => {
@@ -1014,16 +1086,45 @@
     return 2 * R * Math.asin(Math.sqrt(a));
   }
 
-  const PARAM_INPUT_IDS = ['cbProvider', 'cbServers', 'cbStreams', 'cbTestDuration', 'cbBloatMetric'];
-  let lastCompletedConfig = null;
+  function onCirPresetChange() {
+    const val = document.getElementById('cbCirPreset')?.value;
+    const box = document.getElementById('boxCustomCir');
+    const txt = document.getElementById('txtCustomCir');
+    if (box) box.style.display = (val === 'custom') ? 'flex' : 'none';
+    if (val === 'custom' && txt) txt.focus();
+    checkConfigConsistency();
+  }
+
+  function onCustomCirInput() {
+    checkConfigConsistency();
+  }
 
   function getCurrentConfig() {
+    const cirPreset = document.getElementById('cbCirPreset')?.value || '100';
+    const customCir = document.getElementById('txtCustomCir')?.value || '';
+    let cirNominal = 0;
+    let cirLabel = '';
+    if (cirPreset === 'custom') {
+      cirNominal = parseFloat(customCir) || 100;
+      cirLabel = `${cirNominal} Mbps (Custom)`;
+    } else if (cirPreset === 'auto') {
+      cirNominal = 0;
+      cirLabel = 'Auto (Best-Effort)';
+    } else {
+      cirNominal = parseFloat(cirPreset) || 100;
+      cirLabel = `${cirNominal} Mbps`;
+    }
+
     return {
       provider: document.getElementById('cbProvider')?.value || '',
       server: document.getElementById('cbServers')?.value || '',
       streams: document.getElementById('cbStreams')?.value || '',
       duration: document.getElementById('cbTestDuration')?.value || '',
       bloatMetric: document.getElementById('cbBloatMetric')?.value || '',
+      cirPreset: cirPreset,
+      customCir: customCir,
+      cirNominal: cirNominal,
+      cirLabel: cirLabel,
       providerText: document.getElementById('cbProvider')?.selectedOptions[0]?.text || '',
       serverText: document.getElementById('cbServers')?.selectedOptions[0]?.text || '',
       streamsText: document.getElementById('cbStreams')?.selectedOptions[0]?.text || '',
@@ -1040,7 +1141,9 @@
       cur.server !== lastCompletedConfig.server ||
       cur.streams !== lastCompletedConfig.streams ||
       cur.duration !== lastCompletedConfig.duration ||
-      cur.bloatMetric !== lastCompletedConfig.bloatMetric
+      cur.bloatMetric !== lastCompletedConfig.bloatMetric ||
+      cur.cirPreset !== lastCompletedConfig.cirPreset ||
+      (cur.cirPreset === 'custom' && cur.customCir !== lastCompletedConfig.customCir)
     );
   }
 
@@ -1090,6 +1193,14 @@
     if (d) d.value = lastCompletedConfig.duration;
     if (b) b.value = lastCompletedConfig.bloatMetric;
 
+    if (lastCompletedConfig.cirPreset) {
+      const cirEl = document.getElementById('cbCirPreset');
+      if (cirEl) cirEl.value = lastCompletedConfig.cirPreset;
+      const customEl = document.getElementById('txtCustomCir');
+      if (customEl && lastCompletedConfig.customCir) customEl.value = lastCompletedConfig.customCir;
+      onCirPresetChange();
+    }
+
     onProviderChange();
     onServerSelectChange();
     onBloatMetricChange();
@@ -1106,7 +1217,84 @@
     setTxt('auditStreams', cfg.streamsText || cfg.streams);
     setTxt('auditDuration', cfg.durationText || cfg.duration);
     setTxt('auditBloat', cfg.bloatMetricText || cfg.bloatMetric);
+    setTxt('auditCir', cfg.cirLabel || '—');
     setTxt('auditTimestamp', cfg.timestamp || new Date().toLocaleString('pt-BR'));
+  }
+
+  function updateRfc6349Display(rfc) {
+    if (!rfc) return;
+    const cirVal = document.getElementById('rfcCirVal');
+    const slaPct = document.getElementById('rfcSlaPct');
+    const bdpVal = document.getElementById('rfcBdpVal');
+    const bdpSub = document.getElementById('rfcBdpSub');
+    const ratioVal = document.getElementById('rfcRatioVal');
+    const ratioSub = document.getElementById('rfcRatioSub');
+    const bufVal = document.getElementById('rfcBufferDelayVal');
+    const bufSub = document.getElementById('rfcBufferDelaySub');
+    const badge = document.getElementById('rfcSlaBadge');
+
+    if (cirVal) {
+      cirVal.innerText = rfc.isAuto ? `${rfc.cir.toFixed(1)} Mbps (Auto)` : `${rfc.cir.toFixed(0)} Mbps`;
+    }
+    if (slaPct) {
+      if (rfc.isAuto) {
+        slaPct.innerText = `Vazão Atingida: ${Math.max(rfc.dlSlaPct, rfc.ulSlaPct).toFixed(0)}% ref`;
+        slaPct.style.color = 'var(--cyan)';
+      } else {
+        slaPct.innerText = `DL: ${rfc.dlSlaPct.toFixed(1)}% • UL: ${rfc.ulSlaPct.toFixed(1)}%`;
+        slaPct.style.color = rfc.worstSlaPct >= 95 ? 'var(--green)' : (rfc.worstSlaPct >= 85 ? 'var(--amber)' : 'var(--red)');
+      }
+    }
+    if (bdpVal) {
+      bdpVal.innerText = rfc.bdpKb >= 1024 ? `${(rfc.bdpKb / 1024).toFixed(2)} MB` : `${rfc.bdpKb.toFixed(1)} KB`;
+    }
+    if (bdpSub) {
+      bdpSub.innerText = `Buffer ideal em trânsito (${rfc.rttMs.toFixed(0)}ms RTT)`;
+    }
+    if (ratioVal) {
+      ratioVal.innerText = rfc.timeRatio.toFixed(2);
+      ratioVal.style.color = rfc.timeRatio <= 1.06 ? 'var(--green)' : (rfc.timeRatio <= 1.20 ? 'var(--amber)' : 'var(--red)');
+    }
+    if (ratioSub) {
+      ratioSub.innerText = rfc.timeRatio <= 1.06 ? 'Excelente (Transferência Ideal)' : 'Sobretaxa / Retransmissão TCP';
+    }
+    if (bufVal) {
+      const sign = rfc.bufferDelayPct >= 0 ? '+' : '';
+      bufVal.innerText = `${sign}${rfc.bufferDelayPct.toFixed(1)}%`;
+      bufVal.style.color = rfc.bufferDelayPct <= 15 ? 'var(--green)' : (rfc.bufferDelayPct <= 50 ? 'var(--amber)' : 'var(--red)');
+    }
+    if (bufSub) {
+      bufSub.innerText = rfc.bufferDelayPct <= 15 ? 'Classe A (≤15% conformidade SLA)' : `+Δ ${rfc.worstDelta.toFixed(0)}ms sob estresse`;
+    }
+    if (badge) {
+      if (rfc.isAuto) {
+        badge.innerText = '✓ DESCOBERTA LIVRE (BEST-EFFORT)';
+        badge.style.borderColor = 'var(--cyan)';
+        badge.style.color = 'var(--cyan)';
+      } else if (rfc.isSlaApproved) {
+        badge.innerText = '✓ SLA APROVADO (RFC 6349 ≥ 95%)';
+        badge.style.borderColor = 'var(--green)';
+        badge.style.color = 'var(--green)';
+      } else if (rfc.worstSlaPct >= 85) {
+        badge.innerText = '⚠️ SLA EM ALERTA (85% - 94%)';
+        badge.style.borderColor = 'var(--amber)';
+        badge.style.color = 'var(--amber)';
+      } else {
+        badge.innerText = '✗ SLA REPROVADO (< 95%)';
+        badge.style.borderColor = 'var(--red)';
+        badge.style.color = 'var(--red)';
+      }
+    }
+
+    const auditBdp = document.getElementById('auditBdp');
+    const auditRatio = document.getElementById('auditRatio');
+    const auditSla = document.getElementById('auditSlaStatus');
+    if (auditBdp) auditBdp.innerText = `${rfc.bdpKb.toFixed(1)} KB`;
+    if (auditRatio) auditRatio.innerText = `${rfc.timeRatio.toFixed(2)} (${rfc.timeRatio <= 1.06 ? 'Excelente' : 'Aceitável'})`;
+    if (auditSla) {
+      auditSla.innerText = rfc.isAuto ? 'Descoberta Livre' : (rfc.isSlaApproved ? `✓ Aprovado (${rfc.worstSlaPct.toFixed(1)}% CIR)` : `✗ Reprovado (${rfc.worstSlaPct.toFixed(1)}% CIR)`);
+      auditSla.style.color = rfc.isAuto ? '#0284c7' : (rfc.isSlaApproved ? '#15803d' : '#b91c1c');
+    }
   }
 
   function setButtonsState(running, canPrint = null) {
@@ -1358,6 +1546,24 @@
     maxGraphSpeed = 50;
     redrawCanvas();
     document.getElementById('chartOverlay').style.display = 'none';
+
+    // 6. Zera Auditoria RFC 6349
+    const rfcCir = document.getElementById('rfcCirVal');
+    const rfcSla = document.getElementById('rfcSlaPct');
+    const rfcBdp = document.getElementById('rfcBdpVal');
+    const rfcRat = document.getElementById('rfcRatioVal');
+    const rfcBuf = document.getElementById('rfcBufferDelayVal');
+    const rfcBad = document.getElementById('rfcSlaBadge');
+    if (rfcCir) rfcCir.innerText = '—';
+    if (rfcSla) { rfcSla.innerText = 'SLA Target: ≥95%'; rfcSla.style.color = 'var(--text-muted)'; }
+    if (rfcBdp) rfcBdp.innerText = '—';
+    if (rfcRat) { rfcRat.innerText = '—'; rfcRat.style.color = '#fff'; }
+    if (rfcBuf) { rfcBuf.innerText = '—'; rfcBuf.style.color = 'var(--green)'; }
+    if (rfcBad) {
+      rfcBad.innerText = 'Aguardando Início do Teste';
+      rfcBad.style.borderColor = '#334155';
+      rfcBad.style.color = '#94a3b8';
+    }
   }
 
   async function startTest() {
@@ -1423,15 +1629,51 @@
       window.LAST_BLOAT_DATA = { dlSamples, ulSamples, idleBaseline: idlePing.avg };
       const bloatRes = updateBufferbloatCard(dlSamples, ulSamples, idlePing.avg);
 
-      setStatus('success', 'HOMOLOGADO COM SUCESSO');
+      // 5. CÁLCULO DAS 4 MÉTRICAS FORMAIS RFC 6349 (SLA COMPLIANCE)
+      const currentCfg = getCurrentConfig();
+      const cirNominal = currentCfg.cirNominal > 0 ? currentCfg.cirNominal : Math.max(dlRes.avg, ulRes.avg);
+      const isAutoCir = (currentCfg.cirNominal === 0);
+
+      // A. BDP Teórico do Circuito = (CIR_bps * RTT_basal_s) / 8
+      const rttBasalSec = Math.max(1, idlePing.avg) / 1000.0;
+      const bdpBytes = (cirNominal * 1000000.0 * rttBasalSec) / 8.0;
+      const bdpKb = bdpBytes / 1024.0;
+
+      // B. Atingimento do SLA de Throughput TCP (RFC 6349 exige >= 95% do CIR contratado)
+      const dlSlaPct = (dlRes.avg / cirNominal) * 100.0;
+      const ulSlaPct = (ulRes.avg / cirNominal) * 100.0;
+      const worstSlaPct = Math.min(dlSlaPct, ulSlaPct);
+      const isSlaApproved = isAutoCir ? true : (worstSlaPct >= 95.0);
+
+      // C. TCP Transfer Time Ratio = Ideal / Actual ou (CIR / Throughput_medio)
+      const avgMeasured = (dlRes.avg + ulRes.avg) / 2.0;
+      const timeRatio = avgMeasured > 0 ? (cirNominal / avgMeasured) : 1.0;
+
+      // D. Buffer Delay (%) = (Delta_RTT_carga / RTT_basal) * 100%
+      const bufferDelayPct = (bloatRes.worstDelta / Math.max(1, idlePing.avg)) * 100.0;
+
+      updateRfc6349Display({
+        cir: cirNominal,
+        isAuto: isAutoCir,
+        rttMs: idlePing.avg,
+        bdpKb: bdpKb,
+        dlSlaPct: dlSlaPct,
+        ulSlaPct: ulSlaPct,
+        worstSlaPct: worstSlaPct,
+        isSlaApproved: isSlaApproved,
+        timeRatio: timeRatio,
+        bufferDelayPct: bufferDelayPct,
+        worstDelta: bloatRes.worstDelta
+      });
 
       // Registra a configuração imutável homologada no teste
       lastCompletedConfig = getCurrentConfig();
       lastCompletedConfig.timestamp = new Date().toLocaleString('pt-BR');
       updatePrintAuditBox(lastCompletedConfig);
 
+      setStatus('success', isSlaApproved ? 'HOMOLOGADO COM SUCESSO (SLA RFC 6349)' : 'HOMOLOGADO — ALERTA DE SLA');
       setButtonsState(false, true);
-      log(`[CONCLUÍDO] Download: ${dlRes.avg.toFixed(1)} Mbps | Upload: ${ulRes.avg.toFixed(1)} Mbps | Ping: ${idlePing.avg.toFixed(0)} ms | Jitter: ${idlePing.jitter.toFixed(1)} ms | Grade: ${bloatRes.gradeOverall.grade} (+Δ ${bloatRes.worstDelta.toFixed(1)} ms)`);
+      log(`[CONCLUÍDO RFC 6349] DL: ${dlRes.avg.toFixed(1)} Mbps (${dlSlaPct.toFixed(1)}% CIR) | UL: ${ulRes.avg.toFixed(1)} Mbps (${ulSlaPct.toFixed(1)}% CIR) | BDP: ${bdpKb.toFixed(1)} KB | Ratio: ${timeRatio.toFixed(2)} | SLA: ${isSlaApproved ? 'APROVADO' : 'NÃO CONFORME'}`);
     } catch (e) {
       if (e.name === 'AbortError') {
         setStatus('cancel', 'TESTE CANCELADO');
