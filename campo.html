@@ -458,14 +458,16 @@
         <label class="select-label" for="cbCirBanda">🎯 Banda Contratada do Link (CIR):</label>
         <div style="display: flex; gap: 6px; align-items: center;">
           <select id="cbCirBanda" class="select-control" onchange="onCirChange()">
-            <option value="50">50 Mbps (Circuito Básico)</option>
-            <option value="100" selected>100 Mbps (Padrão Agências / Lojas)</option>
-            <option value="200">200 Mbps (Média Escala)</option>
-            <option value="300">300 Mbps (Fibra Alta Vazão)</option>
-            <option value="500">500 Mbps (Ultra Banda Larga)</option>
-            <option value="600">600 Mbps (Sede Regional)</option>
-            <option value="1000">1.0 Gbps (Gigabit Carrier-Grade)</option>
-            <option value="custom">✏️ Digitar Outro Valor (Mbps)...</option>
+            <option value="10">10 Mbps</option>
+            <option value="20">20 Mbps</option>
+            <option value="50">50 Mbps</option>
+            <option value="100" selected>100 Mbps</option>
+            <option value="200">200 Mbps</option>
+            <option value="300">300 Mbps</option>
+            <option value="500">500 Mbps</option>
+            <option value="600">600 Mbps</option>
+            <option value="1000">1.0 Gbps</option>
+            <option value="custom">✏️ Personalizado (Mbps)...</option>
           </select>
           <div id="boxCustomCir" style="display: none; align-items: center; gap: 4px;">
             <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; background: #0f172a; border: 1.5px solid var(--cyan); color: #fff; padding: 9px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
@@ -1523,3 +1525,4 @@
 
 </body>
 </html>
+
