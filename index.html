@@ -463,7 +463,7 @@
         Cobertura Nacional Dinâmica (27 Capitais + Polos)
       </div>
     </div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
       <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Provedor / Motor de Teste:</label>
         <select id="cbProvider" onchange="onProviderChange()" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
@@ -480,6 +480,26 @@
         <select id="cbServers" onchange="onServerSelectChange()" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
           <option value="sparc_vinhedo" selected>🔥 [DEDICADO SPARC] Vinhedo / SP (Oracle Cloud sa-vinhedo-1)</option>
           <option value="auto">⭐ [AUTOMÁTICO] Menor Esforço (Descobrindo servidores locais...)</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Conexões Paralelas (RFC 6349 Multi-Stream):</label>
+        <select id="cbStreams" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+          <option value="6" selected>⭐ 6 Streams Simultâneos (RFC 6349 / Alta Banda)</option>
+          <option value="4">4 Streams Simultâneos (Padrão)</option>
+          <option value="8">8 Streams Simultâneos (Gigabit 1Gbps+)</option>
+          <option value="1">1 Stream Único (Legado / Diagnóstico BDP)</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Duração da Saturação (Stream Contínuo):</label>
+        <select id="cbTestDuration" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+          <option value="15">⚡ 15 segundos (Padrão RFC 6349)</option>
+          <option value="30">⏱️ 30 segundos (Estendido)</option>
+          <option value="60" selected>🔥 60 segundos (1 Minuto Ininterrupto — Homologação)</option>
+          <option value="10">🚀 10 segundos (Rápido)</option>
         </select>
       </div>
 
@@ -1331,85 +1351,147 @@
     const prov = document.getElementById('cbProvider')?.value;
     const isSparc = (sel === 'sparc_vinhedo' || prov === 'sparc_cloud');
 
-    // Chunks progressivos e otimizados para rápida estabilização
-    const chunkUrls = isSparc
-      ? [
-          'https://204.216.133.98.nip.io/test-10mb.bin',
-          'https://204.216.133.98.nip.io/test-25mb.bin',
-          'https://204.216.133.98.nip.io/test-50mb.bin',
-          'https://204.216.133.98.nip.io/test-50mb.bin'
-        ]
-      : [
-          'https://speed.cloudflare.com/__down?bytes=5000000',
-          'https://speed.cloudflare.com/__down?bytes=15000000',
-          'https://speed.cloudflare.com/__down?bytes=25000000',
-          'https://speed.cloudflare.com/__down?bytes=25000000'
-        ];
+    const durationSec = parseInt(document.getElementById('cbTestDuration')?.value || '15', 10);
+    const numStreams = parseInt(document.getElementById('cbStreams')?.value || '6', 10);
+    const durationMs = durationSec * 1000;
 
-    let totalBytes = 0;
+    log(`[DOWNLOAD] Multi-Stream RFC 6349: ${numStreams} streams simultâneos | Duração: ${durationSec}s contínuos...`);
+
+    const getNextChunkUrl = () => {
+      if (isSparc) {
+        // Alterna entre chunks grandes de 50MB e 100MB em Vinhedo
+        const files = ['test-50mb.bin', 'test-100mb.bin'];
+        const chosen = files[Math.floor(Math.random() * files.length)];
+        return `https://204.216.133.98.nip.io/${chosen}?r=${Math.random()}`;
+      } else {
+        // Cloudflare Speed: chunks de 50MB para saturação contínua
+        return `https://speed.cloudflare.com/__down?bytes=50000000&r=${Math.random()}`;
+      }
+    };
+
+    let totalBytesReceived = 0;
     let peakSpeed = 0;
-
-    const tStart = performance.now();
-    let lastSampleTime = tStart;
-    let lastSampleBytes = 0;
     let currentSmoothSpeed = 0;
 
-    for (let i = 0; i < chunkUrls.length; i++) {
-      signal.throwIfAborted();
-      const url = chunkUrls[i] + (chunkUrls[i].includes('?') ? '&r=' : '?r=') + Math.random();
-      const resp = await fetch(url, { signal, cache: 'no-store' });
-      const reader = resp.body.getReader();
-      let isFirstReadInChunk = true;
+    const tStart = performance.now();
+    const tDeadline = tStart + durationMs;
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        totalBytes += value.length;
+    // Rastreamento para cálculo estável RFC 6349 (descarta primeiros 1.5s de TCP slow-start)
+    let stableStartTime = 0;
+    let stableStartBytes = 0;
+    const slowStartDurationMs = Math.min(2000, durationMs * 0.20);
 
-        // Isola completamente a latência do handshake HTTP entre chunks (evita vales)
-        if (isFirstReadInChunk) {
-          isFirstReadInChunk = false;
-          lastSampleTime = performance.now();
-          lastSampleBytes = totalBytes;
-          continue;
-        }
+    const localAbort = new AbortController();
+    const onParentAbort = () => localAbort.abort();
+    signal.addEventListener('abort', onParentAbort);
 
-        const now = performance.now();
-        const dt = (now - lastSampleTime) / 1000;
+    let lastSampleTime = tStart;
+    let lastSampleBytes = 0;
 
-        // Janela estável de 140ms com medição de vazão real ininterrupta
-        if (dt >= 0.14) {
-          const deltaBytes = totalBytes - lastSampleBytes;
-          if (deltaBytes > 0) {
-            let instMbps = (deltaBytes * 8) / (dt * 1000000);
+    // Worker individual paralelo em loop contínuo
+    async function downloadWorker(id) {
+      while (performance.now() < tDeadline && !localAbort.signal.aborted) {
+        try {
+          const url = getNextChunkUrl();
+          const resp = await fetch(url, { signal: localAbort.signal, cache: 'no-store' });
+          if (!resp.body) break;
+          const reader = resp.body.getReader();
 
-            // Amortecimento de transição contra micro-flutuações de buffers do navegador
-            if (currentSmoothSpeed > 0 && instMbps < currentSmoothSpeed * 0.75) {
-              instMbps = currentSmoothSpeed * 0.90;
+          while (performance.now() < tDeadline && !localAbort.signal.aborted) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (value && value.length > 0) {
+              totalBytesReceived += value.length;
             }
-
-            // Suavização exponencial EMA ponderada (80% histórico / 20% instantâneo) para fluidez total
-            currentSmoothSpeed = currentSmoothSpeed === 0 ? instMbps : (currentSmoothSpeed * 0.80 + instMbps * 0.20);
-            peakSpeed = Math.max(peakSpeed, currentSmoothSpeed);
-
-            document.getElementById('txtDownload').innerText = currentSmoothSpeed.toFixed(1);
-            document.getElementById('txtDownloadPico').innerText = `Pico: ${peakSpeed.toFixed(1)} Mbps`;
-            addGraphPoint(currentSmoothSpeed, true);
-
-            lastSampleTime = now;
-            lastSampleBytes = totalBytes;
           }
+          try { reader.cancel(); } catch (_) {}
+        } catch (e) {
+          if (localAbort.signal.aborted) break;
+          await new Promise(r => setTimeout(r, 80));
+        }
+      }
+    }
+
+    // Amostragem em tempo real (120ms) para fluidez de UI e curva gráfica
+    const ticker = setInterval(() => {
+      const now = performance.now();
+      const elapsed = now - tStart;
+      const dt = (now - lastSampleTime) / 1000;
+
+      if (dt >= 0.09) {
+        const deltaBytes = totalBytesReceived - lastSampleBytes;
+        if (deltaBytes >= 0) {
+          const instMbps = (deltaBytes * 8) / (dt * 1000000);
+
+          if (currentSmoothSpeed === 0) {
+            currentSmoothSpeed = instMbps;
+          } else {
+            // Suavização EMA ponderada (65% histórico / 35% instantâneo)
+            currentSmoothSpeed = currentSmoothSpeed * 0.65 + instMbps * 0.35;
+          }
+
+          peakSpeed = Math.max(peakSpeed, currentSmoothSpeed);
+
+          document.getElementById('txtDownload').innerText = currentSmoothSpeed.toFixed(1);
+          document.getElementById('txtDownloadPico').innerText = `Pico: ${peakSpeed.toFixed(1)} Mbps`;
+          addGraphPoint(currentSmoothSpeed, true);
+
+          lastSampleTime = now;
+          lastSampleBytes = totalBytesReceived;
         }
       }
 
-      const pct = ((i + 1) / chunkUrls.length) * 100;
-      document.getElementById('pbDownload').style.width = pct + '%';
+      if (elapsed >= slowStartDurationMs && stableStartTime === 0) {
+        stableStartTime = now;
+        stableStartBytes = totalBytesReceived;
+      }
+
+      const progressPct = Math.min(100, (elapsed / durationMs) * 100);
+      document.getElementById('pbDownload').style.width = progressPct.toFixed(1) + '%';
+    }, 120);
+
+    // Dispara todos os workers concorrentes simultaneamente
+    const workers = [];
+    for (let i = 0; i < numStreams; i++) {
+      workers.push(downloadWorker(i));
     }
 
-    const totalDur = (performance.now() - tStart) / 1000;
-    const avgMbps = (totalBytes * 8) / (totalDur * 1000000);
+    // Monitora até o deadline ou cancelamento
+    await Promise.race([
+      Promise.all(workers),
+      new Promise(resolve => {
+        const timerDeadline = setInterval(() => {
+          if (performance.now() >= tDeadline || signal.aborted) {
+            clearInterval(timerDeadline);
+            resolve();
+          }
+        }, 80);
+      })
+    ]);
+
+    localAbort.abort();
+    signal.removeEventListener('abort', onParentAbort);
+    clearInterval(ticker);
+
+    signal.throwIfAborted();
+
+    const tEnd = performance.now();
+    document.getElementById('pbDownload').style.width = '100%';
+
+    // Cálculo da média na fase estável (RFC 6349)
+    let avgMbps = 0;
+    if (stableStartTime > 0 && tEnd > stableStartTime) {
+      const stableDurSec = (tEnd - stableStartTime) / 1000;
+      const stableDeltaBytes = totalBytesReceived - stableStartBytes;
+      avgMbps = (stableDeltaBytes * 8) / (stableDurSec * 1000000);
+    } else {
+      const totalDurSec = Math.max(0.1, (tEnd - tStart) / 1000);
+      avgMbps = (totalBytesReceived * 8) / (totalDurSec * 1000000);
+    }
+
     const finalDl = currentSmoothSpeed > 0 ? Math.max(avgMbps, currentSmoothSpeed * 0.95) : avgMbps;
     document.getElementById('txtDownload').innerText = finalDl.toFixed(1);
+    document.getElementById('txtDownloadPico').innerText = `Pico: ${Math.max(peakSpeed, finalDl).toFixed(1)} Mbps`;
 
     return { avg: finalDl, peak: Math.max(peakSpeed, finalDl) };
   }
@@ -1422,24 +1504,128 @@
       ? 'https://204.216.133.98.nip.io/upload'
       : 'https://speed.cloudflare.com/__up';
 
-    const payload = new Uint8Array(1500000); // 1.5 MB por round
-    let totalBytes = 0;
+    const durationSec = Math.min(30, parseInt(document.getElementById('cbTestDuration')?.value || '15', 10));
+    const numStreams = 4; // 4 streams paralelos para upload
+    const durationMs = durationSec * 1000;
+
+    log(`[UPLOAD] Multi-Stream: ${numStreams} streams simultâneos | Duração: ${durationSec}s contínuos...`);
+
+    const payloadSize = 2500000; // 2.5 MB por pacote
+    const payload = new Uint8Array(payloadSize);
+
+    let totalBytesSent = 0;
     let peakSpeed = 0;
     let currentSmoothUpload = 0;
-    const rounds = 14;
 
     const tStart = performance.now();
+    const tDeadline = tStart + durationMs;
 
-    for (let i = 0; i < rounds; i++) {
-      signal.throwIfAborted();
-      const t0 = performance.now();
+    let stableStartTime = 0;
+    let stableStartBytes = 0;
+    const slowStartDurationMs = Math.min(2000, durationMs * 0.20);
 
-      await fetch(uploadUrl, {
-        method: 'POST',
-        body: payload,
-        signal,
-        headers: { 'Content-Type': 'application/octet-stream' }
-      });
+    const localAbort = new AbortController();
+    const onParentAbort = () => localAbort.abort();
+    signal.addEventListener('abort', onParentAbort);
+
+    let lastSampleTime = tStart;
+    let lastSampleBytes = 0;
+
+    async function uploadWorker(id) {
+      while (performance.now() < tDeadline && !localAbort.signal.aborted) {
+        try {
+          await fetch(uploadUrl, {
+            method: 'POST',
+            body: payload,
+            signal: localAbort.signal,
+            headers: { 'Content-Type': 'application/octet-stream' }
+          });
+          totalBytesSent += payloadSize;
+        } catch (e) {
+          if (localAbort.signal.aborted) break;
+          await new Promise(r => setTimeout(r, 80));
+        }
+      }
+    }
+
+    const ticker = setInterval(() => {
+      const now = performance.now();
+      const elapsed = now - tStart;
+      const dt = (now - lastSampleTime) / 1000;
+
+      if (dt >= 0.09) {
+        const deltaBytes = totalBytesSent - lastSampleBytes;
+        if (deltaBytes >= 0) {
+          const instMbps = (deltaBytes * 8) / (dt * 1000000);
+
+          if (currentSmoothUpload === 0) {
+            currentSmoothUpload = instMbps;
+          } else {
+            currentSmoothUpload = currentSmoothUpload * 0.65 + instMbps * 0.35;
+          }
+
+          peakSpeed = Math.max(peakSpeed, currentSmoothUpload);
+
+          document.getElementById('txtUpload').innerText = currentSmoothUpload.toFixed(1);
+          document.getElementById('txtUploadPico').innerText = `Pico: ${peakSpeed.toFixed(1)} Mbps`;
+          addGraphPoint(currentSmoothUpload, false);
+
+          lastSampleTime = now;
+          lastSampleBytes = totalBytesSent;
+        }
+      }
+
+      if (elapsed >= slowStartDurationMs && stableStartTime === 0) {
+        stableStartTime = now;
+        stableStartBytes = totalBytesSent;
+      }
+
+      const progressPct = Math.min(100, (elapsed / durationMs) * 100);
+      document.getElementById('pbUpload').style.width = progressPct.toFixed(1) + '%';
+    }, 120);
+
+    const workers = [];
+    for (let i = 0; i < numStreams; i++) {
+      workers.push(uploadWorker(i));
+    }
+
+    await Promise.race([
+      Promise.all(workers),
+      new Promise(resolve => {
+        const timerDeadline = setInterval(() => {
+          if (performance.now() >= tDeadline || signal.aborted) {
+            clearInterval(timerDeadline);
+            resolve();
+          }
+        }, 80);
+      })
+    ]);
+
+    localAbort.abort();
+    signal.removeEventListener('abort', onParentAbort);
+    clearInterval(ticker);
+
+    signal.throwIfAborted();
+
+    const tEnd = performance.now();
+    document.getElementById('pbUpload').style.width = '100%';
+
+    let avgMbps = 0;
+    if (stableStartTime > 0 && tEnd > stableStartTime) {
+      const stableDurSec = (tEnd - stableStartTime) / 1000;
+      const stableDeltaBytes = totalBytesSent - stableStartBytes;
+      avgMbps = (stableDeltaBytes * 8) / (stableDurSec * 1000000);
+    } else {
+      const totalDurSec = Math.max(0.1, (tEnd - tStart) / 1000);
+      avgMbps = (totalBytesSent * 8) / (totalDurSec * 1000000);
+    }
+
+    const finalUl = currentSmoothUpload > 0 ? Math.max(avgMbps, currentSmoothUpload * 0.95) : avgMbps;
+    document.getElementById('txtUpload').innerText = finalUl.toFixed(1);
+    document.getElementById('txtUploadPico').innerText = `Pico: ${Math.max(peakSpeed, finalUl).toFixed(1)} Mbps`;
+
+    return { avg: finalUl, peak: Math.max(peakSpeed, finalUl) };
+  });
 
       totalBytes += payload.length;
       const roundDur = Math.max(0.01, (performance.now() - t0) / 1000);
