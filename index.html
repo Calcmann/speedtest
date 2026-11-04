@@ -532,16 +532,17 @@
         <!-- MODO SIMÉTRICO (PADRÃO) -->
         <div id="boxSymmetricCir" style="display: flex; gap: 6px; align-items: center;">
           <select id="cbCirPreset" onchange="onCirPresetChange()" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; flex: 1; cursor: pointer;">
-            <option value="auto">⭐ [AUTO] Descoberta Livre (Best-Effort)</option>
-            <option value="10">10 Mbps (Link Legado / E1)</option>
-            <option value="20">20 Mbps (Link Corporativo)</option>
-            <option value="50">50 Mbps (Banda Básica)</option>
-            <option value="100" selected>100 Mbps (Padrão Telecom Simétrico)</option>
-            <option value="200">200 Mbps (Média Escala)</option>
-            <option value="300">300 Mbps (Fibra Alta Vazão)</option>
-            <option value="500">500 Mbps (Ultra Banda Larga)</option>
-            <option value="1000">1.0 Gbps (Gigabit Carrier-Grade)</option>
-            <option value="custom">✏️ Personalizado (Arbitrar Valor Único...)</option>
+            <option value="auto">⭐ [AUTO] Descoberta Livre</option>
+            <option value="10">10 Mbps</option>
+            <option value="20">20 Mbps</option>
+            <option value="50">50 Mbps</option>
+            <option value="100" selected>100 Mbps</option>
+            <option value="200">200 Mbps</option>
+            <option value="300">300 Mbps</option>
+            <option value="500">500 Mbps</option>
+            <option value="600">600 Mbps</option>
+            <option value="1000">1.0 Gbps</option>
+            <option value="custom">✏️ Personalizado (Mbps)...</option>
           </select>
           <div id="boxCustomCir" style="display: none; align-items: center; gap: 3px;">
             <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 74px; background: #0f172a; border: 1.5px solid var(--cyan); color: #fff; padding: 7px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
@@ -555,15 +556,15 @@
           <div style="display: flex; gap: 6px; align-items: center;">
             <span style="font-size: 10px; font-weight: 800; color: var(--green); width: 85px; white-space: nowrap;">↓ CIR DOWNLOAD:</span>
             <select id="cbCirDlPreset" onchange="onCirDlPresetChange()" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; flex: 1; cursor: pointer;">
-              <option value="auto">⭐ [AUTO] Best-Effort</option>
-              <option value="50">50 Mbps (Básica)</option>
+              <option value="auto">⭐ [AUTO] Descoberta Livre</option>
+              <option value="50">50 Mbps</option>
               <option value="100">100 Mbps</option>
               <option value="200">200 Mbps</option>
-              <option value="300" selected>300 Mbps (Banda Larga Típica)</option>
-              <option value="500">500 Mbps (Fibra Alta)</option>
+              <option value="300" selected>300 Mbps</option>
+              <option value="500">500 Mbps</option>
               <option value="600">600 Mbps</option>
-              <option value="1000">1.0 Gbps (Gigabit)</option>
-              <option value="custom">✏️ Personalizado...</option>
+              <option value="1000">1.0 Gbps</option>
+              <option value="custom">✏️ Personalizado (Mbps)...</option>
             </select>
             <div id="boxCustomCirDl" style="display: none; align-items: center; gap: 3px;">
               <input type="number" id="txtCustomCirDl" min="1" max="10000" placeholder="Mbps" style="width: 68px; background: #0f172a; border: 1.5px solid var(--green); color: #fff; padding: 5px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
@@ -575,16 +576,18 @@
           <div style="display: flex; gap: 6px; align-items: center;">
             <span style="font-size: 10px; font-weight: 800; color: var(--blue); width: 85px; white-space: nowrap;">↑ CIR UPLOAD:</span>
             <select id="cbCirUlPreset" onchange="onCirUlPresetChange()" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; flex: 1; cursor: pointer;">
-              <option value="auto">⭐ [AUTO] Best-Effort</option>
-              <option value="10">10 Mbps (Legado / ADSL)</option>
+              <option value="auto">⭐ [AUTO] Descoberta Livre</option>
+              <option value="10">10 Mbps</option>
               <option value="20">20 Mbps</option>
-              <option value="35">35 Mbps (Cabo Coaxial / DOCSIS)</option>
+              <option value="35">35 Mbps</option>
               <option value="50">50 Mbps</option>
               <option value="100">100 Mbps</option>
-              <option value="150" selected>150 Mbps (50% de 300M GPON)</option>
-              <option value="250">250 Mbps (50% de 500M GPON)</option>
+              <option value="150" selected>150 Mbps</option>
+              <option value="200">200 Mbps</option>
+              <option value="250">250 Mbps</option>
               <option value="500">500 Mbps</option>
-              <option value="custom">✏️ Personalizado...</option>
+              <option value="1000">1.0 Gbps</option>
+              <option value="custom">✏️ Personalizado (Mbps)...</option>
             </select>
             <div id="boxCustomCirUl" style="display: none; align-items: center; gap: 3px;">
               <input type="number" id="txtCustomCirUl" min="1" max="10000" placeholder="Mbps" style="width: 68px; background: #0f172a; border: 1.5px solid var(--blue); color: #fff; padding: 5px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
