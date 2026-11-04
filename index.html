@@ -417,7 +417,8 @@
     @media print {
       body { background: #fff; color: #000; padding: 0; }
       .container { max-width: 100%; }
-      .hero-action-card, .actions, .btn-primary, .btn-hero-start, .btn-secondary, .log-box { display: none !important; }
+      .hero-action-card, .actions, .btn-primary, .btn-hero-start, .btn-secondary, .log-box, #configMismatchWarning, .server-card { display: none !important; }
+      #printAuditSummary { display: block !important; }
       .header, .kpi-card, .chart-card, .topology-card {
         background: #fff !important;
         border: 1px solid #cbd5e1 !important;
@@ -513,6 +514,35 @@
         </select>
       </div>
     </div>
+  </div>
+
+  <!-- AUDITORIA DE PARÂMETROS HOMOLOGADOS (EXIBIDO EXCLUSIVAMENTE NO LAUDO PDF/IMPRESSÃO) -->
+  <div id="printAuditSummary" style="display: none; margin-bottom: 14px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 16px; font-size: 11px; background: #f8fafc; color: #0f172a;">
+    <div style="font-weight: 800; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; color: #1e293b; border-bottom: 1.5px solid #94a3b8; padding-bottom: 4px; display: flex; justify-content: space-between;">
+      <span>📋 LAUDO OFICIAL DE TELEMETRIA RFC 6349 — PARÂMETROS HOMOLOGADOS</span>
+      <span id="auditTimestamp" style="color: #475569; font-weight: 600;">—</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; line-height: 1.4;">
+      <div><strong>Provedor / Motor:</strong> <span id="auditProvider">—</span></div>
+      <div><strong>Servidor Alvo:</strong> <span id="auditServer">—</span></div>
+      <div><strong>Conexões Concorrentes:</strong> <span id="auditStreams">—</span></div>
+      <div><strong>Duração da Saturação:</strong> <span id="auditDuration">—</span></div>
+      <div><strong>Métrica Bufferbloat:</strong> <span id="auditBloat">—</span></div>
+      <div><strong>Autenticidade do Teste:</strong> <span style="color: #10b981; font-weight: 800;">✓ 100% Invariável / Auditado</span></div>
+    </div>
+  </div>
+
+  <!-- AVISO DE PARÂMETROS ALTERADOS / BLOQUEIO DE LAUDO -->
+  <div id="configMismatchWarning" style="display: none; background: rgba(245, 158, 11, 0.12); border: 1.5px solid var(--amber); border-radius: 8px; padding: 10px 16px; margin-bottom: 14px; align-items: center; justify-content: space-between; gap: 12px; font-size: 11.5px; color: #fde68a;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 18px;">⚠️</span>
+      <div>
+        <strong>Parâmetros Alterados após a Execução:</strong> A configuração atual da tela difere do teste homologado. O salvamento do Laudo PDF foi bloqueado para impedir laudos inconsistentes. Execute um novo teste com esta configuração ou restaure os parâmetros originais testados.
+      </div>
+    </div>
+    <button type="button" onclick="restaurarParametrosTestados()" style="background: var(--amber); color: #000; border: none; font-weight: 800; font-size: 11px; padding: 6px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+      ↺ Restaurar Configuração Testada
+    </button>
   </div>
 
   <!-- BARRA HERO PRINCIPAL DE DISPARO DO TESTE (MÁXIMO DESTAQUE NO TOPO DA PÁGINA) -->
@@ -690,6 +720,11 @@
   window.addEventListener('DOMContentLoaded', async () => {
     initCanvas();
     await discoverGeo();
+
+    // Registra listeners de consistência de parâmetros
+    PARAM_INPUT_IDS.forEach(id => {
+      document.getElementById(id)?.addEventListener('change', checkConfigConsistency);
+    });
   });
 
   async function discoverGeo() {
@@ -979,6 +1014,101 @@
     return 2 * R * Math.asin(Math.sqrt(a));
   }
 
+  const PARAM_INPUT_IDS = ['cbProvider', 'cbServers', 'cbStreams', 'cbTestDuration', 'cbBloatMetric'];
+  let lastCompletedConfig = null;
+
+  function getCurrentConfig() {
+    return {
+      provider: document.getElementById('cbProvider')?.value || '',
+      server: document.getElementById('cbServers')?.value || '',
+      streams: document.getElementById('cbStreams')?.value || '',
+      duration: document.getElementById('cbTestDuration')?.value || '',
+      bloatMetric: document.getElementById('cbBloatMetric')?.value || '',
+      providerText: document.getElementById('cbProvider')?.selectedOptions[0]?.text || '',
+      serverText: document.getElementById('cbServers')?.selectedOptions[0]?.text || '',
+      streamsText: document.getElementById('cbStreams')?.selectedOptions[0]?.text || '',
+      durationText: document.getElementById('cbTestDuration')?.selectedOptions[0]?.text || '',
+      bloatMetricText: document.getElementById('cbBloatMetric')?.selectedOptions[0]?.text || ''
+    };
+  }
+
+  function hasConfigMismatch() {
+    if (!lastCompletedConfig) return false;
+    const cur = getCurrentConfig();
+    return (
+      cur.provider !== lastCompletedConfig.provider ||
+      cur.server !== lastCompletedConfig.server ||
+      cur.streams !== lastCompletedConfig.streams ||
+      cur.duration !== lastCompletedConfig.duration ||
+      cur.bloatMetric !== lastCompletedConfig.bloatMetric
+    );
+  }
+
+  function checkConfigConsistency() {
+    if (isRunning) return;
+    const mismatchWarn = document.getElementById('configMismatchWarning');
+    const bPrint = document.getElementById('btnPrint');
+    const bPrintB = document.getElementById('btnPrintBottom');
+
+    if (lastCompletedConfig && hasConfigMismatch()) {
+      if (bPrint) {
+        bPrint.disabled = true;
+        bPrint.title = 'Parâmetros modificados após o teste. Execute um novo teste para liberar o laudo.';
+      }
+      if (bPrintB) {
+        bPrintB.disabled = true;
+        bPrintB.title = 'Parâmetros modificados após o teste. Execute um novo teste para liberar o laudo.';
+      }
+      if (mismatchWarn) mismatchWarn.style.display = 'flex';
+      setStatus('warn', 'CONFIGURAÇÃO MODIFICADA — REFAÇA O TESTE');
+      log('[AVISO] Configuração alterada após o teste. Emissão de Laudo PDF bloqueada para evitar divergências. Restaure ou realize um novo teste.');
+    } else if (lastCompletedConfig && !hasConfigMismatch()) {
+      if (bPrint) {
+        bPrint.disabled = false;
+        bPrint.title = 'Salvar Laudo PDF';
+      }
+      if (bPrintB) {
+        bPrintB.disabled = false;
+        bPrintB.title = 'Salvar Laudo PDF';
+      }
+      if (mismatchWarn) mismatchWarn.style.display = 'none';
+      setStatus('success', 'HOMOLOGADO COM SUCESSO');
+    }
+  }
+
+  function restaurarParametrosTestados() {
+    if (!lastCompletedConfig) return;
+    const p = document.getElementById('cbProvider');
+    const s = document.getElementById('cbServers');
+    const st = document.getElementById('cbStreams');
+    const d = document.getElementById('cbTestDuration');
+    const b = document.getElementById('cbBloatMetric');
+
+    if (p) p.value = lastCompletedConfig.provider;
+    if (s) s.value = lastCompletedConfig.server;
+    if (st) st.value = lastCompletedConfig.streams;
+    if (d) d.value = lastCompletedConfig.duration;
+    if (b) b.value = lastCompletedConfig.bloatMetric;
+
+    onProviderChange();
+    onServerSelectChange();
+    onBloatMetricChange();
+
+    checkConfigConsistency();
+    log('[OK] Parâmetros testados restaurados com sucesso. Emissão de laudo PDF liberada.');
+  }
+
+  function updatePrintAuditBox(cfg) {
+    if (!cfg) return;
+    const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    setTxt('auditProvider', cfg.providerText || cfg.provider);
+    setTxt('auditServer', cfg.serverText || cfg.server);
+    setTxt('auditStreams', cfg.streamsText || cfg.streams);
+    setTxt('auditDuration', cfg.durationText || cfg.duration);
+    setTxt('auditBloat', cfg.bloatMetricText || cfg.bloatMetric);
+    setTxt('auditTimestamp', cfg.timestamp || new Date().toLocaleString('pt-BR'));
+  }
+
   function setButtonsState(running, canPrint = null) {
     const bStart = document.getElementById('btnStart');
     const bStartB = document.getElementById('btnStartBottom');
@@ -991,9 +1121,22 @@
     if (bStartB) bStartB.disabled = running;
     if (bCancel) bCancel.disabled = !running;
     if (bCancelB) bCancelB.disabled = !running;
+
+    // Bloqueia ou desbloqueia todos os seletores de parâmetros durante a execução
+    PARAM_INPUT_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.disabled = running;
+        el.style.opacity = running ? '0.55' : '1';
+        el.style.cursor = running ? 'not-allowed' : 'pointer';
+        el.style.filter = running ? 'grayscale(0.5)' : 'none';
+      }
+    });
+
     if (canPrint !== null) {
-      if (bPrint) bPrint.disabled = !canPrint;
-      if (bPrintB) bPrintB.disabled = !canPrint;
+      const allowPrint = canPrint && !hasConfigMismatch();
+      if (bPrint) bPrint.disabled = !allowPrint;
+      if (bPrintB) bPrintB.disabled = !allowPrint;
     }
   }
 
@@ -1225,6 +1368,10 @@
     // Zera completamente todos os parâmetros e KPIs do teste anterior
     resetTestParameters();
 
+    lastCompletedConfig = null;
+    const mismatchWarn = document.getElementById('configMismatchWarning');
+    if (mismatchWarn) mismatchWarn.style.display = 'none';
+
     setButtonsState(true, false);
     setStatus('running', 'EXECUTANDO TESTE...');
 
@@ -1277,6 +1424,12 @@
       const bloatRes = updateBufferbloatCard(dlSamples, ulSamples, idlePing.avg);
 
       setStatus('success', 'HOMOLOGADO COM SUCESSO');
+
+      // Registra a configuração imutável homologada no teste
+      lastCompletedConfig = getCurrentConfig();
+      lastCompletedConfig.timestamp = new Date().toLocaleString('pt-BR');
+      updatePrintAuditBox(lastCompletedConfig);
+
       setButtonsState(false, true);
       log(`[CONCLUÍDO] Download: ${dlRes.avg.toFixed(1)} Mbps | Upload: ${ulRes.avg.toFixed(1)} Mbps | Ping: ${idlePing.avg.toFixed(0)} ms | Jitter: ${idlePing.jitter.toFixed(1)} ms | Grade: ${bloatRes.gradeOverall.grade} (+Δ ${bloatRes.worstDelta.toFixed(1)} ms)`);
     } catch (e) {
@@ -1669,6 +1822,9 @@
     } else if (type === 'success') {
       badge.style.borderColor = 'var(--green)';
       dot.style.background = 'var(--green)';
+    } else if (type === 'warn') {
+      badge.style.borderColor = 'var(--amber)';
+      dot.style.background = 'var(--amber)';
     } else if (type === 'error') {
       badge.style.borderColor = 'var(--red)';
       dot.style.background = 'var(--red)';
@@ -1818,6 +1974,14 @@
   }
 
   function printReport() {
+    if (!lastCompletedConfig) {
+      alert('Nenhum teste homologado para emissão de laudo. Execute o teste antes de gerar o laudo.');
+      return;
+    }
+    if (hasConfigMismatch()) {
+      alert('Atenção: Os parâmetros da interface foram alterados após o término do teste.\n\nPara emitir o laudo com esta nova configuração, execute um novo teste de banda larga.\nCaso deseje o laudo do teste anterior, clique em "Restaurar Configuração Testada".');
+      return;
+    }
     window.print();
   }
 </script>
