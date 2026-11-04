@@ -1625,30 +1625,6 @@
     document.getElementById('txtUploadPico').innerText = `Pico: ${Math.max(peakSpeed, finalUl).toFixed(1)} Mbps`;
 
     return { avg: finalUl, peak: Math.max(peakSpeed, finalUl) };
-  });
-
-      totalBytes += payload.length;
-      const roundDur = Math.max(0.01, (performance.now() - t0) / 1000);
-      const instMbps = (payload.length * 8) / (roundDur * 1000000);
-
-      // Suavização contínua EMA para upload
-      currentSmoothUpload = currentSmoothUpload === 0 ? instMbps : (currentSmoothUpload * 0.65 + instMbps * 0.35);
-      peakSpeed = Math.max(peakSpeed, currentSmoothUpload);
-
-      document.getElementById('txtUpload').innerText = currentSmoothUpload.toFixed(1);
-      document.getElementById('txtUploadPico').innerText = `Pico: ${peakSpeed.toFixed(1)} Mbps`;
-      addGraphPoint(currentSmoothUpload, false);
-
-      const pct = ((i + 1) / rounds) * 100;
-      document.getElementById('pbUpload').style.width = pct + '%';
-    }
-
-    const totalDur = (performance.now() - tStart) / 1000;
-    const avgMbps = (totalBytes * 8) / (totalDur * 1000000);
-    const finalUl = currentSmoothUpload > 0 ? Math.max(avgMbps, currentSmoothUpload * 0.95) : avgMbps;
-    document.getElementById('txtUpload').innerText = finalUl.toFixed(1);
-
-    return { avg: finalUl, peak: Math.max(peakSpeed, finalUl) };
   }
 
   function setStatus(type, text) {
