@@ -1504,6 +1504,11 @@
     const numStreams = parseInt(document.getElementById('cbStreams')?.value || '6', 10);
     const durationMs = durationSec * 1000;
 
+    // Amostragem e amortecimento proporcionais à duração para manter densidade visual estável e linear
+    const graphSampleIntervalMs = Math.max(220, Math.round(durationMs / 60));
+    const emaWeight = Math.max(0.06, Math.min(0.20, 2.5 / durationSec));
+    const emaDecay = 1 - emaWeight;
+
     log(`[DOWNLOAD] Multi-Stream RFC 6349 (${isSparc ? 'SPARC Vinhedo OCI' : 'Cloudflare Edge Multi-Anycast'}): ${numStreams} streams simultâneos | Duração: ${durationSec}s contínuos...`);
 
     const getNextChunkUrl = () => {
@@ -1571,8 +1576,8 @@
           if (currentSmoothSpeed === 0) {
             currentSmoothSpeed = instMbps;
           } else {
-            // Suavização EMA ponderada (80% histórico / 20% instantâneo)
-            currentSmoothSpeed = currentSmoothSpeed * 0.80 + instMbps * 0.20;
+            // Suavização EMA proporcional à duração do teste para curva estável e linear
+            currentSmoothSpeed = currentSmoothSpeed * emaDecay + instMbps * emaWeight;
           }
 
           peakSpeed = Math.max(peakSpeed, currentSmoothSpeed);
@@ -1580,7 +1585,7 @@
           document.getElementById('txtDownload').innerText = currentSmoothSpeed.toFixed(1);
           document.getElementById('txtDownloadPico').innerText = `Pico: ${peakSpeed.toFixed(1)} Mbps`;
 
-          if (now - lastGraphTime >= 240) {
+          if (now - lastGraphTime >= graphSampleIntervalMs) {
             addGraphPoint(currentSmoothSpeed, true);
             lastGraphTime = now;
           }
@@ -1652,6 +1657,11 @@
     const durationSec = parseInt(document.getElementById('cbTestDuration')?.value || '15', 10);
     const numStreams = parseInt(document.getElementById('cbStreams')?.value || '4', 10);
     const durationMs = durationSec * 1000;
+
+    // Amostragem e amortecimento proporcionais à duração para manter densidade visual estável e linear
+    const graphSampleIntervalMs = Math.max(220, Math.round(durationMs / 60));
+    const emaWeight = Math.max(0.06, Math.min(0.20, 2.5 / durationSec));
+    const emaDecay = 1 - emaWeight;
 
     log(`[UPLOAD] Multi-Stream RFC 6349 (${isSparc ? 'Vinhedo' : 'Cloudflare Edge'}): ${numStreams} streams simultâneos | Duração: ${durationSec}s contínuos...`);
 
@@ -1740,7 +1750,8 @@
           if (currentSmoothUpload === 0) {
             currentSmoothUpload = instMbps;
           } else {
-            currentSmoothUpload = currentSmoothUpload * 0.80 + instMbps * 0.20;
+            // Suavização EMA proporcional à duração do teste para curva estável e linear
+            currentSmoothUpload = currentSmoothUpload * emaDecay + instMbps * emaWeight;
           }
 
           peakSpeed = Math.max(peakSpeed, currentSmoothUpload);
@@ -1748,7 +1759,7 @@
           document.getElementById('txtUpload').innerText = currentSmoothUpload.toFixed(1);
           document.getElementById('txtUploadPico').innerText = `Pico: ${peakSpeed.toFixed(1)} Mbps`;
 
-          if (now - lastGraphTime >= 240) {
+          if (now - lastGraphTime >= graphSampleIntervalMs) {
             addGraphPoint(currentSmoothUpload, false);
             lastGraphTime = now;
           }
@@ -1885,16 +1896,25 @@
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Filtro Gaussiano de 3 pontos para amortecer ruídos TCP microscópicos
+    // Filtro Gaussiano adaptativo de suavização proporcional à densidade temporal (elimina dentes de serra em 30s e 60s)
     function getSmoothedPoints(points) {
       if (points.length <= 2) return points;
-      const res = [points[0]];
-      for (let i = 1; i < points.length - 1; i++) {
-        const sm = points[i - 1] * 0.25 + points[i] * 0.50 + points[i + 1] * 0.25;
-        res.push(sm);
+
+      // Passagens de amortecimento adaptativas proporcionais à quantidade de amostras
+      // Para testes longos (30s e 60s com >30 a >50 pontos), aplica passagens adicionais que expandem o kernel Gaussiano
+      const passes = points.length > 50 ? 3 : (points.length > 30 ? 2 : 1);
+
+      let current = [...points];
+      for (let p = 0; p < passes; p++) {
+        const next = [current[0]];
+        for (let i = 1; i < current.length - 1; i++) {
+          const sm = current[i - 1] * 0.22 + current[i] * 0.56 + current[i + 1] * 0.22;
+          next.push(sm);
+        }
+        next.push(current[current.length - 1]);
+        current = next;
       }
-      res.push(points[points.length - 1]);
-      return res;
+      return current;
     }
 
     // Desenha curva com spline Bézier suave através de pontos médios (sem dentes de serra)
