@@ -463,12 +463,12 @@
         Cobertura Nacional Dinâmica (27 Capitais + Polos)
       </div>
     </div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px;">
       <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Provedor / Motor de Teste:</label>
         <select id="cbProvider" onchange="onProviderChange()" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
-          <option value="sparc_cloud" selected>🏢 SPARC Cloud Vinhedo (Servidor Dedicado OCI)</option>
-          <option value="cloudflare">⚡ Cloudflare Speed (Multi-Anycast Global)</option>
+          <option value="cloudflare" selected>⚡ Cloudflare Speed (Multi-Anycast Global — Alta Vazão)</option>
+          <option value="sparc_cloud">🏢 SPARC Cloud Vinhedo (Servidor Dedicado OCI)</option>
           <option value="ookla">📡 Ookla Speedtest (Certificado Oficial &amp; Redes Parceiras)</option>
           <option value="mlab">🌐 M-Lab NDT (Measurement Lab / PTT.br)</option>
           <option value="regional">🚀 Multi-Stream Regional (IX.br CDNs)</option>
@@ -478,27 +478,27 @@
       <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Servidor Alvo (Georreferenciado ao Link):</label>
         <select id="cbServers" onchange="onServerSelectChange()" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
-          <option value="sparc_vinhedo" selected>🔥 [DEDICADO SPARC] Vinhedo / SP (Oracle Cloud sa-vinhedo-1)</option>
-          <option value="auto">⭐ [AUTOMÁTICO] Menor Esforço (Descobrindo servidores locais...)</option>
+          <option value="auto" selected>⭐ [AUTOMÁTICO] Menor Esforço (Descobrindo servidores locais...)</option>
+          <option value="sparc_vinhedo">🔥 [DEDICADO SPARC] Vinhedo / SP (Oracle Cloud sa-vinhedo-1)</option>
         </select>
       </div>
 
       <div>
-        <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Conexões Paralelas (RFC 6349 Multi-Stream):</label>
+        <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Conexões Paralelas (RFC 6349):</label>
         <select id="cbStreams" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
           <option value="6" selected>⭐ 6 Streams Simultâneos (RFC 6349 / Alta Banda)</option>
-          <option value="4">4 Streams Simultâneos (Padrão)</option>
+          <option value="4">4 Streams Simultâneos (Equilibrado)</option>
           <option value="8">8 Streams Simultâneos (Gigabit 1Gbps+)</option>
-          <option value="1">1 Stream Único (Legado / Diagnóstico BDP)</option>
+          <option value="1">1 Stream Único (Diagnóstico BDP)</option>
         </select>
       </div>
 
       <div>
-        <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Duração da Saturação (Stream Contínuo):</label>
+        <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Duração da Saturação (Tempo Contínuo):</label>
         <select id="cbTestDuration" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
-          <option value="15">⚡ 15 segundos (Padrão RFC 6349)</option>
+          <option value="15" selected>⚡ 15 segundos (Padrão RFC 6349)</option>
           <option value="30">⏱️ 30 segundos (Estendido)</option>
-          <option value="60" selected>🔥 60 segundos (1 Minuto Ininterrupto — Homologação)</option>
+          <option value="60">🔥 60 segundos (1 Minuto Ininterrupto — Homologação)</option>
           <option value="10">🚀 10 segundos (Rápido)</option>
         </select>
       </div>
@@ -903,7 +903,7 @@
       log('[MOTOR] Provedor de teste comutado para: SPARC Cloud Vinhedo (Servidor Dedicado OCI)');
       if (cb) cb.value = 'sparc_vinhedo';
     } else {
-      txtStatus.innerText = 'Motor: Cloudflare Speed (Multi-Anycast Global)';
+      txtStatus.innerText = 'Motor: Cloudflare Speed (Multi-Anycast Global — Alta Vazão)';
       log('[MOTOR] Provedor de teste comutado para: Cloudflare Speed (Multi-Anycast Global)');
       if (cb && cb.value === 'sparc_vinhedo') cb.value = 'auto';
     }
@@ -940,7 +940,7 @@
     } else if (sel === 'auto') {
       // Pega o mais próximo descoberto
       const hubs = Object.values(window.ACTIVE_DYNAMIC_HUBS || {});
-      target = hubs.length > 0 ? hubs[0] : { id: 'fln', name: 'Florianópolis / SC', city: 'Florianópolis', lat: -27.5967, lon: -48.5492, distKm: 15.2 };
+      target = hubs.length > 0 ? hubs[0] : { id: 'fln', name: 'Florianópolis / SC', city: 'Florianópolis (Regional SC)', lat: -27.5967, lon: -48.5492, distKm: 15.2 };
     } else if (sel === 'anycast') {
       target = { id: colo || 'GRU', name: `Cloudflare ${colo}`, city: `Datacenter Central ${colo}`, lat: -23.4356, lon: -46.4731, distKm: 505.2 };
     } else if (window.ACTIVE_DYNAMIC_HUBS && window.ACTIVE_DYNAMIC_HUBS[sel]) {
@@ -1355,12 +1355,10 @@
 
     const getNextChunkUrl = () => {
       if (isSparc) {
-        // Alterna entre chunks grandes de 50MB e 100MB em Vinhedo
         const files = ['test-50mb.bin', 'test-100mb.bin'];
         const chosen = files[Math.floor(Math.random() * files.length)];
         return `https://204.216.133.98.nip.io/${chosen}?r=${Math.random()}`;
       } else {
-        // Cloudflare Speed: chunks de 50MB para saturação contínua
         return `https://speed.cloudflare.com/__down?bytes=50000000&r=${Math.random()}`;
       }
     };
@@ -1372,7 +1370,6 @@
     const tStart = performance.now();
     const tDeadline = tStart + durationMs;
 
-    // Rastreamento para cálculo estável RFC 6349 (descarta primeiros 1.5s de TCP slow-start)
     let stableStartTime = 0;
     let stableStartBytes = 0;
     const slowStartDurationMs = Math.min(2000, durationMs * 0.20);
@@ -1383,8 +1380,8 @@
 
     let lastSampleTime = tStart;
     let lastSampleBytes = 0;
+    let lastGraphTime = tStart;
 
-    // Worker individual paralelo em loop contínuo
     async function downloadWorker(id) {
       while (performance.now() < tDeadline && !localAbort.signal.aborted) {
         try {
@@ -1408,13 +1405,12 @@
       }
     }
 
-    // Amostragem em tempo real (120ms) para fluidez de UI e curva gráfica
     const ticker = setInterval(() => {
       const now = performance.now();
       const elapsed = now - tStart;
       const dt = (now - lastSampleTime) / 1000;
 
-      if (dt >= 0.09) {
+      if (dt >= 0.12) {
         const deltaBytes = totalBytesReceived - lastSampleBytes;
         if (deltaBytes >= 0) {
           const instMbps = (deltaBytes * 8) / (dt * 1000000);
@@ -1422,15 +1418,19 @@
           if (currentSmoothSpeed === 0) {
             currentSmoothSpeed = instMbps;
           } else {
-            // Suavização EMA ponderada (65% histórico / 35% instantâneo)
-            currentSmoothSpeed = currentSmoothSpeed * 0.65 + instMbps * 0.35;
+            // Suavização EMA ponderada (80% histórico / 20% instantâneo)
+            currentSmoothSpeed = currentSmoothSpeed * 0.80 + instMbps * 0.20;
           }
 
           peakSpeed = Math.max(peakSpeed, currentSmoothSpeed);
 
           document.getElementById('txtDownload').innerText = currentSmoothSpeed.toFixed(1);
           document.getElementById('txtDownloadPico').innerText = `Pico: ${peakSpeed.toFixed(1)} Mbps`;
-          addGraphPoint(currentSmoothSpeed, true);
+
+          if (now - lastGraphTime >= 240) {
+            addGraphPoint(currentSmoothSpeed, true);
+            lastGraphTime = now;
+          }
 
           lastSampleTime = now;
           lastSampleBytes = totalBytesReceived;
@@ -1444,15 +1444,13 @@
 
       const progressPct = Math.min(100, (elapsed / durationMs) * 100);
       document.getElementById('pbDownload').style.width = progressPct.toFixed(1) + '%';
-    }, 120);
+    }, 100);
 
-    // Dispara todos os workers concorrentes simultaneamente
     const workers = [];
     for (let i = 0; i < numStreams; i++) {
       workers.push(downloadWorker(i));
     }
 
-    // Monitora até o deadline ou cancelamento
     await Promise.race([
       Promise.all(workers),
       new Promise(resolve => {
@@ -1474,7 +1472,6 @@
     const tEnd = performance.now();
     document.getElementById('pbDownload').style.width = '100%';
 
-    // Cálculo da média na fase estável (RFC 6349)
     let avgMbps = 0;
     if (stableStartTime > 0 && tEnd > stableStartTime) {
       const stableDurSec = (tEnd - stableStartTime) / 1000;
@@ -1499,14 +1496,13 @@
       ? 'https://204.216.133.98.nip.io/upload'
       : 'https://speed.cloudflare.com/__up';
 
-    const durationSec = Math.min(30, parseInt(document.getElementById('cbTestDuration')?.value || '15', 10));
-    const numStreams = 4; // 4 streams paralelos para upload
+    const durationSec = parseInt(document.getElementById('cbTestDuration')?.value || '15', 10);
+    const numStreams = 4;
     const durationMs = durationSec * 1000;
 
     log(`[UPLOAD] Multi-Stream RFC 6349 (${isSparc ? 'Vinhedo' : 'Cloudflare Edge'}): ${numStreams} streams simultâneos | Duração: ${durationSec}s contínuos...`);
 
-    // Payload de 2 MB para cada envio
-    const payloadSize = 2000000;
+    const payloadSize = 1000000; // 1 MB
     const payload = new Uint8Array(payloadSize);
 
     let totalBytesSent = 0;
@@ -1526,8 +1522,8 @@
 
     let lastSampleTime = tStart;
     let lastSampleBytes = 0;
+    let lastGraphTime = tStart;
 
-    // Envio seguro e medido pelo evento oficial onprogress da interface de rede (XHR Upload)
     function sendPayloadXhr() {
       return new Promise((resolve) => {
         if (performance.now() >= tDeadline || localAbort.signal.aborted) {
@@ -1574,7 +1570,7 @@
       const elapsed = now - tStart;
       const dt = (now - lastSampleTime) / 1000;
 
-      if (dt >= 0.09) {
+      if (dt >= 0.12) {
         const deltaBytes = totalBytesSent - lastSampleBytes;
         if (deltaBytes >= 0) {
           const instMbps = (deltaBytes * 8) / (dt * 1000000);
@@ -1582,14 +1578,18 @@
           if (currentSmoothUpload === 0) {
             currentSmoothUpload = instMbps;
           } else {
-            currentSmoothUpload = currentSmoothUpload * 0.65 + instMbps * 0.35;
+            currentSmoothUpload = currentSmoothUpload * 0.80 + instMbps * 0.20;
           }
 
           peakSpeed = Math.max(peakSpeed, currentSmoothUpload);
 
           document.getElementById('txtUpload').innerText = currentSmoothUpload.toFixed(1);
           document.getElementById('txtUploadPico').innerText = `Pico: ${peakSpeed.toFixed(1)} Mbps`;
-          addGraphPoint(currentSmoothUpload, false);
+
+          if (now - lastGraphTime >= 240) {
+            addGraphPoint(currentSmoothUpload, false);
+            lastGraphTime = now;
+          }
 
           lastSampleTime = now;
           lastSampleBytes = totalBytesSent;
@@ -1603,7 +1603,7 @@
 
       const progressPct = Math.min(100, (elapsed / durationMs) * 100);
       document.getElementById('pbUpload').style.width = progressPct.toFixed(1) + '%';
-    }, 120);
+    }, 100);
 
     const workers = [];
     for (let i = 0; i < numStreams; i++) {
@@ -1701,7 +1701,7 @@
 
     ctx.clearRect(0, 0, w, h);
 
-    // Linhas de Grade
+    // Linhas de Grade Sutis
     ctx.strokeStyle = '#161f30';
     ctx.lineWidth = 1;
     ctx.setLineDash([3, 3]);
@@ -1720,77 +1720,92 @@
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Curva Download
-    if (dlPoints.length > 1) {
-      const dw = w * 0.46;
-      const startX = 10;
+    // Filtro Gaussiano de 3 pontos para amortecer ruídos TCP microscópicos
+    function getSmoothedPoints(points) {
+      if (points.length <= 2) return points;
+      const res = [points[0]];
+      for (let i = 1; i < points.length - 1; i++) {
+        const sm = points[i - 1] * 0.25 + points[i] * 0.50 + points[i + 1] * 0.25;
+        res.push(sm);
+      }
+      res.push(points[points.length - 1]);
+      return res;
+    }
 
-      // Área Gradiente Download
-      const gradDl = ctx.createLinearGradient(0, 0, 0, h);
-      gradDl.addColorStop(0, 'rgba(16, 185, 129, 0.35)');
-      gradDl.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+    // Desenha curva com spline Bézier suave através de pontos médios (sem dentes de serra)
+    function drawSmoothCurve(rawPoints, startX, width, isDownload) {
+      if (rawPoints.length < 2) return;
+      const points = getSmoothedPoints(rawPoints);
+      const n = points.length;
+
+      const coords = points.map((spd, idx) => {
+        const x = startX + (idx / Math.max(1, n - 1)) * width;
+        const y = Math.max(8, h - (spd / maxGraphSpeed) * (h - 22));
+        return { x, y };
+      });
+
+      // 1. Área com Gradiente Neon sob a curva
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      if (isDownload) {
+        grad.addColorStop(0, 'rgba(16, 185, 129, 0.38)');
+        grad.addColorStop(0.65, 'rgba(16, 185, 129, 0.08)');
+        grad.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+      } else {
+        grad.addColorStop(0, 'rgba(59, 130, 246, 0.38)');
+        grad.addColorStop(0.65, 'rgba(59, 130, 246, 0.08)');
+        grad.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+      }
 
       ctx.beginPath();
-      ctx.moveTo(startX, h);
-      dlPoints.forEach((spd, idx) => {
-        const x = startX + (idx / Math.max(1, dlPoints.length - 1)) * dw;
-        const y = Math.max(8, h - (spd / maxGraphSpeed) * (h - 18));
-        ctx.lineTo(x, y);
-      });
-      ctx.lineTo(startX + dw, h);
+      ctx.moveTo(coords[0].x, h);
+      ctx.lineTo(coords[0].x, coords[0].y);
+
+      for (let i = 0; i < coords.length - 1; i++) {
+        const midX = (coords[i].x + coords[i + 1].x) / 2;
+        const midY = (coords[i].y + coords[i + 1].y) / 2;
+        ctx.quadraticCurveTo(coords[i].x, coords[i].y, midX, midY);
+      }
+      ctx.lineTo(coords[coords.length - 1].x, coords[coords.length - 1].y);
+      ctx.lineTo(coords[coords.length - 1].x, h);
       ctx.closePath();
-      ctx.fillStyle = gradDl;
+      ctx.fillStyle = grad;
       ctx.fill();
 
-      // Linha Neon Download
+      // 2. Linha Neon Fluida de Contorno
       ctx.beginPath();
-      dlPoints.forEach((spd, idx) => {
-        const x = startX + (idx / Math.max(1, dlPoints.length - 1)) * dw;
-        const y = Math.max(8, h - (spd / maxGraphSpeed) * (h - 18));
-        if (idx === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.strokeStyle = '#10b981';
-      ctx.lineWidth = 2.5;
+      ctx.moveTo(coords[0].x, coords[0].y);
+      for (let i = 0; i < coords.length - 1; i++) {
+        const midX = (coords[i].x + coords[i + 1].x) / 2;
+        const midY = (coords[i].y + coords[i + 1].y) / 2;
+        ctx.quadraticCurveTo(coords[i].x, coords[i].y, midX, midY);
+      }
+      ctx.lineTo(coords[coords.length - 1].x, coords[coords.length - 1].y);
+
+      ctx.strokeStyle = isDownload ? '#10b981' : '#3b82f6';
+      ctx.lineWidth = 2.8;
+      ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
+      ctx.shadowColor = isDownload ? 'rgba(16, 185, 129, 0.7)' : 'rgba(59, 130, 246, 0.7)';
+      ctx.shadowBlur = 8;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Ponto de pulso neon na ponta
+      const last = coords[coords.length - 1];
+      ctx.beginPath();
+      ctx.arc(last.x, last.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(last.x, last.y, 7, 0, Math.PI * 2);
+      ctx.strokeStyle = isDownload ? '#10b981' : '#3b82f6';
+      ctx.lineWidth = 2;
       ctx.stroke();
     }
 
-    // Curva Upload
-    if (ulPoints.length > 1) {
-      const uw = w * 0.46;
-      const startX = w * 0.52;
-
-      // Área Gradiente Upload
-      const gradUl = ctx.createLinearGradient(0, 0, 0, h);
-      gradUl.addColorStop(0, 'rgba(59, 130, 246, 0.35)');
-      gradUl.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
-
-      ctx.beginPath();
-      ctx.moveTo(startX, h);
-      ulPoints.forEach((spd, idx) => {
-        const x = startX + (idx / Math.max(1, ulPoints.length - 1)) * uw;
-        const y = Math.max(8, h - (spd / maxGraphSpeed) * (h - 18));
-        ctx.lineTo(x, y);
-      });
-      ctx.lineTo(startX + uw, h);
-      ctx.closePath();
-      ctx.fillStyle = gradUl;
-      ctx.fill();
-
-      // Linha Neon Upload
-      ctx.beginPath();
-      ulPoints.forEach((spd, idx) => {
-        const x = startX + (idx / Math.max(1, ulPoints.length - 1)) * uw;
-        const y = Math.max(8, h - (spd / maxGraphSpeed) * (h - 18));
-        if (idx === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 2.5;
-      ctx.lineJoin = 'round';
-      ctx.stroke();
-    }
+    const dw = w * 0.46;
+    drawSmoothCurve(dlPoints, 10, dw, true);
+    drawSmoothCurve(ulPoints, w * 0.52, dw, false);
   }
 
   function printReport() {
