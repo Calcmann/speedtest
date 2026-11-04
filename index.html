@@ -514,25 +514,77 @@
         </select>
       </div>
 
-      <!-- ARBITRAGEM DE BANDA / CIR (RFC 6349) -->
-      <div>
-        <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">🎯 Banda Contratada / CIR (SLA RFC 6349):</label>
-        <div style="display: flex; gap: 6px; align-items: center;">
+      <!-- ARBITRAGEM DE BANDA / CIR (RFC 6349) — SIMÉTRICO E ASSIMÉTRICO -->
+      <div style="grid-column: span 2;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 4px;">
+          <label style="font-size: 10px; font-weight: 700; color: var(--text-muted);">🎯 Banda Contratada / CIR (SLA RFC 6349):</label>
+          <label style="font-size: 10px; font-weight: 800; color: var(--cyan); display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chkAsymmetricCir" onchange="onAsymmetricCirToggle()" style="cursor: pointer; accent-color: var(--cyan);" />
+            <span>⚡ Circuito Assimétrico (DL ≠ UL)</span>
+          </label>
+        </div>
+
+        <!-- MODO SIMÉTRICO (PADRÃO) -->
+        <div id="boxSymmetricCir" style="display: flex; gap: 6px; align-items: center;">
           <select id="cbCirPreset" onchange="onCirPresetChange()" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; flex: 1; cursor: pointer;">
             <option value="auto">⭐ [AUTO] Descoberta Livre (Best-Effort)</option>
             <option value="10">10 Mbps (Link Legado / E1)</option>
             <option value="20">20 Mbps (Link Corporativo)</option>
             <option value="50">50 Mbps (Banda Básica)</option>
-            <option value="100" selected>100 Mbps (Padrão Telecom)</option>
+            <option value="100" selected>100 Mbps (Padrão Telecom Simétrico)</option>
             <option value="200">200 Mbps (Média Escala)</option>
             <option value="300">300 Mbps (Fibra Alta Vazão)</option>
             <option value="500">500 Mbps (Ultra Banda Larga)</option>
             <option value="1000">1.0 Gbps (Gigabit Carrier-Grade)</option>
-            <option value="custom">✏️ Personalizado (Arbitrar Valor...)</option>
+            <option value="custom">✏️ Personalizado (Arbitrar Valor Único...)</option>
           </select>
           <div id="boxCustomCir" style="display: none; align-items: center; gap: 3px;">
-            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 72px; background: #0f172a; border: 1.5px solid var(--cyan); color: #fff; padding: 7px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
+            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 74px; background: #0f172a; border: 1.5px solid var(--cyan); color: #fff; padding: 7px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
             <span style="font-size: 10px; font-weight: 700; color: var(--text-muted);">Mbps</span>
+          </div>
+        </div>
+
+        <!-- MODO ASSIMÉTRICO (EXIBIDO QUANDO O CHECKBOX ESTIVER MARCADO) -->
+        <div id="boxAsymmetricCir" style="display: none; display: flex; flex-direction: column; gap: 6px; background: rgba(15, 23, 42, 0.6); padding: 8px; border-radius: 8px; border: 1px dashed #334155;">
+          <!-- DOWNLOAD ASSIMÉTRICO -->
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span style="font-size: 10px; font-weight: 800; color: var(--green); width: 85px; white-space: nowrap;">↓ CIR DOWNLOAD:</span>
+            <select id="cbCirDlPreset" onchange="onCirDlPresetChange()" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; flex: 1; cursor: pointer;">
+              <option value="auto">⭐ [AUTO] Best-Effort</option>
+              <option value="50">50 Mbps (Básica)</option>
+              <option value="100">100 Mbps</option>
+              <option value="200">200 Mbps</option>
+              <option value="300" selected>300 Mbps (Banda Larga Típica)</option>
+              <option value="500">500 Mbps (Fibra Alta)</option>
+              <option value="600">600 Mbps</option>
+              <option value="1000">1.0 Gbps (Gigabit)</option>
+              <option value="custom">✏️ Personalizado...</option>
+            </select>
+            <div id="boxCustomCirDl" style="display: none; align-items: center; gap: 3px;">
+              <input type="number" id="txtCustomCirDl" min="1" max="10000" placeholder="Mbps" style="width: 68px; background: #0f172a; border: 1.5px solid var(--green); color: #fff; padding: 5px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
+              <span style="font-size: 9.5px; font-weight: 700; color: var(--text-muted);">Mbps</span>
+            </div>
+          </div>
+
+          <!-- UPLOAD ASSIMÉTRICO -->
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span style="font-size: 10px; font-weight: 800; color: var(--blue); width: 85px; white-space: nowrap;">↑ CIR UPLOAD:</span>
+            <select id="cbCirUlPreset" onchange="onCirUlPresetChange()" style="background: #1e293b; border: 1px solid #334155; color: #fff; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; flex: 1; cursor: pointer;">
+              <option value="auto">⭐ [AUTO] Best-Effort</option>
+              <option value="10">10 Mbps (Legado / ADSL)</option>
+              <option value="20">20 Mbps</option>
+              <option value="35">35 Mbps (Cabo Coaxial / DOCSIS)</option>
+              <option value="50">50 Mbps</option>
+              <option value="100">100 Mbps</option>
+              <option value="150" selected>150 Mbps (50% de 300M GPON)</option>
+              <option value="250">250 Mbps (50% de 500M GPON)</option>
+              <option value="500">500 Mbps</option>
+              <option value="custom">✏️ Personalizado...</option>
+            </select>
+            <div id="boxCustomCirUl" style="display: none; align-items: center; gap: 3px;">
+              <input type="number" id="txtCustomCirUl" min="1" max="10000" placeholder="Mbps" style="width: 68px; background: #0f172a; border: 1.5px solid var(--blue); color: #fff; padding: 5px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
+              <span style="font-size: 9.5px; font-weight: 700; color: var(--text-muted);">Mbps</span>
+            </div>
           </div>
         </div>
       </div>
@@ -785,7 +837,7 @@
     logBox.scrollTop = logBox.scrollHeight;
   }
 
-  const PARAM_INPUT_IDS = ['cbProvider', 'cbServers', 'cbStreams', 'cbTestDuration', 'cbBloatMetric', 'cbCirPreset', 'txtCustomCir'];
+  const PARAM_INPUT_IDS = ['cbProvider', 'cbServers', 'cbStreams', 'cbTestDuration', 'cbBloatMetric', 'chkAsymmetricCir', 'cbCirPreset', 'txtCustomCir', 'cbCirDlPreset', 'txtCustomCirDl', 'cbCirUlPreset', 'txtCustomCirUl'];
   let lastCompletedConfig = null;
 
   // Inicialização e Descoberta Geodésica
@@ -1086,6 +1138,15 @@
     return 2 * R * Math.asin(Math.sqrt(a));
   }
 
+  function onAsymmetricCirToggle() {
+    const isAsym = document.getElementById('chkAsymmetricCir')?.checked;
+    const boxSym = document.getElementById('boxSymmetricCir');
+    const boxAsym = document.getElementById('boxAsymmetricCir');
+    if (boxSym) boxSym.style.display = isAsym ? 'none' : 'flex';
+    if (boxAsym) boxAsym.style.display = isAsym ? 'flex' : 'none';
+    checkConfigConsistency();
+  }
+
   function onCirPresetChange() {
     const val = document.getElementById('cbCirPreset')?.value;
     const box = document.getElementById('boxCustomCir');
@@ -1095,24 +1156,64 @@
     checkConfigConsistency();
   }
 
+  function onCirDlPresetChange() {
+    const val = document.getElementById('cbCirDlPreset')?.value;
+    const box = document.getElementById('boxCustomCirDl');
+    const txt = document.getElementById('txtCustomCirDl');
+    if (box) box.style.display = (val === 'custom') ? 'flex' : 'none';
+    if (val === 'custom' && txt) txt.focus();
+    checkConfigConsistency();
+  }
+
+  function onCirUlPresetChange() {
+    const val = document.getElementById('cbCirUlPreset')?.value;
+    const box = document.getElementById('boxCustomCirUl');
+    const txt = document.getElementById('txtCustomCirUl');
+    if (box) box.style.display = (val === 'custom') ? 'flex' : 'none';
+    if (val === 'custom' && txt) txt.focus();
+    checkConfigConsistency();
+  }
+
   function onCustomCirInput() {
     checkConfigConsistency();
   }
 
+  function parseCirValue(presetVal, customVal) {
+    if (presetVal === 'auto') return { val: 0, label: 'Auto (Best-Effort)' };
+    if (presetVal === 'custom') {
+      const num = parseFloat(customVal) || 100;
+      return { val: num, label: `${num} Mbps` };
+    }
+    const num = parseFloat(presetVal) || 100;
+    return { val: num, label: `${num} Mbps` };
+  }
+
   function getCurrentConfig() {
+    const isAsymmetric = document.getElementById('chkAsymmetricCir')?.checked || false;
     const cirPreset = document.getElementById('cbCirPreset')?.value || '100';
     const customCir = document.getElementById('txtCustomCir')?.value || '';
-    let cirNominal = 0;
+
+    const cirDlPreset = document.getElementById('cbCirDlPreset')?.value || '300';
+    const customCirDl = document.getElementById('txtCustomCirDl')?.value || '';
+
+    const cirUlPreset = document.getElementById('cbCirUlPreset')?.value || '150';
+    const customCirUl = document.getElementById('txtCustomCirUl')?.value || '';
+
+    let cirDlNominal = 0;
+    let cirUlNominal = 0;
     let cirLabel = '';
-    if (cirPreset === 'custom') {
-      cirNominal = parseFloat(customCir) || 100;
-      cirLabel = `${cirNominal} Mbps (Custom)`;
-    } else if (cirPreset === 'auto') {
-      cirNominal = 0;
-      cirLabel = 'Auto (Best-Effort)';
+
+    if (isAsymmetric) {
+      const parsedDl = parseCirValue(cirDlPreset, customCirDl);
+      const parsedUl = parseCirValue(cirUlPreset, customCirUl);
+      cirDlNominal = parsedDl.val;
+      cirUlNominal = parsedUl.val;
+      cirLabel = `DL: ${parsedDl.label} / UL: ${parsedUl.label} (Assimétrico)`;
     } else {
-      cirNominal = parseFloat(cirPreset) || 100;
-      cirLabel = `${cirNominal} Mbps`;
+      const parsedSym = parseCirValue(cirPreset, customCir);
+      cirDlNominal = parsedSym.val;
+      cirUlNominal = parsedSym.val;
+      cirLabel = parsedSym.label;
     }
 
     return {
@@ -1121,9 +1222,16 @@
       streams: document.getElementById('cbStreams')?.value || '',
       duration: document.getElementById('cbTestDuration')?.value || '',
       bloatMetric: document.getElementById('cbBloatMetric')?.value || '',
+      isAsymmetric: isAsymmetric,
       cirPreset: cirPreset,
       customCir: customCir,
-      cirNominal: cirNominal,
+      cirDlPreset: cirDlPreset,
+      customCirDl: customCirDl,
+      cirUlPreset: cirUlPreset,
+      customCirUl: customCirUl,
+      cirDlNominal: cirDlNominal,
+      cirUlNominal: cirUlNominal,
+      cirNominal: Math.max(cirDlNominal, cirUlNominal),
       cirLabel: cirLabel,
       providerText: document.getElementById('cbProvider')?.selectedOptions[0]?.text || '',
       serverText: document.getElementById('cbServers')?.selectedOptions[0]?.text || '',
@@ -1136,15 +1244,28 @@
   function hasConfigMismatch() {
     if (!lastCompletedConfig) return false;
     const cur = getCurrentConfig();
-    return (
-      cur.provider !== lastCompletedConfig.provider ||
-      cur.server !== lastCompletedConfig.server ||
-      cur.streams !== lastCompletedConfig.streams ||
-      cur.duration !== lastCompletedConfig.duration ||
-      cur.bloatMetric !== lastCompletedConfig.bloatMetric ||
-      cur.cirPreset !== lastCompletedConfig.cirPreset ||
-      (cur.cirPreset === 'custom' && cur.customCir !== lastCompletedConfig.customCir)
-    );
+    if (cur.provider !== lastCompletedConfig.provider ||
+        cur.server !== lastCompletedConfig.server ||
+        cur.streams !== lastCompletedConfig.streams ||
+        cur.duration !== lastCompletedConfig.duration ||
+        cur.bloatMetric !== lastCompletedConfig.bloatMetric ||
+        cur.isAsymmetric !== lastCompletedConfig.isAsymmetric) {
+      return true;
+    }
+
+    if (cur.isAsymmetric) {
+      return (
+        cur.cirDlPreset !== lastCompletedConfig.cirDlPreset ||
+        cur.cirUlPreset !== lastCompletedConfig.cirUlPreset ||
+        (cur.cirDlPreset === 'custom' && cur.customCirDl !== lastCompletedConfig.customCirDl) ||
+        (cur.cirUlPreset === 'custom' && cur.customCirUl !== lastCompletedConfig.customCirUl)
+      );
+    } else {
+      return (
+        cur.cirPreset !== lastCompletedConfig.cirPreset ||
+        (cur.cirPreset === 'custom' && cur.customCir !== lastCompletedConfig.customCir)
+      );
+    }
   }
 
   function checkConfigConsistency() {
@@ -1193,12 +1314,34 @@
     if (d) d.value = lastCompletedConfig.duration;
     if (b) b.value = lastCompletedConfig.bloatMetric;
 
+    const chkAsym = document.getElementById('chkAsymmetricCir');
+    if (chkAsym) {
+      chkAsym.checked = !!lastCompletedConfig.isAsymmetric;
+      onAsymmetricCirToggle();
+    }
+
     if (lastCompletedConfig.cirPreset) {
       const cirEl = document.getElementById('cbCirPreset');
       if (cirEl) cirEl.value = lastCompletedConfig.cirPreset;
       const customEl = document.getElementById('txtCustomCir');
       if (customEl && lastCompletedConfig.customCir) customEl.value = lastCompletedConfig.customCir;
       onCirPresetChange();
+    }
+
+    if (lastCompletedConfig.cirDlPreset) {
+      const dlEl = document.getElementById('cbCirDlPreset');
+      if (dlEl) dlEl.value = lastCompletedConfig.cirDlPreset;
+      const customDlEl = document.getElementById('txtCustomCirDl');
+      if (customDlEl && lastCompletedConfig.customCirDl) customDlEl.value = lastCompletedConfig.customCirDl;
+      onCirDlPresetChange();
+    }
+
+    if (lastCompletedConfig.cirUlPreset) {
+      const ulEl = document.getElementById('cbCirUlPreset');
+      if (ulEl) ulEl.value = lastCompletedConfig.cirUlPreset;
+      const customUlEl = document.getElementById('txtCustomCirUl');
+      if (customUlEl && lastCompletedConfig.customCirUl) customUlEl.value = lastCompletedConfig.customCirUl;
+      onCirUlPresetChange();
     }
 
     onProviderChange();
@@ -1234,7 +1377,13 @@
     const badge = document.getElementById('rfcSlaBadge');
 
     if (cirVal) {
-      cirVal.innerText = rfc.isAuto ? `${rfc.cir.toFixed(1)} Mbps (Auto)` : `${rfc.cir.toFixed(0)} Mbps`;
+      if (rfc.isAuto) {
+        cirVal.innerText = `${rfc.cir.toFixed(1)} Mbps (Auto)`;
+      } else if (rfc.isAsymmetric) {
+        cirVal.innerText = `DL: ${rfc.cirDl.toFixed(0)}M • UL: ${rfc.cirUl.toFixed(0)}M`;
+      } else {
+        cirVal.innerText = `${rfc.cir.toFixed(0)} Mbps`;
+      }
     }
     if (slaPct) {
       if (rfc.isAuto) {
@@ -1640,31 +1789,37 @@
       window.LAST_BLOAT_DATA = { dlSamples, ulSamples, idleBaseline: idlePing.avg };
       const bloatRes = updateBufferbloatCard(dlSamples, ulSamples, idlePing.avg);
 
-      // 5. CÁLCULO DAS 4 MÉTRICAS FORMAIS RFC 6349 (SLA COMPLIANCE)
+      // 5. CÁLCULO DAS 4 MÉTRICAS FORMAIS RFC 6349 (SLA COMPLIANCE — SIMÉTRICO E ASSIMÉTRICO)
       const currentCfg = getCurrentConfig();
-      const cirNominal = currentCfg.cirNominal > 0 ? currentCfg.cirNominal : Math.max(dlRes.avg, ulRes.avg);
-      const isAutoCir = (currentCfg.cirNominal === 0);
+      const cirDlNominal = currentCfg.cirDlNominal > 0 ? currentCfg.cirDlNominal : dlRes.avg;
+      const cirUlNominal = currentCfg.cirUlNominal > 0 ? currentCfg.cirUlNominal : ulRes.avg;
+      const isAutoCir = (currentCfg.cirDlNominal === 0 && currentCfg.cirUlNominal === 0);
 
-      // A. BDP Teórico do Circuito = (CIR_bps * RTT_basal_s) / 8
+      // A. BDP Teórico do Circuito = (CIR_Download_bps * RTT_basal_s) / 8
       const rttBasalSec = Math.max(1, idlePing.avg) / 1000.0;
-      const bdpBytes = (cirNominal * 1000000.0 * rttBasalSec) / 8.0;
+      const maxCirBps = Math.max(cirDlNominal, cirUlNominal) * 1000000.0;
+      const bdpBytes = (maxCirBps * rttBasalSec) / 8.0;
       const bdpKb = bdpBytes / 1024.0;
 
-      // B. Atingimento do SLA de Throughput TCP (RFC 6349 exige >= 95% do CIR contratado)
-      const dlSlaPct = (dlRes.avg / cirNominal) * 100.0;
-      const ulSlaPct = (ulRes.avg / cirNominal) * 100.0;
+      // B. Atingimento do SLA de Throughput TCP Independente (DL e UL)
+      const dlSlaPct = isAutoCir ? 100.0 : ((dlRes.avg / cirDlNominal) * 100.0);
+      const ulSlaPct = isAutoCir ? 100.0 : ((ulRes.avg / cirUlNominal) * 100.0);
       const worstSlaPct = Math.min(dlSlaPct, ulSlaPct);
       const isSlaApproved = isAutoCir ? true : (worstSlaPct >= 95.0);
 
-      // C. TCP Transfer Time Ratio = Ideal / Actual ou (CIR / Throughput_medio)
-      const avgMeasured = (dlRes.avg + ulRes.avg) / 2.0;
-      const timeRatio = avgMeasured > 0 ? (cirNominal / avgMeasured) : 1.0;
+      // C. TCP Transfer Time Ratio Ponderado = ((CIR_DL/DL_avg) + (CIR_UL/UL_avg)) / 2
+      const dlRatio = dlRes.avg > 0 ? (cirDlNominal / dlRes.avg) : 1.0;
+      const ulRatio = ulRes.avg > 0 ? (cirUlNominal / ulRes.avg) : 1.0;
+      const timeRatio = isAutoCir ? 1.0 : ((dlRatio + ulRatio) / 2.0);
 
       // D. Buffer Delay (%) = (Delta_RTT_carga / RTT_basal) * 100%
       const bufferDelayPct = (bloatRes.worstDelta / Math.max(1, idlePing.avg)) * 100.0;
 
       updateRfc6349Display({
-        cir: cirNominal,
+        cir: Math.max(cirDlNominal, cirUlNominal),
+        cirDl: cirDlNominal,
+        cirUl: cirUlNominal,
+        isAsymmetric: currentCfg.isAsymmetric,
         isAuto: isAutoCir,
         rttMs: idlePing.avg,
         bdpKb: bdpKb,
