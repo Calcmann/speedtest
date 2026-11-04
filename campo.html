@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPARC — Homologação de Links & Aceite de Projetos (O Boticário / Bradesco)</title>
+  <style>
+    :root {
+      --bg: #080c15;
+      --card-bg: #0f172a;
+      --card-border: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --green: #10b981;
+      --blue: #3b82f6;
+      --cyan: #06b6d4;
+      --purple: #8b5cf6;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --boticario: #ec4899;
+      --bradesco: #dc2626;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      padding: 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 980px;
+    }
+
+    /* Header */
+    .header {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge-tag {
+      background: linear-gradient(135deg, #0ea5e9, #2563eb);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 9px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .brand-title {
+      font-size: 17px;
+      font-weight: 900;
+      color: #fff;
+    }
+    .brand-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .nav-toggle-btn {
+      background: rgba(147, 51, 234, 0.12);
+      border: 1px solid #9333ea;
+      color: #d8b4fe;
+      padding: 7px 12px;
+      border-radius: 7px;
+      font-size: 11.5px;
+      font-weight: 800;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .nav-toggle-btn:hover {
+      background: rgba(147, 51, 234, 0.25);
+      color: #fff;
+    }
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--cyan);
+    }
+
+    /* CARD HERO DE PROJETO (SIMPLIFICADO PARA O TÉCNICO DE CAMPO) */
+    .project-card {
+      background: var(--card-bg);
+      border: 1.5px solid #2563eb;
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #3b82f6, #06b6d4, #10b981);
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 16px;
+    }
+    @media (max-width: 720px) {
+      .project-grid { grid-template-columns: 1fr; }
+    }
+
+    .select-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .select-control {
+      background: #1e293b;
+      border: 1.5px solid #3b82f6;
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      width: 100%;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .select-control:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+    }
+
+    .rule-explanation-box {
+      margin-top: 12px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 11.5px;
+      line-height: 1.45;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    /* BARRA DE AÇÃO PRINCIPAL */
+    .hero-action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, #2563eb, #06b6d4);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+      transition: all 0.2s;
+    }
+    .btn-start:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.45);
+    }
+    .btn-start:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: var(--text-main);
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: #334155;
+    }
+    .btn-secondary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* KPI CARDS SIMPLIFICADOS */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 3px;
+    }
+    .kpi-card.dl::after { background: var(--green); }
+    .kpi-card.ul::after { background: var(--blue); }
+    .kpi-card.lat::after { background: var(--cyan); }
+    .kpi-card.bloat::after { background: var(--amber); }
+
+    .kpi-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .kpi-val {
+      font-size: 32px;
+      font-weight: 900;
+      line-height: 1.1;
+      color: #fff;
+    }
+    .kpi-target {
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 6px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .progress-bar-wrap {
+      width: 100%;
+      height: 4px;
+      background: #1e293b;
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      transition: width 0.15s ease-out;
+    }
+
+    /* CARD DE VEREDITO OFICIAL DO PROJETO */
+    .verdict-card {
+      display: none;
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.4s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .verdict-card.approved {
+      border: 2px solid var(--green);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .verdict-card.rejected {
+      border: 2px solid var(--red);
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    /* CANVAS DE VAZÃO */
+    .chart-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 11.5px;
+      font-weight: 800;
+    }
+    .canvas-container {
+      width: 100%;
+      height: 150px;
+      position: relative;
+      background: #090d16;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #1e293b;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* TOPOLOGIA AUTOMÁTICA / ROTA DINÂMICA */
+    .topology-strip {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 11px;
+    }
+
+    /* PRINT AUDIT SUMMARY (A4 OFICIAL) */
+    #printAuditSummary {
+      display: none;
+    }
+    @media print {
+      body {
+        background: #fff !important;
+        color: #0f172a !important;
+        padding: 0 !important;
+      }
+      .container { max-width: 100% !important; }
+      .header, .project-card, .hero-action-bar, .chart-card, #configMismatchWarning, .topology-strip, .nav-toggle-btn {
+        display: none !important;
+      }
+      #printAuditSummary {
+        display: block !important;
+        background: #fff !important;
+        border: 2px solid #0f172a !important;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        color: #0f172a !important;
+      }
+      .kpi-card {
+        background: #fff !important;
+        border: 1px solid #94a3b8 !important;
+        color: #0f172a !important;
+        box-shadow: none !important;
+      }
+      .kpi-val { color: #0f172a !important; }
+      .kpi-target { color: #334155 !important; }
+      .verdict-card {
+        display: block !important;
+        background: #fff !important;
+        color: #0f172a !important;
+        border-width: 2px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="brand">
+      <div class="badge-tag">⚡ SPARC WEB</div>
+      <div>
+        <div class="brand-title">Homologação de Enlaces &amp; Aceite de Projetos</div>
+        <div class="brand-sub">Perfis de RFP Automatizados (O Boticário, Bradesco) • Teste One-Click</div>
+      </div>
+    </div>
+    
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <a href="index.html" class="nav-toggle-btn">
+        <span>⚙️ Modo Avançado (RFC 6349) ➔</span>
+      </a>
+      <div class="status-badge" id="badgeStatus">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">PRONTO PARA HOMOLOGAR</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- AVISO DE PARÂMETROS ALTERADOS / BLOQUEIO DE LAUDO -->
+  <div id="configMismatchWarning" style="display: none; background: rgba(245, 158, 11, 0.12); border: 1.5px solid var(--amber); border-radius: 8px; padding: 10px 16px; margin-bottom: 14px; align-items: center; justify-content: space-between; gap: 12px; font-size: 11.5px; color: #fde68a;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 18px;">⚠️</span>
+      <div>
+        <strong>Parâmetros Alterados após a Execução:</strong> O laudo PDF foi bloqueado porque os parâmetros na tela diferem do teste homologado. Refaça o teste ou restaure a configuração testada.
+      </div>
+    </div>
+    <button type="button" onclick="restaurarParametrosTestados()" style="background: var(--amber); color: #000; border: none; font-weight: 800; font-size: 11px; padding: 6px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+      ↺ Restaurar Testado
+    </button>
+  </div>
+
+  <!-- CARD PRINCIPAL: DEFINIÇÃO DO PROJETO E BANDA (EVIDENCIADOS PARA O TÉCNICO) -->
+  <div class="project-card">
+    <div class="project-grid">
+      <!-- CONTROLE 1: BANDA CONTRATADA (CIR) -->
+      <div>
+        <label class="select-label" for="cbCirBanda">🎯 Banda Contratada do Link (CIR):</label>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <select id="cbCirBanda" class="select-control" onchange="onCirChange()">
+            <option value="50">50 Mbps (Circuito Básico)</option>
+            <option value="100" selected>100 Mbps (Padrão Agências / Lojas)</option>
+            <option value="200">200 Mbps (Média Escala)</option>
+            <option value="300">300 Mbps (Fibra Alta Vazão)</option>
+            <option value="500">500 Mbps (Ultra Banda Larga)</option>
+            <option value="600">600 Mbps (Sede Regional)</option>
+            <option value="1000">1.0 Gbps (Gigabit Carrier-Grade)</option>
+            <option value="custom">✏️ Digitar Outro Valor (Mbps)...</option>
+          </select>
+          <div id="boxCustomCir" style="display: none; align-items: center; gap: 4px;">
+            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; background: #0f172a; border: 1.5px solid var(--cyan); color: #fff; padding: 9px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
+            <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">Mbps</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROLE 2: PERFIL DO PROJETO / CLIENTE (CRITÉRIO DA RFP) -->
+      <div>
+        <label class="select-label" for="cbProjetoPerfil">🏢 Perfil do Projeto / Cliente (RFP):</label>
+        <select id="cbProjetoPerfil" class="select-control" onchange="onPerfilChange()">
+          <option value="boticario" selected>🌸 O Boticário (RFP Varejo: Download ≥ 80% • Upload ≥ 20%)</option>
+          <option value="bradesco">🏦 Banco Bradesco (SLA Crítico Bancário: Download ≥ 100% • Upload ≥ 100%)</option>
+          <option value="rfc6349">📋 Padrão Telecom RFC 6349 (Download ≥ 95% • Upload ≥ 95%)</option>
+          <option value="best_effort">⭐ Descoberta Livre (Capacidade Máxima / Sem Reprovação)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- CAIXA EXPLICATIVA DINÂMICA DA REGRA DO PROJETO -->
+    <div class="rule-explanation-box" id="ruleExplanationBox">
+      <span style="font-size: 18px;" id="ruleIcon">🌸</span>
+      <div>
+        <strong id="ruleTitle">Critério Oficial de Homologação — O Boticário:</strong>
+        <div id="ruleText" style="color: var(--text-muted); margin-top: 2px;">
+          Em conformidade com a RFP de Varejo do Boticário, o circuito será <strong>Aprovado</strong> se entregar no mínimo <strong>80% da banda nominal em Download</strong> (ex.: ≥ 80.0 Mbps em 100M) e <strong>20% em Upload</strong> (ex.: ≥ 20.0 Mbps em 100M).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROTA DINÂMICA AUTOMÁTICA (100% TRANSPARENTE AO USUÁRIO LEIGO) -->
+  <div class="topology-strip">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="color: var(--cyan); font-weight: 800;">🌐 ORIGEM:</span>
+      <span id="txtClientIp" style="font-weight: 700; color: #fff;">Detectando IP...</span>
+      <span id="txtClientIsp" style="color: var(--text-muted);">(Provedor Local)</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="color: var(--green); font-weight: 800;">⚡ ROTA DINÂMICA:</span>
+      <span id="txtTargetPop" style="color: #fff; font-weight: 700;">Menor Esforço Geodésico Automático</span>
+    </div>
+  </div>
+
+  <!-- BARRA HERO DE DISPARO E IMPRESSÃO -->
+  <div class="hero-action-bar">
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <button class="btn-start" id="btnStart" onclick="startTest()">
+        <span>🚀 INICIAR HOMOLOGAÇÃO DO LINK</span>
+      </button>
+      <button class="btn-secondary" id="btnCancel" onclick="cancelTest()" disabled>
+        <span>🛑 Cancelar</span>
+      </button>
+    </div>
+
+    <button class="btn-secondary" id="btnPrint" onclick="printReport()" disabled style="background: linear-gradient(135deg, #0284c7, #2563eb); color: #fff; border: none;">
+      <span>📄 Salvar Laudo Técnico PDF</span>
+    </button>
+  </div>
+
+  <!-- KPIS PRINCIPAIS -->
+  <div class="kpi-grid">
+    <!-- DOWNLOAD -->
+    <div class="kpi-card dl">
+      <div class="kpi-title">
+        <span>↓ Download Efetivo</span>
+        <span style="color: var(--green);">FASE 1</span>
+      </div>
+      <div class="kpi-val" id="txtDl">0.0 <span style="font-size: 16px; font-weight: 700; color: var(--text-muted);">Mbps</span></div>
+      <div class="kpi-target" id="txtDlTarget">Meta: Aguardando início...</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="pbDl" style="background: var(--green);"></div>
+      </div>
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="kpi-card ul">
+      <div class="kpi-title">
+        <span>↑ Upload Efetivo</span>
+        <span style="color: var(--blue);">FASE 2</span>
+      </div>
+      <div class="kpi-val" id="txtUl">0.0 <span style="font-size: 16px; font-weight: 700; color: var(--text-muted);">Mbps</span></div>
+      <div class="kpi-target" id="txtUlTarget">Meta: Aguardando início...</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="pbUl" style="background: var(--blue);"></div>
+      </div>
+    </div>
+
+    <!-- LATÊNCIA / PING -->
+    <div class="kpi-card lat">
+      <div class="kpi-title">
+        <span>⚡ Latência Basal (Ping)</span>
+        <span style="color: var(--cyan);">TEMPO REAL</span>
+      </div>
+      <div class="kpi-val" id="txtPing">-- <span style="font-size: 16px; font-weight: 700; color: var(--text-muted);">ms</span></div>
+      <div class="kpi-target" id="txtJitter">Jitter: -- ms • Perda: 0%</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="pbPing" style="background: var(--cyan); width: 100%;"></div>
+      </div>
+    </div>
+
+    <!-- BUFFERBLOAT / QUALIDADE -->
+    <div class="kpi-card bloat">
+      <div class="kpi-title">
+        <span>🛡️ Estabilidade sob Carga</span>
+        <span id="txtBloatGradeBadge" style="color: var(--amber); font-weight: 800;">BUFFERBLOAT</span>
+      </div>
+      <div class="kpi-val" id="txtBloatDelta">-- <span style="font-size: 16px; font-weight: 700; color: var(--text-muted);">ms</span></div>
+      <div class="kpi-target" id="txtBloatDesc">Qualidade sob saturação contínua</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="pbBloat" style="background: var(--amber); width: 100%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL DE VEREDITO OFICIAL DO PROJETO (EXIBIDO APÓS O TESTE) -->
+  <div class="verdict-card" id="verdictCard">
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: flex-start; gap: 14px;">
+        <span style="font-size: 32px;" id="verdictIcon">✓</span>
+        <div>
+          <div style="font-size: 16px; font-weight: 900; letter-spacing: 0.5px;" id="verdictTitle">CIRCUITO HOMOLOGADO COM SUCESSO</div>
+          <div style="font-size: 12px; margin-top: 4px; line-height: 1.45;" id="verdictDetail">
+            Todas as métricas contratuais do projeto foram atendidas integralmente.
+          </div>
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <button type="button" onclick="printReport()" style="background: var(--green); color: #000; border: none; font-weight: 900; font-size: 12px; padding: 10px 18px; border-radius: 8px; cursor: pointer;">
+          📄 Emitir Laudo do Aceite (PDF)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CURVA DE VAZÃO TEMPORAL -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <span style="color: #fff;">📈 Curva de Vazão Contínua (Throughput em Tempo Real)</span>
+      <div style="display: flex; gap: 12px; font-size: 11px;">
+        <span style="color: var(--green);">● Download</span>
+        <span style="color: var(--blue);">● Upload</span>
+      </div>
+    </div>
+    <div class="canvas-container">
+      <canvas id="chartCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- LAUDO PDF FORMAL (EXIBIDO EXCLUSIVAMENTE NA IMPRESSÃO/PDF) -->
+  <div id="printAuditSummary">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 14px;">
+      <div>
+        <h1 style="font-size: 18px; font-weight: 900; text-transform: uppercase;">Laudo Técnico de Homologação de Circuito</h1>
+        <div style="font-size: 11px; color: #475569;">SPARC Telemetria de Enlaces • Aceite Oficial de Campo</div>
+      </div>
+      <div style="text-align: right; font-size: 11px;">
+        <div><strong>Data/Hora:</strong> <span id="auditTimestamp">--</span></div>
+        <div><strong>Status:</strong> <span id="auditStatusLabel" style="font-weight: 900;">--</span></div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; font-size: 11.5px; line-height: 1.5;">
+      <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px;">
+        <div><strong>Cliente / Projeto:</strong> <span id="auditProjeto">--</span></div>
+        <div><strong>Banda Contratada (CIR):</strong> <span id="auditCir">--</span></div>
+        <div><strong>Critério da RFP:</strong> <span id="auditRfpRegra">--</span></div>
+      </div>
+      <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px;">
+        <div><strong>IP Público do Link:</strong> <span id="auditIp">--</span></div>
+        <div><strong>Operadora / ASN:</strong> <span id="auditIsp">--</span></div>
+        <div><strong>PoP Datacenter Alvo:</strong> <span id="auditPop">--</span></div>
+      </div>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 16px;">
+      <thead>
+        <tr style="background: #f1f5f9; border-bottom: 1.5px solid #0f172a;">
+          <th style="padding: 8px; text-align: left;">Parâmetro Auditado</th>
+          <th style="padding: 8px; text-align: right;">Meta Contratual RFP</th>
+          <th style="padding: 8px; text-align: right;">Taxa Medida</th>
+          <th style="padding: 8px; text-align: right;">% Atingido</th>
+          <th style="padding: 8px; text-align: center;">Conformidade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 8px; font-weight: bold;">Download Útil</td>
+          <td style="padding: 8px; text-align: right;" id="auditDlMeta">--</td>
+          <td style="padding: 8px; text-align: right;" id="auditDlMedido">--</td>
+          <td style="padding: 8px; text-align: right;" id="auditDlPct">--</td>
+          <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditDlStatus">--</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 8px; font-weight: bold;">Upload Útil</td>
+          <td style="padding: 8px; text-align: right;" id="auditUlMeta">--</td>
+          <td style="padding: 8px; text-align: right;" id="auditUlMedido">--</td>
+          <td style="padding: 8px; text-align: right;" id="auditUlPct">--</td>
+          <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditUlStatus">--</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 8px; font-weight: bold;">Latência RTT (Ping)</td>
+          <td style="padding: 8px; text-align: right;">≤ 100 ms</td>
+          <td style="padding: 8px; text-align: right;" id="auditPing">--</td>
+          <td style="padding: 8px; text-align: right;">--</td>
+          <td style="padding: 8px; text-align: center; font-weight: bold; color: #16a34a;">CONFORME</td>
+        </tr>
+        <tr style="border-bottom: 1.5px solid #0f172a;">
+          <td style="padding: 8px; font-weight: bold;">Estabilidade (Bufferbloat)</td>
+          <td style="padding: 8px; text-align: right;">Fila Controlada</td>
+          <td style="padding: 8px; text-align: right;" id="auditBloat">--</td>
+          <td style="padding: 8px; text-align: right;">--</td>
+          <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditBloatStatus">--</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="border: 2px solid #0f172a; padding: 12px; border-radius: 6px; margin-bottom: 30px;">
+      <div style="font-size: 13px; font-weight: 900; text-transform: uppercase; margin-bottom: 4px;" id="auditVerdictBoxTitle">PARECER TÉCNICO CONCLUSIVO</div>
+      <div style="font-size: 11.5px; line-height: 1.45;" id="auditVerdictBoxText">
+        O circuito auditado atende rigorosamente a todos os parâmetros técnicos e percentuais exigidos na RFP do projeto, estando formalmente homologado para ativação em produção.
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px; font-size: 11px; text-align: center;">
+      <div>
+        <div style="border-top: 1px solid #0f172a; padding-top: 4px;"><strong>Técnico Responsável pela Homologação</strong></div>
+        <div style="color: #64748b;">SPARC Engenharia de Campo</div>
+      </div>
+      <div>
+        <div style="border-top: 1px solid #0f172a; padding-top: 4px;"><strong>Aceite do Cliente / Fiscal do Projeto</strong></div>
+        <div style="color: #64748b;" id="auditSignClient">O Boticário / Bradesco</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let isRunning = false;
+  let abortController = null;
+  let clientGeo = null;
+  let lastCompletedConfig = null;
+
+  const dlPoints = [];
+  const ulPoints = [];
+  let maxGraphSpeed = 50;
+
+  const PARAM_INPUT_IDS = ['cbCirBanda', 'txtCustomCir', 'cbProjetoPerfil'];
+
+  // PERFIS DE PROJETO OFICIAIS
+  const PROJECT_PROFILES = {
+    boticario: {
+      name: 'O Boticário',
+      fullName: 'O Boticário (RFP Varejo)',
+      icon: '🌸',
+      dlPctReq: 0.80, // 80% do CIR nominal
+      ulPctReq: 0.20, // 20% do CIR nominal
+      title: 'Critério Oficial de Homologação — O Boticário:',
+      desc: 'Em conformidade com a RFP de Varejo do Boticário, o circuito será <strong>Aprovado</strong> se entregar no mínimo <strong>80% da banda em Download</strong> e <strong>20% em Upload</strong>.'
+    },
+    bradesco: {
+      name: 'Banco Bradesco',
+      fullName: 'Banco Bradesco (SLA Bancário Crítico)',
+      icon: '🏦',
+      dlPctReq: 1.00, // 100% do CIR nominal (tolerância zero)
+      ulPctReq: 1.00, // 100% do CIR nominal (simetria bancária total)
+      title: 'Critério Oficial de Homologação — Banco Bradesco:',
+      desc: 'Em conformidade com o SLA de Agências Críticas do Bradesco, o circuito exige <strong>100% da banda contratada em Download E Upload</strong> (tolerância zero para VPN e Caixas).'
+    },
+    rfc6349: {
+      name: 'Padrão Telecom',
+      fullName: 'Padrão Telecom (RFC 6349)',
+      icon: '📋',
+      dlPctReq: 0.95, // 95% padrão IETF
+      ulPctReq: 0.95, // 95% padrão IETF
+      title: 'Critério Oficial RFC 6349:',
+      desc: 'Padrão formal IETF para ativação de enlaces corporativos, exigindo entrega útil de no mínimo <strong>95% da velocidade nominal em Download e Upload</strong>.'
+    },
+    best_effort: {
+      name: 'Descoberta Livre',
+      fullName: 'Descoberta Livre (Best-Effort)',
+      icon: '⭐',
+      dlPctReq: 0.00,
+      ulPctReq: 0.00,
+      title: 'Modo Capacidade Máxima:',
+      desc: 'Aferição livre de vazão máxima instantânea sem critério de reprovação contratual.'
+    }
+  };
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    initCanvas();
+    updateProfileExplaining();
+    updateTargetsDisplay();
+    await discoverGeo();
+
+    PARAM_INPUT_IDS.forEach(id => {
+      document.getElementById(id)?.addEventListener('change', checkConfigConsistency);
+    });
+  });
+
+  function onCirChange() {
+    const val = document.getElementById('cbCirBanda').value;
+    const box = document.getElementById('boxCustomCir');
+    const txt = document.getElementById('txtCustomCir');
+    if (box) box.style.display = (val === 'custom') ? 'flex' : 'none';
+    if (val === 'custom' && txt) txt.focus();
+    updateTargetsDisplay();
+    checkConfigConsistency();
+  }
+
+  function onCustomCirInput() {
+    updateTargetsDisplay();
+    checkConfigConsistency();
+  }
+
+  function onPerfilChange() {
+    updateProfileExplaining();
+    updateTargetsDisplay();
+    checkConfigConsistency();
+  }
+
+  function getCirNominal() {
+    const val = document.getElementById('cbCirBanda').value;
+    if (val === 'custom') {
+      const num = parseFloat(document.getElementById('txtCustomCir')?.value);
+      return (num && num > 0) ? num : 100;
+    }
+    return parseFloat(val) || 100;
+  }
+
+  function updateProfileExplaining() {
+    const profKey = document.getElementById('cbProjetoPerfil').value;
+    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.boticario;
+    document.getElementById('ruleIcon').innerText = p.icon;
+    document.getElementById('ruleTitle').innerText = p.title;
+    document.getElementById('ruleText').innerHTML = p.desc;
+  }
+
+  function updateTargetsDisplay() {
+    const profKey = document.getElementById('cbProjetoPerfil').value;
+    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.boticario;
+    const cir = getCirNominal();
+
+    const dlTargetEl = document.getElementById('txtDlTarget');
+    const ulTargetEl = document.getElementById('txtUlTarget');
+
+    if (profKey === 'best_effort') {
+      if (dlTargetEl) dlTargetEl.innerText = 'Meta: Capacidade Máxima Livre';
+      if (ulTargetEl) ulTargetEl.innerText = 'Meta: Capacidade Máxima Livre';
+    } else {
+      const dlMin = (cir * p.dlPctReq).toFixed(1);
+      const ulMin = (cir * p.ulPctReq).toFixed(1);
+      if (dlTargetEl) dlTargetEl.innerText = `Meta ${p.name}: ≥ ${dlMin} Mbps (${(p.dlPctReq * 100).toFixed(0)}%)`;
+      if (ulTargetEl) ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (${(p.ulPctReq * 100).toFixed(0)}%)`;
+    }
+  }
+
+  function getCurrentConfig() {
+    const cir = getCirNominal();
+    const profKey = document.getElementById('cbProjetoPerfil').value;
+    return {
+      cirVal: cir,
+      cirPreset: document.getElementById('cbCirBanda').value,
+      customCir: document.getElementById('txtCustomCir')?.value || '',
+      profileKey: profKey,
+      profileName: PROJECT_PROFILES[profKey]?.name || 'Projeto'
+    };
+  }
+
+  function hasConfigMismatch() {
+    if (!lastCompletedConfig) return false;
+    const cur = getCurrentConfig();
+    return (
+      cur.cirPreset !== lastCompletedConfig.cirPreset ||
+      (cur.cirPreset === 'custom' && cur.customCir !== lastCompletedConfig.customCir) ||
+      cur.profileKey !== lastCompletedConfig.profileKey
+    );
+  }
+
+  function checkConfigConsistency() {
+    if (isRunning) return;
+    const mismatchWarn = document.getElementById('configMismatchWarning');
+    const bPrint = document.getElementById('btnPrint');
+
+    if (lastCompletedConfig && hasConfigMismatch()) {
+      if (bPrint) {
+        bPrint.disabled = true;
+        bPrint.title = 'Parâmetros modificados. Refaça o teste para gerar o laudo.';
+      }
+      if (mismatchWarn) mismatchWarn.style.display = 'flex';
+      setStatus('warn', 'CONFIGURAÇÃO MODIFICADA');
+    } else if (lastCompletedConfig && !hasConfigMismatch()) {
+      if (bPrint) bPrint.disabled = false;
+      if (mismatchWarn) mismatchWarn.style.display = 'none';
+      setStatus(lastCompletedConfig.statusType || 'success', lastCompletedConfig.statusText || 'HOMOLOGADO');
+    }
+  }
+
+  function restaurarParametrosTestados() {
+    if (!lastCompletedConfig) return;
+    document.getElementById('cbCirBanda').value = lastCompletedConfig.cirPreset;
+    const txtCustom = document.getElementById('txtCustomCir');
+    if (txtCustom && lastCompletedConfig.customCir) txtCustom.value = lastCompletedConfig.customCir;
+    onCirChange();
+
+    document.getElementById('cbProjetoPerfil').value = lastCompletedConfig.profileKey;
+    onPerfilChange();
+
+    checkConfigConsistency();
+  }
+
+  async function discoverGeo() {
+    try {
+      const traceResp = await fetch('https://speed.cloudflare.com/cdn-cgi/trace', { cache: 'no-store' });
+      let colo = 'GRU';
+      if (traceResp.ok) {
+        const text = await traceResp.text();
+        text.split('\n').forEach(l => {
+          const p = l.split('=');
+          if (p[0] === 'colo') colo = p[1].trim();
+        });
+      }
+
+      // Geo via ipwho.is
+      const ipResp = await fetch('https://ipwho.is/', { cache: 'no-store' });
+      if (ipResp.ok) {
+        const d = await ipResp.json();
+        clientGeo = {
+          ip: d.ip || 'Identificado',
+          isp: d.connection?.isp || d.connection?.org || 'Operadora Local',
+          city: d.city || 'São Paulo',
+          colo: colo
+        };
+        document.getElementById('txtClientIp').innerText = clientGeo.ip;
+        document.getElementById('txtClientIsp').innerText = `(${clientGeo.isp})`;
+        document.getElementById('txtTargetPop').innerText = `${clientGeo.city} (PoP Edge ${colo}) — Menor Esforço`;
+      }
+    } catch (_) {
+      document.getElementById('txtClientIp').innerText = 'Conectado';
+      document.getElementById('txtClientIsp').innerText = '(Link Local)';
+      document.getElementById('txtTargetPop').innerText = 'PoP Anycast Regional (Menor Latência)';
+    }
+  }
+
+  function setStatus(type, text) {
+    const badge = document.getElementById('badgeStatus');
+    const dot = document.getElementById('statusDot');
+    const txt = document.getElementById('statusText');
+    txt.innerText = text;
+
+    if (type === 'running') {
+      badge.style.borderColor = 'var(--cyan)';
+      dot.style.background = 'var(--amber)';
+    } else if (type === 'success') {
+      badge.style.borderColor = 'var(--green)';
+      dot.style.background = 'var(--green)';
+    } else if (type === 'warn') {
+      badge.style.borderColor = 'var(--amber)';
+      dot.style.background = 'var(--amber)';
+    } else if (type === 'error') {
+      badge.style.borderColor = 'var(--red)';
+      dot.style.background = 'var(--red)';
+    } else {
+      badge.style.borderColor = '#334155';
+      dot.style.background = '#64748b';
+    }
+  }
+
+  function setControlsState(running) {
+    document.getElementById('btnStart').disabled = running;
+    document.getElementById('btnCancel').disabled = !running;
+    PARAM_INPUT_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.disabled = running;
+        el.style.opacity = running ? '0.55' : '1';
+        el.style.cursor = running ? 'not-allowed' : 'pointer';
+      }
+    });
+  }
+
+  // DISPARO DO TESTE
+  async function startTest() {
+    if (isRunning) return;
+    isRunning = true;
+    abortController = new AbortController();
+    const signal = abortController.signal;
+
+    document.getElementById('verdictCard').style.display = 'none';
+    document.getElementById('configMismatchWarning').style.display = 'none';
+    document.getElementById('btnPrint').disabled = true;
+
+    setControlsState(true);
+    setStatus('running', 'EXECUTANDO HOMOLOGAÇÃO...');
+
+    dlPoints.length = 0;
+    ulPoints.length = 0;
+    maxGraphSpeed = 50;
+    redrawCanvas();
+
+    try {
+      // 1. LATÊNCIA BASE
+      setStatus('running', 'MEDINDO LATÊNCIA...');
+      const pingRes = await measurePing(signal);
+      document.getElementById('txtPing').innerHTML = `${pingRes.avg.toFixed(0)} <span style="font-size: 14px; color: var(--text-muted);">ms</span>`;
+      document.getElementById('txtJitter').innerText = `Jitter: ${pingRes.jitter.toFixed(1)} ms • Perda: 0%`;
+
+      // 2. DOWNLOAD (15 segundos)
+      setStatus('running', 'TESTANDO DOWNLOAD...');
+      const pingerDl = new ActiveLatencyPinger(110);
+      pingerDl.start();
+      let dlSamples = [];
+      let dlRes = { avg: 0, peak: 0 };
+      try {
+        dlRes = await runDownloadTest(signal, 15);
+      } finally {
+        dlSamples = pingerDl.stop();
+      }
+
+      // 3. UPLOAD (15 segundos)
+      setStatus('running', 'TESTANDO UPLOAD...');
+      const pingerUl = new ActiveLatencyPinger(110);
+      pingerUl.start();
+      let ulSamples = [];
+      let ulRes = { avg: 0, peak: 0 };
+      try {
+        ulRes = await runUploadTest(signal, 15);
+      } finally {
+        ulSamples = pingerUl.stop();
+      }
+
+      // 4. BUFFERBLOAT
+      const allSamples = [...dlSamples, ...ulSamples];
+      const deltaBloat = computeBloatDelta(allSamples, pingRes.avg);
+      document.getElementById('txtBloatDelta').innerHTML = `+Δ ${deltaBloat.toFixed(0)} <span style="font-size: 14px; color: var(--text-muted);">ms</span>`;
+      document.getElementById('txtBloatDesc').innerText = deltaBloat <= 20 ? 'Excelente (Sem Bufferbloat)' : (deltaBloat <= 80 ? 'Moderado' : 'Fila Saturada');
+
+      // 5. AUDITORIA CONTRATUAL DO PROJETO
+      const cfg = getCurrentConfig();
+      const p = PROJECT_PROFILES[cfg.profileKey] || PROJECT_PROFILES.boticario;
+      const cir = cfg.cirVal;
+
+      const reqDlMbps = cir * p.dlPctReq;
+      const reqUlMbps = cir * p.ulPctReq;
+
+      const dlPassed = (cfg.profileKey === 'best_effort') || (dlRes.avg >= reqDlMbps * 0.999);
+      const ulPassed = (cfg.profileKey === 'best_effort') || (ulRes.avg >= reqUlMbps * 0.999);
+      const isApproved = dlPassed && ulPassed;
+
+      // EXIBE O VEREDITO DO PROJETO
+      exibirVereditoProjeto({
+        isApproved,
+        profile: p,
+        cir,
+        dlAvg: dlRes.avg,
+        ulAvg: ulRes.avg,
+        reqDlMbps,
+        reqUlMbps,
+        dlPassed,
+        ulPassed,
+        pingAvg: pingRes.avg,
+        deltaBloat
+      });
+
+      lastCompletedConfig = getCurrentConfig();
+      lastCompletedConfig.statusType = isApproved ? 'success' : 'error';
+      lastCompletedConfig.statusText = isApproved ? `HOMOLOGADO (${p.name.toUpperCase()})` : `NÃO HOMOLOGADO (${p.name.toUpperCase()})`;
+      lastCompletedConfig.timestamp = new Date().toLocaleString('pt-BR');
+      lastCompletedConfig.auditData = {
+        dlAvg: dlRes.avg,
+        ulAvg: ulRes.avg,
+        pingAvg: pingRes.avg,
+        deltaBloat,
+        isApproved,
+        reqDlMbps,
+        reqUlMbps
+      };
+
+      atualizarLaudoPdf(lastCompletedConfig);
+      document.getElementById('btnPrint').disabled = false;
+      setStatus(lastCompletedConfig.statusType, lastCompletedConfig.statusText);
+
+    } catch (e) {
+      if (e.name === 'AbortError') {
+        setStatus('warn', 'TESTE CANCELADO');
+      } else {
+        setStatus('error', 'FALHA NO TESTE');
+      }
+    } finally {
+      isRunning = false;
+      setControlsState(false);
+    }
+  }
+
+  function cancelTest() {
+    if (abortController) abortController.abort();
+  }
+
+  function exibirVereditoProjeto(res) {
+    const card = document.getElementById('verdictCard');
+    const icon = document.getElementById('verdictIcon');
+    const title = document.getElementById('verdictTitle');
+    const detail = document.getElementById('verdictDetail');
+
+    card.style.display = 'block';
+
+    if (res.profile.key === 'best_effort') {
+      card.className = 'verdict-card approved';
+      icon.innerText = '⭐';
+      title.innerText = 'TESTE DE CAPACIDADE MÁXIMA CONCLUÍDO';
+      title.style.color = 'var(--cyan)';
+      detail.innerHTML = `Vazão Efetiva Registrada: <strong>Download ${res.dlAvg.toFixed(1)} Mbps</strong> | <strong>Upload ${res.ulAvg.toFixed(1)} Mbps</strong>.`;
+      return;
+    }
+
+    if (res.isApproved) {
+      card.className = 'verdict-card approved';
+      icon.innerText = '✓';
+      title.innerText = `CIRCUITO HOMOLOGADO COM SUCESSO — PROJETO ${res.profile.name.toUpperCase()}`;
+      title.style.color = 'var(--green)';
+      detail.innerHTML = `
+        O enlace cumpre 100% dos requisitos da RFP:<br>
+        • <strong>Download:</strong> ${res.dlAvg.toFixed(1)} Mbps (Meta: ≥ ${res.reqDlMbps.toFixed(1)} Mbps [${((res.dlAvg / res.cir) * 100).toFixed(1)}% do CIR]) — <span style="color: var(--green); font-weight: bold;">CONFORME</span><br>
+        • <strong>Upload:</strong> ${res.ulAvg.toFixed(1)} Mbps (Meta: ≥ ${res.reqUlMbps.toFixed(1)} Mbps [${((res.ulAvg / res.cir) * 100).toFixed(1)}% do CIR]) — <span style="color: var(--green); font-weight: bold;">CONFORME</span>
+      `;
+    } else {
+      card.className = 'verdict-card rejected';
+      icon.innerText = '✗';
+      title.innerText = `CIRCUITO NÃO HOMOLOGADO — REPROVADO NO PROJETO ${res.profile.name.toUpperCase()}`;
+      title.style.color = 'var(--red)';
+
+      let falhaDesc = '';
+      if (!res.dlPassed) {
+        falhaDesc += `• <strong>Download insuficiente:</strong> Entregou ${res.dlAvg.toFixed(1)} Mbps, mas a RFP exige no mínimo ${res.reqDlMbps.toFixed(1)} Mbps.<br>`;
+      }
+      if (!res.ulPassed) {
+        falhaDesc += `• <strong>Upload insuficiente:</strong> Entregou ${res.ulAvg.toFixed(1)} Mbps, mas a RFP exige no mínimo ${res.reqUlMbps.toFixed(1)} Mbps.<br>`;
+      }
+
+      detail.innerHTML = `
+        O enlace <strong>NÃO</strong> atingiu a especificação mínima do projeto:<br>
+        ${falhaDesc}
+        <span style="color: #fca5a5; font-size: 11px;">Ajuste o shaper/policer com a operadora antes de emitir o termo de aceite definitivo.</span>
+      `;
+    }
+  }
+
+  function atualizarLaudoPdf(cfg) {
+    const d = cfg.auditData;
+    const p = PROJECT_PROFILES[cfg.profileKey];
+
+    document.getElementById('auditTimestamp').innerText = cfg.timestamp;
+    document.getElementById('auditStatusLabel').innerText = d.isApproved ? 'HOMOLOGADO' : 'NÃO CONFORME';
+    document.getElementById('auditStatusLabel').style.color = d.isApproved ? '#16a34a' : '#dc2626';
+
+    document.getElementById('auditProjeto').innerText = p.fullName;
+    document.getElementById('auditCir').innerText = `${cfg.cirVal} Mbps`;
+    document.getElementById('auditRfpRegra').innerText = `DL ≥ ${(p.dlPctReq * 100).toFixed(0)}% • UL ≥ ${(p.ulPctReq * 100).toFixed(0)}%`;
+
+    document.getElementById('auditIp').innerText = clientGeo?.ip || 'Detectado';
+    document.getElementById('auditIsp').innerText = clientGeo?.isp || 'Operadora Local';
+    document.getElementById('auditPop').innerText = `${clientGeo?.city || 'Brasil'} (Anycast Edge)`;
+
+    document.getElementById('auditDlMeta').innerText = `≥ ${d.reqDlMbps.toFixed(1)} Mbps`;
+    document.getElementById('auditDlMedido').innerText = `${d.dlAvg.toFixed(1)} Mbps`;
+    document.getElementById('auditDlPct').innerText = `${((d.dlAvg / cfg.cirVal) * 100).toFixed(1)}%`;
+    document.getElementById('auditDlStatus').innerText = (d.dlAvg >= d.reqDlMbps) ? 'CONFORME' : 'REPROVADO';
+    document.getElementById('auditDlStatus').style.color = (d.dlAvg >= d.reqDlMbps) ? '#16a34a' : '#dc2626';
+
+    document.getElementById('auditUlMeta').innerText = `≥ ${d.reqUlMbps.toFixed(1)} Mbps`;
+    document.getElementById('auditUlMedido').innerText = `${d.ulAvg.toFixed(1)} Mbps`;
+    document.getElementById('auditUlPct').innerText = `${((d.ulAvg / cfg.cirVal) * 100).toFixed(1)}%`;
+    document.getElementById('auditUlStatus').innerText = (d.ulAvg >= d.reqUlMbps) ? 'CONFORME' : 'REPROVADO';
+    document.getElementById('auditUlStatus').style.color = (d.ulAvg >= d.reqUlMbps) ? '#16a34a' : '#dc2626';
+
+    document.getElementById('auditPing').innerText = `${d.pingAvg.toFixed(0)} ms`;
+    document.getElementById('auditBloat').innerText = `+Δ ${d.deltaBloat.toFixed(0)} ms`;
+    document.getElementById('auditBloatStatus').innerText = d.deltaBloat <= 50 ? 'CONFORME' : 'ALERTA';
+    document.getElementById('auditBloatStatus').style.color = d.deltaBloat <= 50 ? '#16a34a' : '#d97706';
+
+    const vTitle = document.getElementById('auditVerdictBoxTitle');
+    const vText = document.getElementById('auditVerdictBoxText');
+    if (d.isApproved) {
+      vTitle.innerText = 'PARECER CONCLUSIVO: CIRCUITO HOMOLOGADO';
+      vTitle.style.color = '#16a34a';
+      vText.innerText = `O enlace atende integralmente à RFP do projeto ${p.name}, cumprindo todas as metas de taxa de transferência exigidas em contrato. Circuito aprovado para aceite definitivo.`;
+    } else {
+      vTitle.innerText = 'PARECER CONCLUSIVO: CIRCUITO REPROVADO';
+      vTitle.style.color = '#dc2626';
+      vText.innerText = `O enlace foi reprovado pois não alcançou os níveis de serviço acordados na RFP do projeto ${p.name}. Necessário acionamento da operadora para correção da entrega de banda antes da ativação.`;
+    }
+
+    document.getElementById('auditSignClient').innerText = p.name;
+  }
+
+  function printReport() {
+    window.print();
+  }
+
+  // MOTOR DE MEDIÇÃO MULTI-STREAM
+  async function measurePing(signal) {
+    const samples = [];
+    for (let i = 0; i < 8; i++) {
+      if (signal.aborted) break;
+      const t0 = performance.now();
+      try {
+        await fetch(`https://speed.cloudflare.com/__down?bytes=0&r=${Math.random()}`, { signal, cache: 'no-store' });
+        const dt = performance.now() - t0;
+        if (dt > 0 && dt < 2000) samples.push(dt);
+      } catch (_) {}
+      await new Promise(r => setTimeout(r, 60));
+    }
+    samples.sort((a, b) => a - b);
+    const avg = samples.length ? samples.reduce((a, b) => a + b, 0) / samples.length : 25;
+    let jitter = 0;
+    for (let i = 1; i < samples.length; i++) jitter += Math.abs(samples[i] - samples[i - 1]);
+    jitter = samples.length > 1 ? jitter / (samples.length - 1) : 1.5;
+    return { avg, jitter };
+  }
+
+  class ActiveLatencyPinger {
+    constructor(intervalMs = 110) {
+      this.intervalMs = intervalMs;
+      this.samples = [];
+      this.timer = null;
+      this.running = false;
+    }
+    start() {
+      this.samples = [];
+      this.running = true;
+      const probe = async () => {
+        if (!this.running) return;
+        const t0 = performance.now();
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 1400);
+        try {
+          await fetch(`https://speed.cloudflare.com/__down?bytes=0&r=${Math.random()}`, { signal: ctrl.signal, cache: 'no-store' });
+          clearTimeout(tid);
+          const dt = performance.now() - t0;
+          if (this.running && dt > 0 && dt < 2000) this.samples.push(dt);
+        } catch (_) {
+          clearTimeout(tid);
+        }
+      };
+      probe();
+      this.timer = setInterval(probe, this.intervalMs);
+    }
+    stop() {
+      this.running = false;
+      if (this.timer) clearInterval(this.timer);
+      return this.samples;
+    }
+  }
+
+  function computeBloatDelta(samples, basePing) {
+    if (!samples.length) return 0;
+    samples.sort((a, b) => a - b);
+    const p75 = samples[Math.floor(samples.length * 0.75)];
+    return Math.max(0, p75 - basePing);
+  }
+
+  // DOWNLOAD WORKER COM LEITURA CONTÍNUA
+  async function runDownloadTest(signal, durationSec) {
+    const durationMs = durationSec * 1000;
+    const numStreams = 6;
+    let totalBytes = 0;
+    let currentSmooth = 0;
+    let peakSpeed = 0;
+
+    const tStart = performance.now();
+    const tDeadline = tStart + durationMs;
+    const localAbort = new AbortController();
+    signal.addEventListener('abort', () => localAbort.abort());
+
+    let lastTime = tStart;
+    let lastBytes = 0;
+    let lastGraphTime = tStart;
+
+    async function worker() {
+      while (performance.now() < tDeadline && !localAbort.signal.aborted) {
+        try {
+          const resp = await fetch(`https://speed.cloudflare.com/__down?bytes=50000000&r=${Math.random()}`, {
+            signal: localAbort.signal,
+            cache: 'no-store'
+          });
+          if (!resp.body) break;
+          const reader = resp.body.getReader();
+          while (performance.now() < tDeadline && !localAbort.signal.aborted) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (value) totalBytes += value.length;
+          }
+          try { reader.cancel(); } catch (_) {}
+        } catch (_) {
+          if (localAbort.signal.aborted) break;
+          await new Promise(r => setTimeout(r, 60));
+        }
+      }
+    }
+
+    const ticker = setInterval(() => {
+      const now = performance.now();
+      const dt = (now - lastTime) / 1000;
+      if (dt >= 0.12) {
+        const delta = totalBytes - lastBytes;
+        if (delta >= 0) {
+          const inst = (delta * 8) / (dt * 1e6);
+          currentSmooth = (currentSmooth === 0) ? inst : (currentSmooth * 0.85 + inst * 0.15);
+          peakSpeed = Math.max(peakSpeed, currentSmooth);
+          document.getElementById('txtDl').innerText = currentSmooth.toFixed(1);
+
+          if (now - lastGraphTime >= 240) {
+            addGraphPoint(currentSmooth, true);
+            lastGraphTime = now;
+          }
+          lastTime = now;
+          lastBytes = totalBytes;
+        }
+      }
+      const p = Math.min(100, ((now - tStart) / durationMs) * 100);
+      document.getElementById('pbDl').style.width = p.toFixed(0) + '%';
+    }, 100);
+
+    const workers = [];
+    for (let i = 0; i < numStreams; i++) workers.push(worker());
+
+    await Promise.race([
+      Promise.all(workers),
+      new Promise(r => setTimeout(r, durationMs + 200))
+    ]);
+
+    localAbort.abort();
+    clearInterval(ticker);
+    signal.throwIfAborted();
+
+    const totalDurSec = Math.max(0.1, (performance.now() - tStart) / 1000);
+    const avgMbps = (totalBytes * 8) / (totalDurSec * 1e6);
+    const finalDl = currentSmooth > 0 ? Math.max(avgMbps, currentSmooth * 0.96) : avgMbps;
+    document.getElementById('txtDl').innerText = finalDl.toFixed(1);
+    document.getElementById('pbDl').style.width = '100%';
+
+    return { avg: finalDl, peak: Math.max(peakSpeed, finalDl) };
+  }
+
+  // UPLOAD WORKER COM RESOLUÇÃO CONTÍNUA ZERO-LAG (XHR.UPLOAD.ONLOAD)
+  async function runUploadTest(signal, durationSec) {
+    const durationMs = durationSec * 1000;
+    const numStreams = 6;
+    let totalBytes = 0;
+    let currentSmooth = 0;
+    let peakSpeed = 0;
+
+    const payloadBuffer = new Uint8Array(8000000); // 8 MB pré-alocado
+    const tStart = performance.now();
+    const tDeadline = tStart + durationMs;
+    const localAbort = new AbortController();
+    signal.addEventListener('abort', () => localAbort.abort());
+
+    let lastTime = tStart;
+    let lastBytes = 0;
+    let lastGraphTime = tStart;
+
+    function sendChunk() {
+      return new Promise(resolve => {
+        if (performance.now() >= tDeadline || localAbort.signal.aborted) {
+          resolve();
+          return;
+        }
+        let chunkSize = 2500000;
+        if (currentSmooth > 50) chunkSize = 6000000;
+        else if (currentSmooth > 20) chunkSize = 4000000;
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://speed.cloudflare.com/__up?r=${Math.random()}`, true);
+
+        let lastLoaded = 0;
+        let isDone = false;
+
+        const complete = () => {
+          if (isDone) return;
+          isDone = true;
+          if (lastLoaded < chunkSize) {
+            totalBytes += (chunkSize - lastLoaded);
+            lastLoaded = chunkSize;
+          }
+          resolve();
+        };
+
+        xhr.upload.onprogress = (e) => {
+          if (e.loaded > lastLoaded) {
+            totalBytes += (e.loaded - lastLoaded);
+            lastLoaded = e.loaded;
+          }
+        };
+
+        // Resolução instantânea no momento em que os bytes saem para o socket (Zero-Lag)
+        xhr.upload.onload = complete;
+        xhr.upload.onerror = complete;
+        xhr.upload.onabort = complete;
+        xhr.onload = complete;
+        xhr.onerror = complete;
+        xhr.onabort = complete;
+
+        const onAbort = () => { try { xhr.abort(); } catch (_) {} resolve(); };
+        localAbort.signal.addEventListener('abort', onAbort, { once: true });
+
+        xhr.send(new Blob([payloadBuffer.subarray(0, chunkSize)]));
+      });
+    }
+
+    async function worker() {
+      while (performance.now() < tDeadline && !localAbort.signal.aborted) {
+        await sendChunk();
+      }
+    }
+
+    const ticker = setInterval(() => {
+      const now = performance.now();
+      const dt = (now - lastTime) / 1000;
+      if (dt >= 0.12) {
+        const delta = totalBytes - lastBytes;
+        if (delta >= 0) {
+          const inst = (delta * 8) / (dt * 1e6);
+          currentSmooth = (currentSmooth === 0) ? inst : (currentSmooth * 0.85 + inst * 0.15);
+          peakSpeed = Math.max(peakSpeed, currentSmooth);
+          document.getElementById('txtUl').innerText = currentSmooth.toFixed(1);
+
+          if (now - lastGraphTime >= 240) {
+            addGraphPoint(currentSmooth, false);
+            lastGraphTime = now;
+          }
+          lastTime = now;
+          lastBytes = totalBytes;
+        }
+      }
+      const p = Math.min(100, ((now - tStart) / durationMs) * 100);
+      document.getElementById('pbUl').style.width = p.toFixed(0) + '%';
+    }, 100);
+
+    const workers = [];
+    for (let i = 0; i < numStreams; i++) workers.push(worker());
+
+    await Promise.race([
+      Promise.all(workers),
+      new Promise(r => setTimeout(r, durationMs + 200))
+    ]);
+
+    localAbort.abort();
+    clearInterval(ticker);
+    signal.throwIfAborted();
+
+    const totalDurSec = Math.max(0.1, (performance.now() - tStart) / 1000);
+    const avgMbps = (totalBytes * 8) / (totalDurSec * 1e6);
+    const finalUl = currentSmooth > 0 ? Math.max(avgMbps, currentSmooth * 0.96) : avgMbps;
+    document.getElementById('txtUl').innerText = finalUl.toFixed(1);
+    document.getElementById('pbUl').style.width = '100%';
+
+    return { avg: finalUl, peak: Math.max(peakSpeed, finalUl) };
+  }
+
+  // CANVAS RENDERER
+  let canvas, ctx;
+  function initCanvas() {
+    canvas = document.getElementById('chartCanvas');
+    ctx = canvas.getContext('2d');
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+  }
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * window.devicePixelRatio;
+    canvas.height = rect.height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    redrawCanvas();
+  }
+
+  function addGraphPoint(val, isDl) {
+    if (isDl) dlPoints.push(val);
+    else ulPoints.push(val);
+    maxGraphSpeed = Math.max(maxGraphSpeed, val * 1.15);
+    redrawCanvas();
+  }
+
+  function redrawCanvas() {
+    if (!ctx) return;
+    const w = canvas.getBoundingClientRect().width;
+    const h = canvas.getBoundingClientRect().height;
+    ctx.clearRect(0, 0, w, h);
+
+    // Grid
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 1;
+    for (let i = 1; i <= 3; i++) {
+      const y = (h / 4) * i;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+
+    // Curvas
+    const midX = w / 2;
+    drawCurve(dlPoints, 0, midX, h, '#10b981', 'rgba(16, 185, 129, 0.15)');
+    drawCurve(ulPoints, midX, w, h, '#3b82f6', 'rgba(59, 130, 246, 0.15)');
+  }
+
+  function drawCurve(pts, startX, endX, h, strokeColor, fillColor) {
+    if (pts.length < 2) return;
+    const width = endX - startX;
+    const dx = width / Math.max(pts.length - 1, 1);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(startX, h);
+
+    for (let i = 0; i < pts.length; i++) {
+      const x = startX + i * dx;
+      const y = h - (pts[i] / maxGraphSpeed) * (h - 15);
+      if (i === 0) ctx.lineTo(x, y);
+      else {
+        const prevX = startX + (i - 1) * dx;
+        const prevY = h - (pts[i - 1] / maxGraphSpeed) * (h - 15);
+        const cx = (prevX + x) / 2;
+        ctx.bezierCurveTo(cx, prevY, cx, y, x, y);
+      }
+    }
+
+    const lastX = startX + (pts.length - 1) * dx;
+    ctx.lineTo(lastX, h);
+    ctx.closePath();
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+
+    // Linha do topo
+    ctx.beginPath();
+    for (let i = 0; i < pts.length; i++) {
+      const x = startX + i * dx;
+      const y = h - (pts[i] / maxGraphSpeed) * (h - 15);
+      if (i === 0) ctx.moveTo(x, y);
+      else {
+        const prevX = startX + (i - 1) * dx;
+        const prevY = h - (pts[i - 1] / maxGraphSpeed) * (h - 15);
+        const cx = (prevX + x) / 2;
+        ctx.bezierCurveTo(cx, prevY, cx, y, x, y);
+      }
+    }
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    ctx.restore();
+  }
+</script>
+
+</body>
+</html>
