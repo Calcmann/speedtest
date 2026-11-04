@@ -1497,12 +1497,12 @@
       : 'https://speed.cloudflare.com/__up';
 
     const durationSec = parseInt(document.getElementById('cbTestDuration')?.value || '15', 10);
-    const numStreams = 4;
+    const numStreams = parseInt(document.getElementById('cbStreams')?.value || '4', 10);
     const durationMs = durationSec * 1000;
 
     log(`[UPLOAD] Multi-Stream RFC 6349 (${isSparc ? 'Vinhedo' : 'Cloudflare Edge'}): ${numStreams} streams simultâneos | Duração: ${durationSec}s contínuos...`);
 
-    const payloadSize = 1000000; // 1 MB
+    const payloadSize = 2000000; // 2 MB por chunk otimizado para amostragem contínua
     const payload = new Uint8Array(payloadSize);
 
     let totalBytesSent = 0;
@@ -1533,7 +1533,6 @@
 
         const xhr = new XMLHttpRequest();
         xhr.open('POST', `${uploadUrl}?r=${Math.random()}`, true);
-        xhr.setRequestHeader('Content-Type', 'application/octet-stream');
 
         let lastLoaded = 0;
         xhr.upload.onprogress = (e) => {
@@ -1544,7 +1543,16 @@
           }
         };
 
-        const finish = () => resolve();
+        const finish = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            if (lastLoaded < payloadSize) {
+              totalBytesSent += (payloadSize - lastLoaded);
+              lastLoaded = payloadSize;
+            }
+          }
+          resolve();
+        };
+
         xhr.onload = finish;
         xhr.onerror = finish;
         xhr.onabort = finish;
@@ -1555,7 +1563,8 @@
         };
         localAbort.signal.addEventListener('abort', onAbort, { once: true });
 
-        xhr.send(payload);
+        // Envia Blob binário nativo sem header de Content-Type customizado para manter requisição CORS limpa
+        xhr.send(new Blob([payload]));
       });
     }
 
