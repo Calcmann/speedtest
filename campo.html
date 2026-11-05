@@ -97,6 +97,37 @@
       --boticario: #f43f5e;
       --bradesco: #e11d48;
     }
+    [data-theme="original"] {
+      --bg: #080c15;
+      --card-bg: #0f172a;
+      --card-border: #1e293b;
+      --card-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --input-bg: #1e293b;
+      --input-border: #3b82f6;
+      --canvas-bg: #090d16;
+      --canvas-grid: #1e293b;
+      --rule-bg: rgba(15, 23, 42, 0.85);
+      --rule-border: #334155;
+      --hero-bg: linear-gradient(135deg, #131c31 0%, #0c1220 100%);
+      
+      --wine-primary: #0ea5e9;
+      --wine-light: #2563eb;
+      --wine-accent: #10b981;
+      --wine-label: #06b6d4;
+      --wine-border: #2563eb;
+      
+      --green: #10b981;
+      --blue: #3b82f6;
+      --cyan: #06b6d4;
+      --purple: #8b5cf6;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --boticario: #ec4899;
+      --bradesco: #dc2626;
+    }
+  
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -545,6 +576,7 @@
         <button type="button" class="theme-btn" id="btnTheme_slate" onclick="setTheme('slate')" title="Tema Ardósia Neutro (Menos Escuro)">🌓 Slate Neutro</button>
         <button type="button" class="theme-btn" id="btnTheme_light" onclick="setTheme('light')" title="Tema Claro Neutro Institucional">☀️ Claro Neutro</button>
         <button type="button" class="theme-btn" id="btnTheme_wine-dark" onclick="setTheme('wine-dark')" title="Tema Vinho Noturno">🍷 Vinho</button>
+        <button type="button" class="theme-btn" id="btnTheme_original" onclick="setTheme('original')" title="Tema Original Cyber/Navy">⚡ Original</button>
       </div>
       <a href="index.html" class="nav-toggle-btn">
         <span>⚙️ Modo Avançado (RFC 6349) ➔</span>
@@ -642,7 +674,7 @@
       </button>
     </div>
 
-    <button class="btn-secondary" id="btnPrint" onclick="printReport()" disabled style="background: linear-gradient(135deg, #70102b, #9f1239); color: #fff; border: 1px solid #be123c;">
+    <button class="btn-secondary" id="btnPrint" onclick="printReport()" disabled style="background: linear-gradient(135deg, var(--wine-primary), var(--wine-light)); color: #fff; border: 1px solid rgba(255,255,255,0.2);">
       <span>📄 Salvar Comprovante PDF</span>
     </button>
   </div>
@@ -1619,7 +1651,7 @@
   function setTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
     localStorage.setItem('sparc_theme', t);
-    ['slate', 'light', 'wine-dark'].forEach(name => {
+    ['slate', 'light', 'wine-dark', 'original'].forEach(name => {
       const btn = document.getElementById('btnTheme_' + name);
       if (btn) {
         if (name === t) btn.classList.add('active');
