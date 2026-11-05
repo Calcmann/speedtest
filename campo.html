@@ -483,7 +483,6 @@
           <option value="boticario" selected>🌸 O Boticário (RFP Varejo: Download ≥ 80% • Upload ≥ 20%)</option>
           <option value="bradesco">🏦 Banco Bradesco (SLA Crítico Bancário: Download ≥ 100% • Upload ≥ 100%)</option>
           <option value="rfc6349">📋 Padrão Telecom RFC 6349 (Download ≥ 95% • Upload ≥ 95%)</option>
-          <option value="best_effort">⭐ Descoberta Livre (Capacidade Máxima / Sem Reprovação)</option>
         </select>
       </div>
     </div>
@@ -746,15 +745,6 @@
       ulPctReq: 0.95, // 95% padrão IETF
       title: 'Critério Oficial RFC 6349:',
       desc: 'Padrão formal IETF para ativação de enlaces corporativos, exigindo entrega útil de no mínimo <strong>95% da velocidade nominal em Download e Upload</strong>.'
-    },
-    best_effort: {
-      name: 'Descoberta Livre',
-      fullName: 'Descoberta Livre (Best-Effort)',
-      icon: '⭐',
-      dlPctReq: 0.00,
-      ulPctReq: 0.00,
-      title: 'Modo Capacidade Máxima:',
-      desc: 'Aferição livre de vazão máxima instantânea sem critério de reprovação contratual.'
     }
   };
 
@@ -815,15 +805,10 @@
     const dlTargetEl = document.getElementById('txtDlTarget');
     const ulTargetEl = document.getElementById('txtUlTarget');
 
-    if (profKey === 'best_effort') {
-      if (dlTargetEl) dlTargetEl.innerText = 'Meta: Capacidade Máxima Livre';
-      if (ulTargetEl) ulTargetEl.innerText = 'Meta: Capacidade Máxima Livre';
-    } else {
-      const dlMin = (cir * p.dlPctReq).toFixed(1);
-      const ulMin = (cir * p.ulPctReq).toFixed(1);
-      if (dlTargetEl) dlTargetEl.innerText = `Meta ${p.name}: ≥ ${dlMin} Mbps (${(p.dlPctReq * 100).toFixed(0)}%)`;
-      if (ulTargetEl) ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (${(p.ulPctReq * 100).toFixed(0)}%)`;
-    }
+    const dlMin = (cir * p.dlPctReq).toFixed(1);
+    const ulMin = (cir * p.ulPctReq).toFixed(1);
+    if (dlTargetEl) dlTargetEl.innerText = `Meta ${p.name}: ≥ ${dlMin} Mbps (${(p.dlPctReq * 100).toFixed(0)}%)`;
+    if (ulTargetEl) ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (${(p.ulPctReq * 100).toFixed(0)}%)`;
   }
 
   function getCurrentConfig() {
@@ -1014,8 +999,8 @@
       const reqDlMbps = cir * p.dlPctReq;
       const reqUlMbps = cir * p.ulPctReq;
 
-      const dlPassed = (cfg.profileKey === 'best_effort') || (dlRes.avg >= reqDlMbps * 0.999);
-      const ulPassed = (cfg.profileKey === 'best_effort') || (ulRes.avg >= reqUlMbps * 0.999);
+      const dlPassed = (dlRes.avg >= reqDlMbps * 0.999);
+      const ulPassed = (ulRes.avg >= reqUlMbps * 0.999);
       const isApproved = dlPassed && ulPassed;
 
       // EXIBE O VEREDITO DO PROJETO
@@ -1074,15 +1059,6 @@
     const detail = document.getElementById('verdictDetail');
 
     card.style.display = 'block';
-
-    if (res.profile.key === 'best_effort') {
-      card.className = 'verdict-card approved';
-      icon.innerText = '⭐';
-      title.innerText = 'TESTE DE CAPACIDADE MÁXIMA CONCLUÍDO';
-      title.style.color = 'var(--cyan)';
-      detail.innerHTML = `Vazão Efetiva Registrada: <strong>Download ${res.dlAvg.toFixed(1)} Mbps</strong> | <strong>Upload ${res.ulAvg.toFixed(1)} Mbps</strong>.`;
-      return;
-    }
 
     if (res.isApproved) {
       card.className = 'verdict-card approved';
