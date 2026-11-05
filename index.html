@@ -85,6 +85,33 @@
       --red: #ef4444;
       --amber: #f59e0b;
     }
+    [data-theme="original"] {
+      --bg: #080c15;
+      --card-bg: #0f172a;
+      --card-border: #1e293b;
+      --card-shadow: 0 4px 25px rgba(0, 0, 0, 0.45);
+      --text-main: #f8fafc;
+      --text-muted: #cbd5e1;
+      --input-bg: #1e293b;
+      --input-border: #334155;
+      --canvas-bg: #060911;
+      --canvas-grid: #1e293b;
+      --hero-bg: linear-gradient(135deg, #131c31 0%, #0c1220 100%);
+      
+      --wine-primary: #7c3aed;
+      --wine-light: #4f46e5;
+      --wine-accent: #06b6d4;
+      --wine-label: #06b6d4;
+      --wine-border: #334155;
+      
+      --green: #10b981;
+      --blue: #3b82f6;
+      --cyan: #06b6d4;
+      --purple: #8b5cf6;
+      --red: #ef4444;
+      --amber: #f59e0b;
+    }
+  
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -556,6 +583,7 @@
         <button type="button" class="theme-btn" id="btnTheme_slate" onclick="setTheme('slate')" title="Tema Ardósia Neutro (Menos Escuro)">🌓 Slate Neutro</button>
         <button type="button" class="theme-btn" id="btnTheme_light" onclick="setTheme('light')" title="Tema Claro Neutro Institucional">☀️ Claro Neutro</button>
         <button type="button" class="theme-btn" id="btnTheme_wine-dark" onclick="setTheme('wine-dark')" title="Tema Vinho Noturno">🍷 Vinho</button>
+        <button type="button" class="theme-btn" id="btnTheme_original" onclick="setTheme('original')" title="Tema Original Cyber/Navy">⚡ Original</button>
       </div>
       <a href="campo.html" style="background: rgba(136, 19, 55, 0.22); border: 1px solid #881337; color: #fecdd3; padding: 7px 12px; border-radius: 7px; font-size: 11.5px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px;">
         <span>🏢 Modo Projetos (O Boticário / Bradesco) ➔</span>
@@ -2586,7 +2614,7 @@
   function setTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
     localStorage.setItem('sparc_theme', t);
-    ['slate', 'light', 'wine-dark'].forEach(name => {
+    ['slate', 'light', 'wine-dark', 'original'].forEach(name => {
       const btn = document.getElementById('btnTheme_' + name);
       if (btn) {
         if (name === t) btn.classList.add('active');
