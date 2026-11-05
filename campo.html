@@ -5,12 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SPARC — Validação de Links & Aceite de Projetos (O Boticário / Bradesco)</title>
   <style>
-    :root {
+    :root, [data-theme="slate"] {
+      --bg: #131722;
+      --card-bg: #1e2433;
+      --card-border: #2e384b;
+      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --input-bg: #161b26;
+      --input-border: #38445a;
+      --canvas-bg: #10141e;
+      --canvas-grid: #242c3d;
+      --rule-bg: rgba(30, 41, 59, 0.7);
+      --rule-border: #334155;
+      --hero-bg: linear-gradient(135deg, #1c2331 0%, #151a24 100%);
+      
+      --wine-primary: #881337;
+      --wine-light: #be123c;
+      --wine-accent: #f43f5e;
+      --wine-label: #fda4af;
+      --wine-border: #881337;
+      
+      --green: #10b981;
+      --blue: #f43f5e;
+      --cyan: #38bdf8;
+      --purple: #be123c;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --boticario: #f43f5e;
+      --bradesco: #e11d48;
+    }
+
+    [data-theme="light"] {
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --card-border: #cbd5e1;
+      --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.07);
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --input-bg: #f8fafc;
+      --input-border: #cbd5e1;
+      --canvas-bg: #f8fafc;
+      --canvas-grid: #e2e8f0;
+      --rule-bg: #fff1f2;
+      --rule-border: #fecdd3;
+      --hero-bg: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      
+      --wine-primary: #881337;
+      --wine-light: #be123c;
+      --wine-accent: #9f1239;
+      --wine-label: #881337;
+      --wine-border: #9f1239;
+      
+      --green: #059669;
+      --blue: #be123c;
+      --cyan: #0284c7;
+      --purple: #9f1239;
+      --red: #dc2626;
+      --amber: #d97706;
+      --boticario: #be123c;
+      --bradesco: #9f1239;
+    }
+
+    [data-theme="wine-dark"] {
       --bg: #0a0407;
       --card-bg: #140710;
       --card-border: #2c0e1e;
+      --card-shadow: 0 8px 28px rgba(136, 19, 55, 0.25);
       --text-main: #fdf2f4;
       --text-muted: #a38c96;
+      --input-bg: #1b0a15;
+      --input-border: #881337;
+      --canvas-bg: #090306;
+      --canvas-grid: #2c0e1e;
+      --rule-bg: rgba(76, 5, 25, 0.35);
+      --rule-border: #581024;
+      --hero-bg: linear-gradient(135deg, #1a0814 0%, #11050d 100%);
+      
+      --wine-primary: #881337;
+      --wine-light: #be123c;
+      --wine-accent: #f43f5e;
+      --wine-label: #fda4af;
+      --wine-border: #881337;
+      
       --green: #10b981;
       --blue: #f43f5e;
       --cyan: #fda4af;
@@ -19,11 +96,6 @@
       --amber: #f59e0b;
       --boticario: #f43f5e;
       --bradesco: #e11d48;
-      --wine-900: #4c0519;
-      --wine-800: #881337;
-      --wine-700: #9f1239;
-      --wine-600: #be123c;
-      --wine-500: #e11d48;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,6 +108,43 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+
+        /* Theme Switcher */
+    .theme-switcher {
+      display: inline-flex;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 3px;
+      align-items: center;
+    }
+    .theme-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .theme-btn:hover {
+      color: var(--text-main);
+      background: rgba(128, 128, 128, 0.12);
+    }
+    .theme-btn.active {
+      background: var(--card-bg);
+      color: var(--text-main);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+      border: 1px solid var(--card-border);
+      font-weight: 800;
     }
 
     .container {
@@ -73,7 +182,7 @@
     .brand-title {
       font-size: 17px;
       font-weight: 900;
-      color: #fff;
+      color: var(--text-main);
     }
     .brand-sub {
       font-size: 11.5px;
@@ -101,8 +210,8 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      background: #1b0a15;
-      border: 1px solid #3d1424;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
       padding: 8px 14px;
       border-radius: 8px;
       font-size: 12px;
@@ -118,11 +227,11 @@
     /* CARD HERO DE PROJETO (SIMPLIFICADO PARA O TÉCNICO DE CAMPO) */
     .project-card {
       background: var(--card-bg);
-      border: 1.5px solid #881337;
+      border: 1.5px solid var(--wine-border);
       border-radius: 12px;
       padding: 18px 22px;
       margin-bottom: 16px;
-      box-shadow: 0 8px 28px rgba(136, 19, 55, 0.25);
+      box-shadow: var(--card-shadow);
       position: relative;
       overflow: hidden;
     }
@@ -130,7 +239,7 @@
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, #881337, #be123c, #fb7185);
+      background: linear-gradient(90deg, var(--wine-primary), var(--wine-light), var(--wine-accent));
     }
 
     .project-grid {
@@ -145,7 +254,7 @@
     .select-label {
       font-size: 11px;
       font-weight: 800;
-      color: #fda4af;
+      color: var(--wine-label);
       display: flex;
       align-items: center;
       gap: 6px;
@@ -155,9 +264,9 @@
     }
 
     .select-control {
-      background: #1b0a15;
-      border: 1.5px solid #881337;
-      color: #fff;
+      background: var(--input-bg);
+      border: 1.5px solid var(--input-border);
+      color: var(--text-main);
       padding: 10px 12px;
       border-radius: 8px;
       font-size: 13px;
@@ -223,8 +332,8 @@
     }
 
     .btn-secondary {
-      background: #1b0a15;
-      border: 1px solid #3d1424;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
       color: var(--text-main);
       padding: 12px 18px;
       border-radius: 8px;
@@ -237,7 +346,7 @@
       transition: all 0.2s;
     }
     .btn-secondary:hover:not(:disabled) {
-      background: #2d1020;
+      background: var(--card-border);
     }
     .btn-secondary:disabled {
       opacity: 0.45;
@@ -282,7 +391,7 @@
       font-size: 32px;
       font-weight: 900;
       line-height: 1.1;
-      color: #fff;
+      color: var(--text-main);
     }
     .kpi-target {
       font-size: 11px;
@@ -297,7 +406,7 @@
     .progress-bar-wrap {
       width: 100%;
       height: 4px;
-      background: #240c1a;
+      background: var(--input-bg);
       border-radius: 2px;
       margin-top: 8px;
       overflow: hidden;
@@ -352,7 +461,7 @@
       width: 100%;
       height: 150px;
       position: relative;
-      background: #090306;
+      background: var(--canvas-bg);
       border-radius: 8px;
       overflow: hidden;
       border: 1px solid var(--card-border);
@@ -432,6 +541,11 @@
     </div>
     
     <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <div class="theme-switcher">
+        <button type="button" class="theme-btn" id="btnTheme_slate" onclick="setTheme('slate')" title="Tema Ardósia Neutro (Menos Escuro)">🌓 Slate Neutro</button>
+        <button type="button" class="theme-btn" id="btnTheme_light" onclick="setTheme('light')" title="Tema Claro Neutro Institucional">☀️ Claro Neutro</button>
+        <button type="button" class="theme-btn" id="btnTheme_wine-dark" onclick="setTheme('wine-dark')" title="Tema Vinho Noturno">🍷 Vinho</button>
+      </div>
       <a href="index.html" class="nav-toggle-btn">
         <span>⚙️ Modo Avançado (RFC 6349) ➔</span>
       </a>
@@ -475,7 +589,7 @@
             <option value="custom">✏️ Personalizado (Mbps)...</option>
           </select>
           <div id="boxCustomCir" style="display: none; align-items: center; gap: 4px;">
-            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; background: #1b0a15; border: 1.5px solid #881337; color: #fff; padding: 9px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
+            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; background: var(--input-bg); border: 1.5px solid var(--input-border); color: var(--text-main); padding: 9px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
             <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">Mbps</span>
           </div>
         </div>
@@ -508,12 +622,12 @@
   <div class="topology-strip">
     <div style="display: flex; align-items: center; gap: 8px;">
       <span style="color: var(--cyan); font-weight: 800;">🌐 ORIGEM:</span>
-      <span id="txtClientIp" style="font-weight: 700; color: #fff;">Detectando IP...</span>
+      <span id="txtClientIp" style="font-weight: 700; color: var(--text-main);">Detectando IP...</span>
       <span id="txtClientIsp" style="color: var(--text-muted);">(Provedor Local)</span>
     </div>
     <div style="display: flex; align-items: center; gap: 8px;">
       <span style="color: var(--green); font-weight: 800;">⚡ ROTA DINÂMICA:</span>
-      <span id="txtTargetPop" style="color: #fff; font-weight: 700;">Menor Esforço Geodésico Automático</span>
+      <span id="txtTargetPop" style="color: var(--text-main); font-weight: 700;">Menor Esforço Geodésico Automático</span>
     </div>
   </div>
 
@@ -611,7 +725,7 @@
   <!-- CURVA DE VAZÃO TEMPORAL -->
   <div class="chart-card">
     <div class="chart-header">
-      <span style="color: #fff;">📈 Curva de Vazão Contínua (Throughput em Tempo Real)</span>
+      <span style="color: var(--text-main);">📈 Curva de Vazão Contínua (Throughput em Tempo Real)</span>
       <div style="display: flex; gap: 12px; font-size: 11px;">
         <span style="color: var(--green);">● Download</span>
         <span style="color: var(--blue);">● Upload</span>
@@ -1436,7 +1550,8 @@
     ctx.clearRect(0, 0, w, h);
 
     // Grid
-    ctx.strokeStyle = '#2c0e1e';
+    const computed = getComputedStyle(document.documentElement);
+    ctx.strokeStyle = computed.getPropertyValue('--canvas-grid').trim() || '#242c3d';
     ctx.lineWidth = 1;
     for (let i = 1; i <= 3; i++) {
       const y = (h / 4) * i;
@@ -1497,6 +1612,26 @@
     ctx.stroke();
     ctx.restore();
   }
+
+  // ==========================================
+  // CONTROLE DE TEMAS (SLATE NEUTRO / CLARO / VINHO)
+  // ==========================================
+  function setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('sparc_theme', t);
+    ['slate', 'light', 'wine-dark'].forEach(name => {
+      const btn = document.getElementById('btnTheme_' + name);
+      if (btn) {
+        if (name === t) btn.classList.add('active');
+        else btn.classList.remove('active');
+      }
+    });
+    if (typeof redrawCanvas === 'function') redrawCanvas();
+  }
+
+  // Inicializa tema salvo ou padrão 'slate' (menos escuro e neutro)
+  const initialTheme = localStorage.getItem('sparc_theme') || 'slate';
+  setTheme(initialTheme);
 </script>
 
 </body>
