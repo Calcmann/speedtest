@@ -5,23 +5,85 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SPARC — Teste Avançado de Banda Larga & Qualidade de Link</title>
   <style>
-    :root {
+    :root, [data-theme="slate"] {
+      --bg: #131722;
+      --card-bg: #1e2433;
+      --card-border: #2e384b;
+      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --input-bg: #161b26;
+      --input-border: #38445a;
+      --canvas-bg: #10141e;
+      --canvas-grid: #242c3d;
+      --hero-bg: linear-gradient(135deg, #1c2331 0%, #151a24 100%);
+      
+      --wine-primary: #881337;
+      --wine-light: #be123c;
+      --wine-accent: #f43f5e;
+      --wine-label: #fda4af;
+      --wine-border: #881337;
+      
+      --green: #10b981;
+      --blue: #f43f5e;
+      --cyan: #38bdf8;
+      --purple: #be123c;
+      --red: #ef4444;
+      --amber: #f59e0b;
+    }
+
+    [data-theme="light"] {
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --card-border: #cbd5e1;
+      --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.07);
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --input-bg: #f8fafc;
+      --input-border: #cbd5e1;
+      --canvas-bg: #f8fafc;
+      --canvas-grid: #e2e8f0;
+      --hero-bg: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      
+      --wine-primary: #881337;
+      --wine-light: #be123c;
+      --wine-accent: #9f1239;
+      --wine-label: #881337;
+      --wine-border: #9f1239;
+      
+      --green: #059669;
+      --blue: #be123c;
+      --cyan: #0284c7;
+      --purple: #9f1239;
+      --red: #dc2626;
+      --amber: #d97706;
+    }
+
+    [data-theme="wine-dark"] {
       --bg: #0a0407;
       --card-bg: #140710;
       --card-border: #2c0e1e;
+      --card-shadow: 0 8px 28px rgba(136, 19, 55, 0.25);
       --text-main: #fdf2f4;
       --text-muted: #a38c96;
+      --input-bg: #1b0a15;
+      --input-border: #881337;
+      --canvas-bg: #090306;
+      --canvas-grid: #2c0e1e;
+      --hero-bg: linear-gradient(135deg, #1a0814 0%, #11050d 100%);
+      
+      --wine-primary: #881337;
+      --wine-light: #be123c;
+      --wine-accent: #f43f5e;
+      --wine-label: #fda4af;
+      --wine-border: #881337;
+      
       --green: #10b981;
       --blue: #f43f5e;
       --cyan: #fda4af;
       --purple: #be123c;
       --red: #ef4444;
       --amber: #f59e0b;
-      --wine-900: #4c0519;
-      --wine-800: #881337;
-      --wine-700: #9f1239;
-      --wine-600: #be123c;
-      --wine-500: #e11d48;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,6 +96,43 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+
+        /* Theme Switcher */
+    .theme-switcher {
+      display: inline-flex;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 3px;
+      align-items: center;
+    }
+    .theme-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .theme-btn:hover {
+      color: var(--text-main);
+      background: rgba(128, 128, 128, 0.12);
+    }
+    .theme-btn.active {
+      background: var(--card-bg);
+      color: var(--text-main);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+      border: 1px solid var(--card-border);
+      font-weight: 800;
     }
 
     .container {
@@ -71,7 +170,7 @@
     .brand-title {
       font-size: 17px;
       font-weight: 900;
-      color: #fff;
+      color: var(--text-main);
     }
     .brand-sub {
       font-size: 11px;
@@ -81,8 +180,8 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      background: #1b0a15;
-      border: 1px solid #3d1424;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
       padding: 8px 14px;
       border-radius: 8px;
       font-size: 12px;
@@ -132,7 +231,7 @@
     .kpi-val {
       font-size: 32px;
       font-weight: 900;
-      color: #fff;
+      color: var(--text-main);
       line-height: 1.1;
       display: flex;
       align-items: baseline;
@@ -202,7 +301,7 @@
       position: relative;
       width: 100%;
       height: 150px;
-      background: #090306;
+      background: var(--canvas-bg);
       border: 1px solid var(--card-border);
       border-radius: 8px;
       overflow: hidden;
@@ -280,8 +379,8 @@
 
     /* Hero Action Card (Painel de Destaque Superior) */
     .hero-action-card {
-      background: linear-gradient(135deg, #1a0814 0%, #11050d 100%);
-      border: 1.5px solid #881337;
+      background: var(--hero-bg);
+      border: 1.5px solid var(--card-border);
       border-radius: 12px;
       padding: 14px 18px;
       margin-bottom: 16px;
@@ -299,7 +398,7 @@
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 3px;
-      background: linear-gradient(90deg, #881337, #be123c, #fb7185);
+      background: linear-gradient(90deg, var(--wine-primary), var(--wine-light), var(--wine-accent));
     }
     .hero-left, .hero-right {
       display: flex;
@@ -453,6 +552,11 @@
       </div>
     </div>
     <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <div class="theme-switcher">
+        <button type="button" class="theme-btn" id="btnTheme_slate" onclick="setTheme('slate')" title="Tema Ardósia Neutro (Menos Escuro)">🌓 Slate Neutro</button>
+        <button type="button" class="theme-btn" id="btnTheme_light" onclick="setTheme('light')" title="Tema Claro Neutro Institucional">☀️ Claro Neutro</button>
+        <button type="button" class="theme-btn" id="btnTheme_wine-dark" onclick="setTheme('wine-dark')" title="Tema Vinho Noturno">🍷 Vinho</button>
+      </div>
       <a href="campo.html" style="background: rgba(136, 19, 55, 0.22); border: 1px solid #881337; color: #fecdd3; padding: 7px 12px; border-radius: 7px; font-size: 11.5px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px;">
         <span>🏢 Modo Projetos (O Boticário / Bradesco) ➔</span>
       </a>
@@ -477,7 +581,7 @@
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px;">
       <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Provedor / Motor de Teste:</label>
-        <select id="cbProvider" onchange="onProviderChange()" style="background: #1b0a15; border: 1px solid #3d1424; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+        <select id="cbProvider" onchange="onProviderChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
           <option value="cloudflare" selected>⚡ Cloudflare Speed (Multi-Anycast Global — Alta Vazão)</option>
           <option value="sparc_cloud">🏢 SPARC Cloud Vinhedo (Servidor Dedicado OCI)</option>
           <option value="ookla">📡 Ookla Speedtest (Certificado Oficial &amp; Redes Parceiras)</option>
@@ -488,7 +592,7 @@
 
       <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Servidor Alvo (Georreferenciado ao Link):</label>
-        <select id="cbServers" onchange="onServerSelectChange()" style="background: #1b0a15; border: 1px solid #3d1424; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+        <select id="cbServers" onchange="onServerSelectChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
           <option value="auto" selected>⭐ [AUTOMÁTICO] Menor Esforço (Descobrindo servidores locais...)</option>
           <option value="sparc_vinhedo">🔥 [DEDICADO SPARC] Vinhedo / SP (Oracle Cloud sa-vinhedo-1)</option>
         </select>
@@ -496,7 +600,7 @@
 
       <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Conexões Paralelas (RFC 6349):</label>
-        <select id="cbStreams" style="background: #1b0a15; border: 1px solid #3d1424; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+        <select id="cbStreams" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
           <option value="6" selected>⭐ 6 Streams Simultâneos (RFC 6349 / Alta Banda)</option>
           <option value="4">4 Streams Simultâneos (Equilibrado)</option>
           <option value="8">8 Streams Simultâneos (Gigabit 1Gbps+)</option>
@@ -506,7 +610,7 @@
 
       <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Duração da Saturação (Tempo Contínuo):</label>
-        <select id="cbTestDuration" style="background: #1b0a15; border: 1px solid #3d1424; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+        <select id="cbTestDuration" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
           <option value="15" selected>⚡ 15 segundos (Padrão RFC 6349)</option>
           <option value="30">⏱️ 30 segundos (Estendido)</option>
           <option value="60">🔥 60 segundos (1 Minuto Ininterrupto — Validação Plena)</option>
@@ -516,7 +620,7 @@
 
       <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Métrica de Bufferbloat (Filtro Estatístico):</label>
-        <select id="cbBloatMetric" onchange="onBloatMetricChange()" style="background: #1b0a15; border: 1px solid #3d1424; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+        <select id="cbBloatMetric" onchange="onBloatMetricChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
           <option value="waveform" selected>⭐ Waveform P75 (Interquartil Robusto — Padrão)</option>
           <option value="median">📊 Mediana Estrita RFC 6349 (P50)</option>
           <option value="p90">🔥 Estresse de Pico P90 (Tolerância Zero)</option>
@@ -536,7 +640,7 @@
 
         <!-- MODO SIMÉTRICO (PADRÃO) -->
         <div id="boxSymmetricCir" style="display: flex; gap: 6px; align-items: center;">
-          <select id="cbCirPreset" onchange="onCirPresetChange()" style="background: #1b0a15; border: 1px solid #3d1424; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; flex: 1; cursor: pointer;">
+          <select id="cbCirPreset" onchange="onCirPresetChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; flex: 1; cursor: pointer;">
             <option value="auto">⭐ [AUTO] Descoberta Livre</option>
             <option value="10">10 Mbps</option>
             <option value="20">20 Mbps</option>
@@ -550,7 +654,7 @@
             <option value="custom">✏️ Personalizado (Mbps)...</option>
           </select>
           <div id="boxCustomCir" style="display: none; align-items: center; gap: 3px;">
-            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 74px; background: #0f172a; border: 1.5px solid var(--cyan); color: #fff; padding: 7px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
+            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 74px; background: var(--input-bg); border: 1.5px solid var(--input-border); color: #fff; padding: 7px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
             <span style="font-size: 10px; font-weight: 700; color: var(--text-muted);">Mbps</span>
           </div>
         </div>
@@ -560,7 +664,7 @@
           <!-- DOWNLOAD ASSIMÉTRICO -->
           <div style="display: flex; gap: 6px; align-items: center;">
             <span style="font-size: 10px; font-weight: 800; color: var(--green); width: 85px; white-space: nowrap;">↓ CIR DOWNLOAD:</span>
-            <select id="cbCirDlPreset" onchange="onCirDlPresetChange()" style="background: #1b0a15; border: 1px solid #3d1424; color: #fff; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; flex: 1; cursor: pointer;">
+            <select id="cbCirDlPreset" onchange="onCirDlPresetChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; flex: 1; cursor: pointer;">
               <option value="auto">⭐ [AUTO] Descoberta Livre</option>
               <option value="50">50 Mbps</option>
               <option value="100">100 Mbps</option>
@@ -580,7 +684,7 @@
           <!-- UPLOAD ASSIMÉTRICO -->
           <div style="display: flex; gap: 6px; align-items: center;">
             <span style="font-size: 10px; font-weight: 800; color: var(--blue); width: 85px; white-space: nowrap;">↑ CIR UPLOAD:</span>
-            <select id="cbCirUlPreset" onchange="onCirUlPresetChange()" style="background: #1b0a15; border: 1px solid #3d1424; color: #fff; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; flex: 1; cursor: pointer;">
+            <select id="cbCirUlPreset" onchange="onCirUlPresetChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; flex: 1; cursor: pointer;">
               <option value="auto">⭐ [AUTO] Descoberta Livre</option>
               <option value="10">10 Mbps</option>
               <option value="20">20 Mbps</option>
@@ -727,7 +831,7 @@
         <span style="font-size: 14px;">🎯</span>
         <span style="font-size: 12px; font-weight: 800; color: #fff; letter-spacing: 0.5px;">AUDITORIA DE CIRCUITO & VALIDAÇÃO DE SLA (RFC 6349)</span>
       </div>
-      <div id="rfcSlaBadge" style="background: #1b0a15; border: 1px solid #3d1424; color: #94a3b8; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">
+      <div id="rfcSlaBadge" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #94a3b8; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">
         Aguardando Início do Teste
       </div>
     </div>
@@ -2347,7 +2451,8 @@
     ctx.clearRect(0, 0, w, h);
 
     // Linhas de Grade Sutis
-    ctx.strokeStyle = '#200a16';
+    const computed = getComputedStyle(document.documentElement);
+    ctx.strokeStyle = computed.getPropertyValue('--canvas-grid').trim() || '#242c3d';
     ctx.lineWidth = 1;
     ctx.setLineDash([3, 3]);
     [0.25, 0.5, 0.75].forEach(ratio => {
@@ -2358,7 +2463,8 @@
     });
 
     // Divisor Central Download / Upload
-    ctx.strokeStyle = '#2c0e1e';
+    const computed2 = getComputedStyle(document.documentElement);
+    ctx.strokeStyle = computed2.getPropertyValue('--canvas-grid').trim() || '#242c3d';
     ctx.beginPath();
     ctx.moveTo(w * 0.5, 0);
     ctx.lineTo(w * 0.5, h);
@@ -2473,6 +2579,26 @@
     }
     window.print();
   }
+
+  // ==========================================
+  // CONTROLE DE TEMAS (SLATE NEUTRO / CLARO / VINHO)
+  // ==========================================
+  function setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('sparc_theme', t);
+    ['slate', 'light', 'wine-dark'].forEach(name => {
+      const btn = document.getElementById('btnTheme_' + name);
+      if (btn) {
+        if (name === t) btn.classList.add('active');
+        else btn.classList.remove('active');
+      }
+    });
+    if (typeof redrawChart === 'function') redrawChart();
+  }
+
+  // Inicializa tema salvo ou padrão 'slate' (menos escuro e neutro)
+  const initialTheme = localStorage.getItem('sparc_theme') || 'slate';
+  setTheme(initialTheme);
 </script>
 
 </body>
