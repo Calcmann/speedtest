@@ -6,19 +6,24 @@
   <title>SPARC — Validação de Links & Aceite de Projetos (O Boticário / Bradesco)</title>
   <style>
     :root {
-      --bg: #080c15;
-      --card-bg: #0f172a;
-      --card-border: #1e293b;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
+      --bg: #0a0407;
+      --card-bg: #140710;
+      --card-border: #2c0e1e;
+      --text-main: #fdf2f4;
+      --text-muted: #a38c96;
       --green: #10b981;
-      --blue: #3b82f6;
-      --cyan: #06b6d4;
-      --purple: #8b5cf6;
+      --blue: #f43f5e;
+      --cyan: #fda4af;
+      --purple: #be123c;
       --red: #ef4444;
       --amber: #f59e0b;
-      --boticario: #ec4899;
-      --bradesco: #dc2626;
+      --boticario: #f43f5e;
+      --bradesco: #e11d48;
+      --wine-900: #4c0519;
+      --wine-800: #881337;
+      --wine-700: #9f1239;
+      --wine-600: #be123c;
+      --wine-500: #e11d48;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -57,7 +62,7 @@
       gap: 12px;
     }
     .badge-tag {
-      background: linear-gradient(135deg, #0ea5e9, #2563eb);
+      background: linear-gradient(135deg, #881337, #be123c);
       color: #fff;
       font-size: 11px;
       font-weight: 800;
@@ -75,9 +80,9 @@
       color: var(--text-muted);
     }
     .nav-toggle-btn {
-      background: rgba(147, 51, 234, 0.12);
-      border: 1px solid #9333ea;
-      color: #d8b4fe;
+      background: rgba(136, 19, 55, 0.22);
+      border: 1px solid #881337;
+      color: #fecdd3;
       padding: 7px 12px;
       border-radius: 7px;
       font-size: 11.5px;
@@ -89,15 +94,15 @@
       transition: all 0.2s;
     }
     .nav-toggle-btn:hover {
-      background: rgba(147, 51, 234, 0.25);
+      background: rgba(136, 19, 55, 0.45);
       color: #fff;
     }
     .status-badge {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: #1b0a15;
+      border: 1px solid #3d1424;
       padding: 8px 14px;
       border-radius: 8px;
       font-size: 12px;
@@ -107,17 +112,17 @@
       width: 9px;
       height: 9px;
       border-radius: 50%;
-      background: var(--cyan);
+      background: #e11d48;
     }
 
     /* CARD HERO DE PROJETO (SIMPLIFICADO PARA O TÉCNICO DE CAMPO) */
     .project-card {
       background: var(--card-bg);
-      border: 1.5px solid #2563eb;
+      border: 1.5px solid #881337;
       border-radius: 12px;
       padding: 18px 22px;
       margin-bottom: 16px;
-      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
+      box-shadow: 0 8px 28px rgba(136, 19, 55, 0.25);
       position: relative;
       overflow: hidden;
     }
@@ -125,7 +130,7 @@
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, #3b82f6, #06b6d4, #10b981);
+      background: linear-gradient(90deg, #881337, #be123c, #fb7185);
     }
 
     .project-grid {
@@ -140,7 +145,7 @@
     .select-label {
       font-size: 11px;
       font-weight: 800;
-      color: var(--cyan);
+      color: #fda4af;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -150,8 +155,8 @@
     }
 
     .select-control {
-      background: #1e293b;
-      border: 1.5px solid #3b82f6;
+      background: #1b0a15;
+      border: 1.5px solid #881337;
       color: #fff;
       padding: 10px 12px;
       border-radius: 8px;
@@ -163,14 +168,14 @@
       transition: all 0.2s;
     }
     .select-control:focus {
-      border-color: var(--cyan);
-      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+      border-color: #e11d48;
+      box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.25);
     }
 
     .rule-explanation-box {
       margin-top: 12px;
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid #334155;
+      background: rgba(76, 5, 25, 0.35);
+      border: 1px solid #581024;
       border-radius: 8px;
       padding: 10px 14px;
       font-size: 11.5px;
@@ -191,9 +196,9 @@
     }
 
     .btn-start {
-      background: linear-gradient(135deg, #2563eb, #06b6d4);
+      background: linear-gradient(135deg, #881337, #be123c);
       color: #fff;
-      border: none;
+      border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 8px;
       padding: 14px 28px;
       font-size: 15px;
@@ -203,12 +208,12 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+      box-shadow: 0 4px 20px rgba(136, 19, 55, 0.5);
       transition: all 0.2s;
     }
     .btn-start:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.45);
+      box-shadow: 0 6px 26px rgba(225, 29, 72, 0.65);
     }
     .btn-start:disabled {
       opacity: 0.55;
@@ -218,8 +223,8 @@
     }
 
     .btn-secondary {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: #1b0a15;
+      border: 1px solid #3d1424;
       color: var(--text-main);
       padding: 12px 18px;
       border-radius: 8px;
@@ -232,7 +237,7 @@
       transition: all 0.2s;
     }
     .btn-secondary:hover:not(:disabled) {
-      background: #334155;
+      background: #2d1020;
     }
     .btn-secondary:disabled {
       opacity: 0.45;
@@ -292,7 +297,7 @@
     .progress-bar-wrap {
       width: 100%;
       height: 4px;
-      background: #1e293b;
+      background: #240c1a;
       border-radius: 2px;
       margin-top: 8px;
       overflow: hidden;
@@ -347,10 +352,10 @@
       width: 100%;
       height: 150px;
       position: relative;
-      background: #090d16;
+      background: #090306;
       border-radius: 8px;
       overflow: hidden;
-      border: 1px solid #1e293b;
+      border: 1px solid var(--card-border);
     }
     canvas {
       width: 100%;
@@ -470,7 +475,7 @@
             <option value="custom">✏️ Personalizado (Mbps)...</option>
           </select>
           <div id="boxCustomCir" style="display: none; align-items: center; gap: 4px;">
-            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; background: #0f172a; border: 1.5px solid var(--cyan); color: #fff; padding: 9px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
+            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; background: #1b0a15; border: 1.5px solid #881337; color: #fff; padding: 9px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
             <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">Mbps</span>
           </div>
         </div>
@@ -523,7 +528,7 @@
       </button>
     </div>
 
-    <button class="btn-secondary" id="btnPrint" onclick="printReport()" disabled style="background: linear-gradient(135deg, #0284c7, #2563eb); color: #fff; border: none;">
+    <button class="btn-secondary" id="btnPrint" onclick="printReport()" disabled style="background: linear-gradient(135deg, #70102b, #9f1239); color: #fff; border: 1px solid #be123c;">
       <span>📄 Salvar Comprovante PDF</span>
     </button>
   </div>
@@ -912,8 +917,8 @@
       badge.style.borderColor = 'var(--red)';
       dot.style.background = 'var(--red)';
     } else {
-      badge.style.borderColor = '#334155';
-      dot.style.background = '#64748b';
+      badge.style.borderColor = '#3d1424';
+      dot.style.background = '#881337';
     }
   }
 
@@ -1431,7 +1436,7 @@
     ctx.clearRect(0, 0, w, h);
 
     // Grid
-    ctx.strokeStyle = '#1e293b';
+    ctx.strokeStyle = '#2c0e1e';
     ctx.lineWidth = 1;
     for (let i = 1; i <= 3; i++) {
       const y = (h / 4) * i;
@@ -1444,7 +1449,7 @@
     // Curvas
     const midX = w / 2;
     drawCurve(dlPoints, 0, midX, h, '#10b981', 'rgba(16, 185, 129, 0.15)');
-    drawCurve(ulPoints, midX, w, h, '#3b82f6', 'rgba(59, 130, 246, 0.15)');
+    drawCurve(ulPoints, midX, w, h, '#f43f5e', 'rgba(244, 63, 94, 0.15)');
   }
 
   function drawCurve(pts, startX, endX, h, strokeColor, fillColor) {
