@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SPARC — Homologação de Links & Aceite de Projetos (O Boticário / Bradesco)</title>
+  <title>SPARC — Validação de Links & Aceite de Projetos (O Boticário / Bradesco)</title>
   <style>
     :root {
       --bg: #080c15;
@@ -421,7 +421,7 @@
     <div class="brand">
       <div class="badge-tag">⚡ SPARC WEB</div>
       <div>
-        <div class="brand-title">Homologação de Enlaces &amp; Aceite de Projetos</div>
+        <div class="brand-title">Validação de Enlaces &amp; Aceite de Projetos</div>
         <div class="brand-sub">Perfis de RFP Automatizados (O Boticário, Bradesco) • Teste One-Click</div>
       </div>
     </div>
@@ -432,7 +432,7 @@
       </a>
       <div class="status-badge" id="badgeStatus">
         <div class="status-dot" id="statusDot"></div>
-        <span id="statusText">PRONTO PARA HOMOLOGAR</span>
+        <span id="statusText">PRONTO PARA TESTAR</span>
       </div>
     </div>
   </div>
@@ -442,7 +442,7 @@
     <div style="display: flex; align-items: center; gap: 10px;">
       <span style="font-size: 18px;">⚠️</span>
       <div>
-        <strong>Parâmetros Alterados após a Execução:</strong> O laudo PDF foi bloqueado porque os parâmetros na tela diferem do teste homologado. Refaça o teste ou restaure a configuração testada.
+        <strong>Parâmetros Alterados após a Execução:</strong> O comprovante PDF foi bloqueado porque os parâmetros na tela diferem do teste validado. Refaça o teste ou restaure a configuração testada.
       </div>
     </div>
     <button type="button" onclick="restaurarParametrosTestados()" style="background: var(--amber); color: #000; border: none; font-weight: 800; font-size: 11px; padding: 6px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap;">
@@ -491,7 +491,7 @@
     <div class="rule-explanation-box" id="ruleExplanationBox">
       <span style="font-size: 18px;" id="ruleIcon">🌸</span>
       <div>
-        <strong id="ruleTitle">Critério Oficial de Homologação — O Boticário:</strong>
+        <strong id="ruleTitle">Critério de Validação — O Boticário:</strong>
         <div id="ruleText" style="color: var(--text-muted); margin-top: 2px;">
           Em conformidade com a RFP de Varejo do Boticário, o circuito será <strong>Aprovado</strong> se entregar no mínimo <strong>80% da banda nominal em Download</strong> (ex.: ≥ 80.0 Mbps em 100M) e <strong>20% em Upload</strong> (ex.: ≥ 20.0 Mbps em 100M).
         </div>
@@ -516,7 +516,7 @@
   <div class="hero-action-bar">
     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
       <button class="btn-start" id="btnStart" onclick="startTest()">
-        <span>🚀 INICIAR HOMOLOGAÇÃO DO LINK</span>
+        <span>🚀 INICIAR VALIDAÇÃO DO LINK</span>
       </button>
       <button class="btn-secondary" id="btnCancel" onclick="cancelTest()" disabled>
         <span>🛑 Cancelar</span>
@@ -524,7 +524,7 @@
     </div>
 
     <button class="btn-secondary" id="btnPrint" onclick="printReport()" disabled style="background: linear-gradient(135deg, #0284c7, #2563eb); color: #fff; border: none;">
-      <span>📄 Salvar Laudo Técnico PDF</span>
+      <span>📄 Salvar Comprovante PDF</span>
     </button>
   </div>
 
@@ -589,7 +589,7 @@
       <div style="display: flex; align-items: flex-start; gap: 14px;">
         <span style="font-size: 32px;" id="verdictIcon">✓</span>
         <div>
-          <div style="font-size: 16px; font-weight: 900; letter-spacing: 0.5px;" id="verdictTitle">CIRCUITO HOMOLOGADO COM SUCESSO</div>
+          <div style="font-size: 16px; font-weight: 900; letter-spacing: 0.5px;" id="verdictTitle">CIRCUITO VALIDADO COM SUCESSO</div>
           <div style="font-size: 12px; margin-top: 4px; line-height: 1.45;" id="verdictDetail">
             Todas as métricas contratuais do projeto foram atendidas integralmente.
           </div>
@@ -597,7 +597,7 @@
       </div>
       <div style="text-align: right;">
         <button type="button" onclick="printReport()" style="background: var(--green); color: #000; border: none; font-weight: 900; font-size: 12px; padding: 10px 18px; border-radius: 8px; cursor: pointer;">
-          📄 Emitir Laudo do Aceite (PDF)
+          📄 Emitir Comprovante de Teste (PDF)
         </button>
       </div>
     </div>
@@ -621,7 +621,7 @@
   <div id="printAuditSummary">
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 14px;">
       <div>
-        <h1 style="font-size: 18px; font-weight: 900; text-transform: uppercase;">Laudo Técnico de Homologação de Circuito</h1>
+        <h1 style="font-size: 18px; font-weight: 900; text-transform: uppercase;">Comprovante de Teste &amp; Validação de Circuito</h1>
         <div style="font-size: 11px; color: #475569;">SPARC Telemetria de Enlaces • Aceite Oficial de Campo</div>
       </div>
       <div style="text-align: right; font-size: 11px;">
@@ -688,19 +688,14 @@
     <div style="border: 2px solid #0f172a; padding: 12px; border-radius: 6px; margin-bottom: 30px;">
       <div style="font-size: 13px; font-weight: 900; text-transform: uppercase; margin-bottom: 4px;" id="auditVerdictBoxTitle">PARECER TÉCNICO CONCLUSIVO</div>
       <div style="font-size: 11.5px; line-height: 1.45;" id="auditVerdictBoxText">
-        O circuito auditado atende rigorosamente a todos os parâmetros técnicos e percentuais exigidos na RFP do projeto, estando formalmente homologado para ativação em produção.
+        O circuito auditado atende rigorosamente a todos os parâmetros técnicos e percentuais exigidos na RFP do projeto, estando o enlace validado e apto para ativação.
       </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px; font-size: 11px; text-align: center;">
-      <div>
-        <div style="border-top: 1px solid #0f172a; padding-top: 4px;"><strong>Técnico Responsável pela Homologação</strong></div>
-        <div style="color: #64748b;">SPARC Engenharia de Campo</div>
-      </div>
-      <div>
-        <div style="border-top: 1px solid #0f172a; padding-top: 4px;"><strong>Aceite do Cliente / Fiscal do Projeto</strong></div>
-        <div style="color: #64748b;" id="auditSignClient">O Boticário / Bradesco</div>
-      </div>
+    <!-- RODAPÉ DIGITAL (SEM CAMPOS DE ASSINATURA FÍSICA) -->
+    <div style="margin-top: 25px; border-top: 1px solid #cbd5e1; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #64748b;">
+      <div>⚡ SPARC Web Telemetry • Comprovante Digital de Validação de Banda &amp; SLA</div>
+      <div>Documento Digital de Apoio Técnico • Gerado Automaticamente</div>
     </div>
   </div>
 </div>
@@ -725,7 +720,7 @@
       icon: '🌸',
       dlPctReq: 0.80, // 80% do CIR nominal
       ulPctReq: 0.20, // 20% do CIR nominal
-      title: 'Critério Oficial de Homologação — O Boticário:',
+      title: 'Critério de Validação — O Boticário:',
       desc: 'Em conformidade com a RFP de Varejo do Boticário, o circuito será <strong>Aprovado</strong> se entregar no mínimo <strong>80% da banda em Download</strong> e <strong>20% em Upload</strong>.'
     },
     bradesco: {
@@ -734,7 +729,7 @@
       icon: '🏦',
       dlPctReq: 1.00, // 100% do CIR nominal (tolerância zero)
       ulPctReq: 1.00, // 100% do CIR nominal (simetria bancária total)
-      title: 'Critério Oficial de Homologação — Banco Bradesco:',
+      title: 'Critério de Validação — Banco Bradesco:',
       desc: 'Em conformidade com o SLA de Agências Críticas do Bradesco, o circuito exige <strong>100% da banda contratada em Download E Upload</strong> (tolerância zero para VPN e Caixas).'
     },
     rfc6349: {
@@ -841,14 +836,14 @@
     if (lastCompletedConfig && hasConfigMismatch()) {
       if (bPrint) {
         bPrint.disabled = true;
-        bPrint.title = 'Parâmetros modificados. Refaça o teste para gerar o laudo.';
+        bPrint.title = 'Parâmetros modificados. Refaça o teste para gerar o comprovante.';
       }
       if (mismatchWarn) mismatchWarn.style.display = 'flex';
       setStatus('warn', 'CONFIGURAÇÃO MODIFICADA');
     } else if (lastCompletedConfig && !hasConfigMismatch()) {
       if (bPrint) bPrint.disabled = false;
       if (mismatchWarn) mismatchWarn.style.display = 'none';
-      setStatus(lastCompletedConfig.statusType || 'success', lastCompletedConfig.statusText || 'HOMOLOGADO');
+      setStatus(lastCompletedConfig.statusType || 'success', lastCompletedConfig.statusText || 'VALIDADO');
     }
   }
 
@@ -947,7 +942,7 @@
     document.getElementById('btnPrint').disabled = true;
 
     setControlsState(true);
-    setStatus('running', 'EXECUTANDO HOMOLOGAÇÃO...');
+    setStatus('running', 'VALIDANDO LINK...');
 
     dlPoints.length = 0;
     ulPoints.length = 0;
@@ -1020,7 +1015,7 @@
 
       lastCompletedConfig = getCurrentConfig();
       lastCompletedConfig.statusType = isApproved ? 'success' : 'error';
-      lastCompletedConfig.statusText = isApproved ? `HOMOLOGADO (${p.name.toUpperCase()})` : `NÃO HOMOLOGADO (${p.name.toUpperCase()})`;
+      lastCompletedConfig.statusText = isApproved ? `VALIDADO (${p.name.toUpperCase()})` : `NÃO CONFORME (${p.name.toUpperCase()})`;
       lastCompletedConfig.timestamp = new Date().toLocaleString('pt-BR');
       lastCompletedConfig.auditData = {
         dlAvg: dlRes.avg,
@@ -1073,7 +1068,7 @@
     } else {
       card.className = 'verdict-card rejected';
       icon.innerText = '✗';
-      title.innerText = `CIRCUITO NÃO HOMOLOGADO — REPROVADO NO PROJETO ${res.profile.name.toUpperCase()}`;
+      title.innerText = `CIRCUITO NÃO CONFORME — REPROVADO NO PROJETO ${res.profile.name.toUpperCase()}`;
       title.style.color = 'var(--red)';
 
       let falhaDesc = '';
@@ -1097,7 +1092,7 @@
     const p = PROJECT_PROFILES[cfg.profileKey];
 
     document.getElementById('auditTimestamp').innerText = cfg.timestamp;
-    document.getElementById('auditStatusLabel').innerText = d.isApproved ? 'HOMOLOGADO' : 'NÃO CONFORME';
+    document.getElementById('auditStatusLabel').innerText = d.isApproved ? 'VALIDADO / APROVADO' : 'NÃO CONFORME';
     document.getElementById('auditStatusLabel').style.color = d.isApproved ? '#16a34a' : '#dc2626';
 
     document.getElementById('auditProjeto').innerText = p.fullName;
@@ -1128,16 +1123,16 @@
     const vTitle = document.getElementById('auditVerdictBoxTitle');
     const vText = document.getElementById('auditVerdictBoxText');
     if (d.isApproved) {
-      vTitle.innerText = 'PARECER CONCLUSIVO: CIRCUITO HOMOLOGADO';
+      vTitle.innerText = 'RESULTADO DO TESTE: CIRCUITO VALIDADO E APROVADO';
       vTitle.style.color = '#16a34a';
-      vText.innerText = `O enlace atende integralmente à RFP do projeto ${p.name}, cumprindo todas as metas de taxa de transferência exigidas em contrato. Circuito aprovado para aceite definitivo.`;
+      vText.innerText = `O enlace atende integralmente à RFP do projeto ${p.name}, cumprindo todas as metas de taxa de transferência exigidas em contrato. Circuito validado e aprovado no teste de campo.`;
     } else {
-      vTitle.innerText = 'PARECER CONCLUSIVO: CIRCUITO REPROVADO';
+      vTitle.innerText = 'RESULTADO DO TESTE: CIRCUITO NÃO CONFORME (REPROVADO)';
       vTitle.style.color = '#dc2626';
       vText.innerText = `O enlace foi reprovado pois não alcançou os níveis de serviço acordados na RFP do projeto ${p.name}. Necessário acionamento da operadora para correção da entrega de banda antes da ativação.`;
     }
 
-    document.getElementById('auditSignClient').innerText = p.name;
+    // rodapé digital dispensando assinatura física
   }
 
   function printReport() {
