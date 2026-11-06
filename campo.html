@@ -1255,6 +1255,11 @@
     abortController = new AbortController();
     const signal = abortController.signal;
 
+    const profKey = document.getElementById('cbProjetoPerfil').value;
+    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bradesco_dedicado;
+    const cirDl = getCirNominal();
+    const cirUl = getUlCirNominal(p, cirDl);
+
     document.getElementById('verdictCard').style.display = 'none';
     document.getElementById('configMismatchWarning').style.display = 'none';
     document.getElementById('btnPrint').disabled = true;
@@ -1288,12 +1293,7 @@
       ulRes = await runUploadTest(signal, 15);
       signal.throwIfAborted();
 
-      // 5. AUDITORIA CONTRATUAL DO PROJETO (5 PILARES DO ANS)
-      const profKey = document.getElementById('cbProjetoPerfil').value;
-      const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bradesco_dedicado;
-      const cirDl = getCirNominal();
-      const cirUl = getUlCirNominal(p, cirDl);
-
+      // 4. AUDITORIA CONTRATUAL DO PROJETO (5 PILARES DO ANS)
       const reqDlMbps = cirDl * p.dlPctReq;
       const reqUlMbps = (p.isAsymmetric && p.name.includes('Boticário'))
         ? (cirDl * p.ulPctReq)
@@ -1354,6 +1354,7 @@
       setStatus(lastCompletedConfig.statusType, lastCompletedConfig.statusText);
 
     } catch (e) {
+      console.error('Falha durante a execução do teste:', e);
       if (e.name === 'AbortError') {
         setStatus('warn', 'TESTE CANCELADO');
       } else {
