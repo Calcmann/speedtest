@@ -276,10 +276,10 @@
     .project-grid {
       display: grid;
       grid-template-columns: 1fr 1.2fr;
-      gap: 16px;
+      gap: 14px 16px;
     }
     @media (max-width: 720px) {
-      .project-grid { grid-template-columns: 1fr; }
+      .project-grid { grid-template-columns: 1fr; gap: 12px; }
     }
 
     .select-label {
@@ -292,13 +292,17 @@
       margin-bottom: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      line-height: 1.2;
     }
 
     .select-control {
       background: var(--input-bg);
       border: 1.5px solid var(--input-border);
       color: var(--text-main);
-      padding: 10px 12px;
+      padding: 0 12px;
+      height: 42px;
+      line-height: 40px;
+      box-sizing: border-box;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 800;
@@ -306,6 +310,10 @@
       cursor: pointer;
       outline: none;
       transition: all 0.2s;
+    }
+    input.select-control {
+      cursor: text;
+      font-weight: 600;
     }
     .select-control:focus {
       border-color: #e11d48;
@@ -603,20 +611,20 @@
 
   <!-- CARD PRINCIPAL: DEFINIÇÃO DO PROJETO E BANDA (EVIDENCIADOS PARA O TÉCNICO) -->
   <div class="project-card">
-    <!-- DADOS DA ORDEM DE SERVIÇO & AGÊNCIA (REGISTRO FORMAL NA OS — TOPO DA CÉLULA) -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed var(--card-border);">
-      <div>
-        <label class="select-label" for="txtOsNumero" style="font-size: 11px; margin-bottom: 5px;">📋 Número da OS / Chamado (Opcional):</label>
-        <input type="text" id="txtOsNumero" placeholder="Ex: OS-BRAD-2026-9021" class="select-control" style="padding: 8px 12px; font-size: 12px;" oninput="checkConfigConsistency()" />
-      </div>
-      <div>
-        <label class="select-label" for="txtAgencia" style="font-size: 11px; margin-bottom: 5px;">🏢 Agência / Prédio (Opcional):</label>
-        <input type="text" id="txtAgencia" placeholder="Ex: Agência 0123 - Centro" class="select-control" style="padding: 8px 12px; font-size: 12px;" oninput="checkConfigConsistency()" />
-      </div>
-    </div>
-
     <div class="project-grid">
-      <!-- CONTROLE 1: BANDA CONTRATADA (CIR) -->
+      <!-- LINHA 1 - COLUNA 1: NÚMERO DA OS / CHAMADO -->
+      <div>
+        <label class="select-label" for="txtOsNumero">📋 Número da OS / Chamado (Opcional):</label>
+        <input type="text" id="txtOsNumero" placeholder="Ex: OS-BRAD-2026-9021" class="select-control" oninput="checkConfigConsistency()" />
+      </div>
+
+      <!-- LINHA 1 - COLUNA 2: AGÊNCIA / PRÉDIO -->
+      <div>
+        <label class="select-label" for="txtAgencia">🏢 Agência / Prédio (Opcional):</label>
+        <input type="text" id="txtAgencia" placeholder="Ex: Agência 0123 - Centro" class="select-control" oninput="checkConfigConsistency()" />
+      </div>
+
+      <!-- LINHA 2 - COLUNA 1: BANDA CONTRATADA (CIR) -->
       <div>
         <label class="select-label" for="cbCirBanda">🎯 Banda Contratada do Link (CIR):</label>
         <div style="display: flex; gap: 6px; align-items: center;">
@@ -635,13 +643,13 @@
             <option value="custom">✏️ Personalizado (Mbps)...</option>
           </select>
           <div id="boxCustomCir" style="display: none; align-items: center; gap: 4px;">
-            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; background: var(--input-bg); border: 1.5px solid var(--input-border); color: var(--text-main); padding: 9px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
+            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; height: 42px; box-sizing: border-box; background: var(--input-bg); border: 1.5px solid var(--input-border); color: var(--text-main); padding: 0 8px; border-radius: 8px; font-size: 13px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
             <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">Mbps</span>
           </div>
         </div>
       </div>
 
-      <!-- CONTROLE 2: PERFIL DO PROJETO / CLIENTE (CRITÉRIO DA RFP) -->
+      <!-- LINHA 2 - COLUNA 2: PERFIL DO PROJETO / CLIENTE (CRITÉRIO DA RFP) -->
       <div>
         <label class="select-label" for="cbProjetoPerfil">🏢 Perfil do Projeto / Cliente (RFP):</label>
         <select id="cbProjetoPerfil" class="select-control" onchange="onPerfilChange()">
@@ -660,7 +668,7 @@
         <span style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Capacidade indicada na OS / Provedor</span>
       </div>
       <div style="display: flex; gap: 6px; align-items: center;">
-        <select id="cbUlCirBanda" class="select-control" onchange="onUlCirChange()" style="padding: 8px 10px; font-size: 12px;">
+        <select id="cbUlCirBanda" class="select-control" onchange="onUlCirChange()">
           <option value="auto" selected>⚡ Automático (Padrão do Perfil / Provedor)</option>
           <option value="5">5 Mbps</option>
           <option value="10">10 Mbps</option>
@@ -676,7 +684,7 @@
           <option value="custom">✏️ Personalizado (Mbps)...</option>
         </select>
         <div id="boxCustomUlCir" style="display: none; align-items: center; gap: 4px;">
-          <input type="number" id="txtCustomUlCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; background: var(--input-bg); border: 1.5px solid var(--input-border); color: var(--text-main); padding: 8px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; text-align: right;" oninput="onCustomUlCirInput()" />
+          <input type="number" id="txtCustomUlCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; height: 42px; box-sizing: border-box; background: var(--input-bg); border: 1.5px solid var(--input-border); color: var(--text-main); padding: 0 8px; border-radius: 8px; font-size: 13px; font-weight: bold; text-align: right;" oninput="onCustomUlCirInput()" />
           <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">Mbps</span>
         </div>
       </div>
