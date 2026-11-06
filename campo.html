@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SPARC — Validação de Links & Aceite de Projetos (O Boticário / Bradesco)</title>
+  <title>SPARC — Validação de Links & Aceite de Projetos (Bradesco Dedicado/Banda Larga • O Boticário)</title>
   <style>
     :root, [data-theme="slate"] {
       --bg: #131722;
@@ -617,7 +617,9 @@
             <option value="300">300 Mbps</option>
             <option value="500">500 Mbps</option>
             <option value="600">600 Mbps</option>
-            <option value="1000">1.0 Gbps</option>
+            <option value="1000">1.0 Gbps (1000M)</option>
+            <option value="2000">2.0 Gbps (2000M)</option>
+            <option value="10000">10.0 Gbps (10G)</option>
             <option value="custom">✏️ Personalizado (Mbps)...</option>
           </select>
           <div id="boxCustomCir" style="display: none; align-items: center; gap: 4px;">
@@ -631,10 +633,52 @@
       <div>
         <label class="select-label" for="cbProjetoPerfil">🏢 Perfil do Projeto / Cliente (RFP):</label>
         <select id="cbProjetoPerfil" class="select-control" onchange="onPerfilChange()">
-          <option value="boticario" selected>🌸 O Boticário (RFP Varejo: Download ≥ 80% • Upload ≥ 20%)</option>
-          <option value="bradesco">🏦 Banco Bradesco (SLA Crítico Bancário: Download ≥ 100% • Upload ≥ 100%)</option>
+          <option value="bradesco_dedicado" selected>🏦 Banco Bradesco — Internet Dedicada (PPB-030-B: Simétrico 100% • RTT ≤ 60ms)</option>
+          <option value="bradesco_bandalarga">🏦 Banco Bradesco — Banda Larga (PPB-030-A: Assimétrico OS • RTT ≤ 80ms)</option>
+          <option value="boticario">🌸 O Boticário (RFP Varejo: Download ≥ 80% • Upload ≥ 20%)</option>
           <option value="rfc6349">📋 Padrão Telecom RFC 6349 (Download ≥ 95% • Upload ≥ 95%)</option>
         </select>
+      </div>
+    </div>
+
+    <!-- CONTROLE ADICIONAL: UPLOAD CONTRATADO PARA LINKS ASSIMÉTRICOS -->
+    <div id="boxAsymmetricUpload" style="display: none; margin-top: 12px; background: rgba(0,0,0,0.12); border: 1px dashed var(--card-border); border-radius: 8px; padding: 10px 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
+        <label class="select-label" for="cbUlCirBanda" style="margin-bottom: 0; color: var(--wine-label);">📤 Upload Contratado da OS (Assimétrico):</label>
+        <span style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Capacidade indicada na OS / Provedor</span>
+      </div>
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <select id="cbUlCirBanda" class="select-control" onchange="onUlCirChange()" style="padding: 8px 10px; font-size: 12px;">
+          <option value="auto" selected>⚡ Automático (Padrão do Perfil / Provedor)</option>
+          <option value="5">5 Mbps</option>
+          <option value="10">10 Mbps</option>
+          <option value="20">20 Mbps</option>
+          <option value="50">50 Mbps</option>
+          <option value="100">100 Mbps</option>
+          <option value="150">150 Mbps</option>
+          <option value="200">200 Mbps</option>
+          <option value="250">250 Mbps</option>
+          <option value="300">300 Mbps</option>
+          <option value="500">500 Mbps</option>
+          <option value="1000">1.0 Gbps</option>
+          <option value="custom">✏️ Personalizado (Mbps)...</option>
+        </select>
+        <div id="boxCustomUlCir" style="display: none; align-items: center; gap: 4px;">
+          <input type="number" id="txtCustomUlCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; background: var(--input-bg); border: 1.5px solid var(--input-border); color: var(--text-main); padding: 8px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; text-align: right;" oninput="onCustomUlCirInput()" />
+          <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">Mbps</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DADOS DA ORDEM DE SERVIÇO & AGÊNCIA (REGISTRO FORMAL NA OS) -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--card-border);">
+      <div>
+        <label class="select-label" for="txtOsNumero" style="font-size: 10px; margin-bottom: 4px;">📋 Número da OS / Chamado (Opcional):</label>
+        <input type="text" id="txtOsNumero" placeholder="Ex: OS-BRAD-2026-9021" class="select-control" style="padding: 7px 10px; font-size: 12px;" oninput="checkConfigConsistency()" />
+      </div>
+      <div>
+        <label class="select-label" for="txtAgencia" style="font-size: 10px; margin-bottom: 4px;">🏢 Agência / Prédio (Opcional):</label>
+        <input type="text" id="txtAgencia" placeholder="Ex: Agência 0123 - Centro" class="select-control" style="padding: 7px 10px; font-size: 12px;" oninput="checkConfigConsistency()" />
       </div>
     </div>
 
@@ -784,10 +828,12 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; font-size: 11.5px; line-height: 1.5;">
       <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px;">
         <div><strong>Cliente / Projeto:</strong> <span id="auditProjeto">--</span></div>
+        <div><strong>Ordem de Serviço (OS):</strong> <span id="auditOsNumero">--</span></div>
+        <div><strong>Agência / Prédio:</strong> <span id="auditAgencia">--</span></div>
         <div><strong>Banda Contratada (CIR):</strong> <span id="auditCir">--</span></div>
-        <div><strong>Critério da RFP:</strong> <span id="auditRfpRegra">--</span></div>
       </div>
       <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px;">
+        <div><strong>Critério da RFP / ANS:</strong> <span id="auditRfpRegra">--</span></div>
         <div><strong>IP Público do Link:</strong> <span id="auditIp">--</span></div>
         <div><strong>Operadora / ASN:</strong> <span id="auditIsp">--</span></div>
         <div><strong>PoP Datacenter Alvo:</strong> <span id="auditPop">--</span></div>
@@ -797,37 +843,51 @@
     <table style="width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 16px;">
       <thead>
         <tr style="background: #f1f5f9; border-bottom: 1.5px solid #0f172a;">
-          <th style="padding: 8px; text-align: left;">Parâmetro Auditado</th>
+          <th style="padding: 8px; text-align: left;">Parâmetro Auditado (ANS / SLA)</th>
           <th style="padding: 8px; text-align: right;">Meta Contratual RFP</th>
-          <th style="padding: 8px; text-align: right;">Taxa Medida</th>
+          <th style="padding: 8px; text-align: right;">Medição Efetiva</th>
           <th style="padding: 8px; text-align: right;">% Atingido</th>
           <th style="padding: 8px; text-align: center;">Conformidade</th>
         </tr>
       </thead>
       <tbody>
         <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 8px; font-weight: bold;">Download Útil</td>
+          <td style="padding: 8px; font-weight: bold;">Capacidade Download</td>
           <td style="padding: 8px; text-align: right;" id="auditDlMeta">--</td>
           <td style="padding: 8px; text-align: right;" id="auditDlMedido">--</td>
           <td style="padding: 8px; text-align: right;" id="auditDlPct">--</td>
           <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditDlStatus">--</td>
         </tr>
         <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 8px; font-weight: bold;">Upload Útil</td>
+          <td style="padding: 8px; font-weight: bold;">Capacidade Upload</td>
           <td style="padding: 8px; text-align: right;" id="auditUlMeta">--</td>
           <td style="padding: 8px; text-align: right;" id="auditUlMedido">--</td>
           <td style="padding: 8px; text-align: right;" id="auditUlPct">--</td>
           <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditUlStatus">--</td>
         </tr>
         <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 8px; font-weight: bold;">Latência RTT (Ping)</td>
-          <td style="padding: 8px; text-align: right;">≤ 100 ms</td>
+          <td style="padding: 8px; font-weight: bold;">Latência Média (RTT)</td>
+          <td style="padding: 8px; text-align: right;" id="auditRttMeta">≤ 60 ms</td>
           <td style="padding: 8px; text-align: right;" id="auditPing">--</td>
+          <td style="padding: 8px; text-align: right;" id="auditRttPct">--</td>
+          <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditRttStatus">--</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 8px; font-weight: bold;">Variação de Jitter</td>
+          <td style="padding: 8px; text-align: right;" id="auditJitterMeta">≤ 50 ms</td>
+          <td style="padding: 8px; text-align: right;" id="auditJitterMedido">--</td>
           <td style="padding: 8px; text-align: right;">--</td>
-          <td style="padding: 8px; text-align: center; font-weight: bold; color: #16a34a;">CONFORME</td>
+          <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditJitterStatus">--</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 8px; font-weight: bold;">Perda de Pacotes (Packet Loss)</td>
+          <td style="padding: 8px; text-align: right;" id="auditLossMeta">&lt; 2,0%</td>
+          <td style="padding: 8px; text-align: right;" id="auditLossMedido">--</td>
+          <td style="padding: 8px; text-align: right;">--</td>
+          <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditLossStatus">--</td>
         </tr>
         <tr style="border-bottom: 1.5px solid #0f172a;">
-          <td style="padding: 8px; font-weight: bold;">Estabilidade (Bufferbloat)</td>
+          <td style="padding: 8px; font-weight: bold;">Estabilidade sob Carga (Bufferbloat)</td>
           <td style="padding: 8px; text-align: right;">Fila Controlada</td>
           <td style="padding: 8px; text-align: right;" id="auditBloat">--</td>
           <td style="padding: 8px; text-align: right;">--</td>
@@ -861,34 +921,61 @@
   const ulPoints = [];
   let maxGraphSpeed = 50;
 
-  const PARAM_INPUT_IDS = ['cbCirBanda', 'txtCustomCir', 'cbProjetoPerfil'];
+  const PARAM_INPUT_IDS = ['cbCirBanda', 'txtCustomCir', 'cbUlCirBanda', 'txtCustomUlCir', 'cbProjetoPerfil', 'txtOsNumero', 'txtAgencia'];
 
-  // PERFIS DE PROJETO OFICIAIS
+  // PERFIS DE PROJETO OFICIAIS COM CRITÉRIOS DE RFP / ANS
   const PROJECT_PROFILES = {
+    bradesco_dedicado: {
+      name: 'Bradesco Dedicado',
+      fullName: 'Banco Bradesco — Internet Dedicada (PPB-030-B)',
+      icon: '🏦',
+      isAsymmetric: false, // 100% Simétrico
+      dlPctReq: 1.00,      // 100% CIR nominal
+      ulPctReq: 1.00,      // 100% CIR nominal (1:1 rigoroso)
+      maxRtt: 60,          // RFP Bradesco: Latência ≤ 60 ms
+      maxJitter: 50,       // RFP Bradesco: Jitter ≤ 50 ms
+      maxLoss: 2.0,        // RFP Bradesco: Perda < 2,0%
+      title: 'Critério Oficial Bradesco — Internet Dedicada (PPB-030-B):',
+      desc: 'SLA Crítico Simétrico <strong>PPB-030-B</strong>: Exige <strong>100% da banda contratada em Download E Upload (1:1 Simétrico)</strong>, com <strong>Latência RTT ≤ 60 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
+    },
+    bradesco_bandalarga: {
+      name: 'Bradesco Banda Larga',
+      fullName: 'Banco Bradesco — Banda Larga (PPB-030-A)',
+      icon: '🏦',
+      isAsymmetric: true,  // Assimétrico
+      dlPctReq: 1.00,      // 100% do Download contratado na OS
+      ulPctReq: 1.00,      // 100% do Upload contratado na OS
+      defaultUlRatio: 0.50,// Padrão 50% do Download se automático
+      maxRtt: 80,          // RFP Bradesco: Latência ≤ 80 ms
+      maxJitter: 50,       // RFP Bradesco: Jitter ≤ 50 ms
+      maxLoss: 2.0,        // RFP Bradesco: Perda < 2,0%
+      title: 'Critério Oficial Bradesco — Banda Larga (PPB-030-A):',
+      desc: 'Acesso <strong>assimétrico</strong> conforme especificado na OS. Exige cumprimento integral da velocidade contratada de Download e Upload, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
+    },
     boticario: {
       name: 'O Boticário',
       fullName: 'O Boticário (RFP Varejo)',
       icon: '🌸',
-      dlPctReq: 0.80, // 80% do CIR nominal
-      ulPctReq: 0.20, // 20% do CIR nominal
-      title: 'Critério de Validação — O Boticário:',
-      desc: 'Em conformidade com a RFP de Varejo do Boticário, o circuito será <strong>Aprovado</strong> se entregar no mínimo <strong>80% da banda em Download</strong> e <strong>20% em Upload</strong>.'
-    },
-    bradesco: {
-      name: 'Banco Bradesco',
-      fullName: 'Banco Bradesco (SLA Bancário Crítico)',
-      icon: '🏦',
-      dlPctReq: 1.00, // 100% do CIR nominal (tolerância zero)
-      ulPctReq: 1.00, // 100% do CIR nominal (simetria bancária total)
-      title: 'Critério de Validação — Banco Bradesco:',
-      desc: 'Em conformidade com o SLA de Agências Críticas do Bradesco, o circuito exige <strong>100% da banda contratada em Download E Upload</strong> (tolerância zero para VPN e Caixas).'
+      isAsymmetric: true,
+      dlPctReq: 0.80,      // 80% do CIR nominal
+      ulPctReq: 0.20,      // 20% do CIR nominal
+      defaultUlRatio: 0.20,
+      maxRtt: 120,
+      maxJitter: 50,
+      maxLoss: 2.0,
+      title: 'Critério de Validação — O Boticário (RFP Varejo):',
+      desc: 'Em conformidade com a RFP de Varejo do Boticário, o circuito será <strong>Aprovado</strong> se entregar no mínimo <strong>80% da banda nominal em Download</strong> (ex.: ≥ 80.0 Mbps em 100M) e <strong>20% em Upload</strong> (ex.: ≥ 20.0 Mbps em 100M).'
     },
     rfc6349: {
       name: 'Padrão Telecom',
       fullName: 'Padrão Telecom (RFC 6349)',
       icon: '📋',
-      dlPctReq: 0.95, // 95% padrão IETF
-      ulPctReq: 0.95, // 95% padrão IETF
+      isAsymmetric: false,
+      dlPctReq: 0.95,      // 95% padrão IETF
+      ulPctReq: 0.95,      // 95% padrão IETF
+      maxRtt: 100,
+      maxJitter: 50,
+      maxLoss: 2.0,
       title: 'Critério Oficial RFC 6349:',
       desc: 'Padrão formal IETF para ativação de enlaces corporativos, exigindo entrega útil de no mínimo <strong>95% da velocidade nominal em Download e Upload</strong>.'
     }
@@ -897,6 +984,7 @@
   window.addEventListener('DOMContentLoaded', async () => {
     initCanvas();
     updateProfileExplaining();
+    toggleAsymmetricControls();
     updateTargetsDisplay();
     await discoverGeo();
 
@@ -920,10 +1008,35 @@
     checkConfigConsistency();
   }
 
-  function onPerfilChange() {
-    updateProfileExplaining();
+  function onUlCirChange() {
+    const val = document.getElementById('cbUlCirBanda').value;
+    const box = document.getElementById('boxCustomUlCir');
+    const txt = document.getElementById('txtCustomUlCir');
+    if (box) box.style.display = (val === 'custom') ? 'flex' : 'none';
+    if (val === 'custom' && txt) txt.focus();
     updateTargetsDisplay();
     checkConfigConsistency();
+  }
+
+  function onCustomUlCirInput() {
+    updateTargetsDisplay();
+    checkConfigConsistency();
+  }
+
+  function onPerfilChange() {
+    updateProfileExplaining();
+    toggleAsymmetricControls();
+    updateTargetsDisplay();
+    checkConfigConsistency();
+  }
+
+  function toggleAsymmetricControls() {
+    const profKey = document.getElementById('cbProjetoPerfil').value;
+    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bradesco_dedicado;
+    const boxAsym = document.getElementById('boxAsymmetricUpload');
+    if (boxAsym) {
+      boxAsym.style.display = p.isAsymmetric ? 'block' : 'none';
+    }
   }
 
   function getCirNominal() {
@@ -935,9 +1048,24 @@
     return parseFloat(val) || 100;
   }
 
+  function getUlCirNominal(p, cirDl) {
+    if (!p.isAsymmetric) return cirDl; // 1:1 simétrico
+    const el = document.getElementById('cbUlCirBanda');
+    if (!el) return cirDl * (p.defaultUlRatio || 0.5);
+    const val = el.value;
+    if (val === 'auto') {
+      return cirDl * (p.defaultUlRatio || 0.5);
+    }
+    if (val === 'custom') {
+      const num = parseFloat(document.getElementById('txtCustomUlCir')?.value);
+      return (num && num > 0) ? num : (cirDl * 0.5);
+    }
+    return parseFloat(val) || (cirDl * 0.5);
+  }
+
   function updateProfileExplaining() {
     const profKey = document.getElementById('cbProjetoPerfil').value;
-    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.boticario;
+    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bradesco_dedicado;
     document.getElementById('ruleIcon').innerText = p.icon;
     document.getElementById('ruleTitle').innerText = p.title;
     document.getElementById('ruleText').innerHTML = p.desc;
@@ -945,27 +1073,46 @@
 
   function updateTargetsDisplay() {
     const profKey = document.getElementById('cbProjetoPerfil').value;
-    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.boticario;
-    const cir = getCirNominal();
+    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bradesco_dedicado;
+    const cirDl = getCirNominal();
+    const cirUl = getUlCirNominal(p, cirDl);
 
     const dlTargetEl = document.getElementById('txtDlTarget');
     const ulTargetEl = document.getElementById('txtUlTarget');
 
-    const dlMin = (cir * p.dlPctReq).toFixed(1);
-    const ulMin = (cir * p.ulPctReq).toFixed(1);
+    const dlMin = (cirDl * p.dlPctReq).toFixed(1);
+    const ulMin = (p.isAsymmetric && p.name.includes('Boticário'))
+      ? (cirDl * p.ulPctReq).toFixed(1)
+      : (cirUl * p.ulPctReq).toFixed(1);
+
     if (dlTargetEl) dlTargetEl.innerText = `Meta ${p.name}: ≥ ${dlMin} Mbps (${(p.dlPctReq * 100).toFixed(0)}%)`;
-    if (ulTargetEl) ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (${(p.ulPctReq * 100).toFixed(0)}%)`;
+    if (ulTargetEl) {
+      if (p.isAsymmetric && p.name.includes('Boticário')) {
+        ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (${(p.ulPctReq * 100).toFixed(0)}% do CIR)`;
+      } else if (p.isAsymmetric) {
+        ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Upload OS: ${cirUl.toFixed(0)}M)`;
+      } else {
+        ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Simétrico 1:1)`;
+      }
+    }
   }
 
   function getCurrentConfig() {
-    const cir = getCirNominal();
     const profKey = document.getElementById('cbProjetoPerfil').value;
+    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bradesco_dedicado;
+    const cirDl = getCirNominal();
+    const cirUl = getUlCirNominal(p, cirDl);
     return {
-      cirVal: cir,
+      cirVal: cirDl,
+      cirUlVal: cirUl,
       cirPreset: document.getElementById('cbCirBanda').value,
       customCir: document.getElementById('txtCustomCir')?.value || '',
+      ulPreset: document.getElementById('cbUlCirBanda')?.value || 'auto',
+      customUlCir: document.getElementById('txtCustomUlCir')?.value || '',
       profileKey: profKey,
-      profileName: PROJECT_PROFILES[profKey]?.name || 'Projeto'
+      profileName: p.name,
+      osNumero: document.getElementById('txtOsNumero')?.value.trim() || '',
+      agencia: document.getElementById('txtAgencia')?.value.trim() || ''
     };
   }
 
@@ -975,7 +1122,11 @@
     return (
       cur.cirPreset !== lastCompletedConfig.cirPreset ||
       (cur.cirPreset === 'custom' && cur.customCir !== lastCompletedConfig.customCir) ||
-      cur.profileKey !== lastCompletedConfig.profileKey
+      cur.ulPreset !== lastCompletedConfig.ulPreset ||
+      (cur.ulPreset === 'custom' && cur.customUlCir !== lastCompletedConfig.customUlCir) ||
+      cur.profileKey !== lastCompletedConfig.profileKey ||
+      cur.osNumero !== lastCompletedConfig.osNumero ||
+      cur.agencia !== lastCompletedConfig.agencia
     );
   }
 
@@ -1005,8 +1156,18 @@
     if (txtCustom && lastCompletedConfig.customCir) txtCustom.value = lastCompletedConfig.customCir;
     onCirChange();
 
+    if (document.getElementById('cbUlCirBanda')) {
+      document.getElementById('cbUlCirBanda').value = lastCompletedConfig.ulPreset;
+      const txtCustomUl = document.getElementById('txtCustomUlCir');
+      if (txtCustomUl && lastCompletedConfig.customUlCir) txtCustomUl.value = lastCompletedConfig.customUlCir;
+      onUlCirChange();
+    }
+
     document.getElementById('cbProjetoPerfil').value = lastCompletedConfig.profileKey;
     onPerfilChange();
+
+    if (document.getElementById('txtOsNumero')) document.getElementById('txtOsNumero').value = lastCompletedConfig.osNumero || '';
+    if (document.getElementById('txtAgencia')) document.getElementById('txtAgencia').value = lastCompletedConfig.agencia || '';
 
     checkConfigConsistency();
   }
@@ -1137,30 +1298,43 @@
       document.getElementById('txtBloatDelta').innerHTML = `+Δ ${deltaBloat.toFixed(0)} <span style="font-size: 14px; color: var(--text-muted);">ms</span>`;
       document.getElementById('txtBloatDesc').innerText = deltaBloat <= 20 ? 'Excelente (Sem Bufferbloat)' : (deltaBloat <= 80 ? 'Moderado' : 'Fila Saturada');
 
-      // 5. AUDITORIA CONTRATUAL DO PROJETO
-      const cfg = getCurrentConfig();
-      const p = PROJECT_PROFILES[cfg.profileKey] || PROJECT_PROFILES.boticario;
-      const cir = cfg.cirVal;
+      // 5. AUDITORIA CONTRATUAL DO PROJETO (5 PILARES DO ANS)
+      const profKey = document.getElementById('cbProjetoPerfil').value;
+      const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bradesco_dedicado;
+      const cirDl = getCirNominal();
+      const cirUl = getUlCirNominal(p, cirDl);
 
-      const reqDlMbps = cir * p.dlPctReq;
-      const reqUlMbps = cir * p.ulPctReq;
+      const reqDlMbps = cirDl * p.dlPctReq;
+      const reqUlMbps = (p.isAsymmetric && p.name.includes('Boticário'))
+        ? (cirDl * p.ulPctReq)
+        : (cirUl * p.ulPctReq);
 
-      const dlPassed = (dlRes.avg >= reqDlMbps * 0.999);
-      const ulPassed = (ulRes.avg >= reqUlMbps * 0.999);
-      const isApproved = dlPassed && ulPassed;
+      const dlPassed = dlRes.avg >= (reqDlMbps - 0.05);
+      const ulPassed = ulRes.avg >= (reqUlMbps - 0.05);
+      const rttPassed = pingRes.avg <= (p.maxRtt || 100);
+      const jitterPassed = pingRes.jitter <= (p.maxJitter || 50);
+      const lossPassed = pingRes.lossPct < (p.maxLoss || 2.0);
+
+      const isApproved = dlPassed && ulPassed && rttPassed && jitterPassed && lossPassed;
 
       // EXIBE O VEREDITO DO PROJETO
       exibirVereditoProjeto({
         isApproved,
         profile: p,
-        cir,
+        cirDl,
+        cirUl,
         dlAvg: dlRes.avg,
         ulAvg: ulRes.avg,
         reqDlMbps,
         reqUlMbps,
         dlPassed,
         ulPassed,
+        rttPassed,
+        jitterPassed,
+        lossPassed,
         pingAvg: pingRes.avg,
+        jitter: pingRes.jitter,
+        lossPct: pingRes.lossPct,
         deltaBloat
       });
 
@@ -1172,10 +1346,19 @@
         dlAvg: dlRes.avg,
         ulAvg: ulRes.avg,
         pingAvg: pingRes.avg,
+        jitter: pingRes.jitter,
+        lossPct: pingRes.lossPct,
         deltaBloat,
         isApproved,
         reqDlMbps,
-        reqUlMbps
+        reqUlMbps,
+        dlPassed,
+        ulPassed,
+        rttPassed,
+        jitterPassed,
+        lossPassed,
+        cirDl,
+        cirUl
       };
 
       atualizarLaudoPdf(lastCompletedConfig);
@@ -1212,28 +1395,40 @@
       title.innerText = `CIRCUITO HOMOLOGADO COM SUCESSO — PROJETO ${res.profile.name.toUpperCase()}`;
       title.style.color = 'var(--green)';
       detail.innerHTML = `
-        O enlace cumpre 100% dos requisitos da RFP:<br>
-        • <strong>Download:</strong> ${res.dlAvg.toFixed(1)} Mbps (Meta: ≥ ${res.reqDlMbps.toFixed(1)} Mbps [${((res.dlAvg / res.cir) * 100).toFixed(1)}% do CIR]) — <span style="color: var(--green); font-weight: bold;">CONFORME</span><br>
-        • <strong>Upload:</strong> ${res.ulAvg.toFixed(1)} Mbps (Meta: ≥ ${res.reqUlMbps.toFixed(1)} Mbps [${((res.ulAvg / res.cir) * 100).toFixed(1)}% do CIR]) — <span style="color: var(--green); font-weight: bold;">CONFORME</span>
+        O enlace cumpre 100% dos requisitos contratuais da RFP / ANS:<br>
+        • <strong>Download:</strong> ${res.dlAvg.toFixed(1)} Mbps (Meta: ≥ ${res.reqDlMbps.toFixed(1)} Mbps [${((res.dlAvg / res.cirDl) * 100).toFixed(1)}%]) — <span style="color: var(--green); font-weight: bold;">CONFORME</span><br>
+        • <strong>Upload:</strong> ${res.ulAvg.toFixed(1)} Mbps (Meta: ≥ ${res.reqUlMbps.toFixed(1)} Mbps [${((res.ulAvg / res.cirUl) * 100).toFixed(1)}%]) — <span style="color: var(--green); font-weight: bold;">CONFORME</span><br>
+        • <strong>Latência RTT:</strong> ${res.pingAvg.toFixed(1)} ms (Teto ANS: ≤ ${res.profile.maxRtt} ms) — <span style="color: var(--green); font-weight: bold;">CONFORME</span><br>
+        • <strong>Jitter:</strong> ${res.jitter.toFixed(1)} ms (Teto ANS: ≤ ${res.profile.maxJitter} ms) — <span style="color: var(--green); font-weight: bold;">CONFORME</span><br>
+        • <strong>Perda de Pacotes:</strong> ${res.lossPct.toFixed(1)}% (Teto ANS: &lt; ${res.profile.maxLoss}%) — <span style="color: var(--green); font-weight: bold;">CONFORME</span>
       `;
     } else {
       card.className = 'verdict-card rejected';
       icon.innerText = '✗';
-      title.innerText = `CIRCUITO NÃO CONFORME — REPROVADO NO PROJETO ${res.profile.name.toUpperCase()}`;
+      title.innerText = `CIRCUITO NÃO CONFORME — REPROVADO NO SLA ${res.profile.name.toUpperCase()}`;
       title.style.color = 'var(--red)';
 
       let falhaDesc = '';
       if (!res.dlPassed) {
-        falhaDesc += `• <strong>Download insuficiente:</strong> Entregou ${res.dlAvg.toFixed(1)} Mbps, mas a RFP exige no mínimo ${res.reqDlMbps.toFixed(1)} Mbps.<br>`;
+        falhaDesc += `• <strong>Download insuficiente:</strong> Entregou ${res.dlAvg.toFixed(1)} Mbps (Meta da RFP: ≥ ${res.reqDlMbps.toFixed(1)} Mbps).<br>`;
       }
       if (!res.ulPassed) {
-        falhaDesc += `• <strong>Upload insuficiente:</strong> Entregou ${res.ulAvg.toFixed(1)} Mbps, mas a RFP exige no mínimo ${res.reqUlMbps.toFixed(1)} Mbps.<br>`;
+        falhaDesc += `• <strong>Upload insuficiente:</strong> Entregou ${res.ulAvg.toFixed(1)} Mbps (Meta da RFP: ≥ ${res.reqUlMbps.toFixed(1)} Mbps).<br>`;
+      }
+      if (!res.rttPassed) {
+        falhaDesc += `• <strong>Latência RTT violada:</strong> Média de ${res.pingAvg.toFixed(1)} ms excedeu o teto contratual de ${res.profile.maxRtt} ms.<br>`;
+      }
+      if (!res.jitterPassed) {
+        falhaDesc += `• <strong>Jitter excessivo:</strong> Variação de ${res.jitter.toFixed(1)} ms excedeu o limite máximo de ${res.profile.maxJitter} ms.<br>`;
+      }
+      if (!res.lossPassed) {
+        falhaDesc += `• <strong>Perda de pacotes detectada:</strong> Taxa de ${res.lossPct.toFixed(1)}% violou o ANS do edital (&lt; ${res.profile.maxLoss}%).<br>`;
       }
 
       detail.innerHTML = `
-        O enlace <strong>NÃO</strong> atingiu a especificação mínima do projeto:<br>
+        O enlace <strong>NÃO</strong> atingiu a especificação mínima de qualidade do projeto:<br>
         ${falhaDesc}
-        <span style="color: #fca5a5; font-size: 11px;">Ajuste o shaper/policer com a operadora antes de emitir o termo de aceite definitivo.</span>
+        <span style="color: #fca5a5; font-size: 11px;">Corrija a rota ou policer com a operadora antes de emitir o termo de aceite definitivo.</span>
       `;
     }
   }
@@ -1247,43 +1442,75 @@
     document.getElementById('auditStatusLabel').style.color = d.isApproved ? '#16a34a' : '#dc2626';
 
     document.getElementById('auditProjeto').innerText = p.fullName;
-    document.getElementById('auditCir').innerText = `${cfg.cirVal} Mbps`;
-    document.getElementById('auditRfpRegra').innerText = `DL ≥ ${(p.dlPctReq * 100).toFixed(0)}% • UL ≥ ${(p.ulPctReq * 100).toFixed(0)}%`;
+    document.getElementById('auditOsNumero').innerText = cfg.osNumero || 'Não informada';
+    document.getElementById('auditAgencia').innerText = cfg.agencia || 'Não informada';
+
+    if (p.isAsymmetric && !p.name.includes('Boticário')) {
+      document.getElementById('auditCir').innerText = `${cfg.cirVal}M Down / ${cfg.cirUlVal}M Up (Assimétrico)`;
+      document.getElementById('auditRfpRegra').innerText = `DL 100% (${cfg.cirVal}M) • UL 100% (${cfg.cirUlVal}M) • RTT ≤ ${p.maxRtt}ms`;
+    } else if (p.isAsymmetric) {
+      document.getElementById('auditCir').innerText = `${cfg.cirVal} Mbps (Assimétrico Varejo)`;
+      document.getElementById('auditRfpRegra').innerText = `DL ≥ 80% • UL ≥ 20% • RTT ≤ ${p.maxRtt}ms`;
+    } else {
+      document.getElementById('auditCir').innerText = `${cfg.cirVal} Mbps (Simétrico 1:1)`;
+      document.getElementById('auditRfpRegra').innerText = `DL 100% • UL 100% (Simétrico) • RTT ≤ ${p.maxRtt}ms`;
+    }
 
     document.getElementById('auditIp').innerText = clientGeo?.ip || 'Detectado';
     document.getElementById('auditIsp').innerText = clientGeo?.isp || 'Operadora Local';
     document.getElementById('auditPop').innerText = `${clientGeo?.city || 'Brasil'} (Anycast Edge)`;
 
+    // 1. Download
     document.getElementById('auditDlMeta').innerText = `≥ ${d.reqDlMbps.toFixed(1)} Mbps`;
     document.getElementById('auditDlMedido').innerText = `${d.dlAvg.toFixed(1)} Mbps`;
     document.getElementById('auditDlPct').innerText = `${((d.dlAvg / cfg.cirVal) * 100).toFixed(1)}%`;
-    document.getElementById('auditDlStatus').innerText = (d.dlAvg >= d.reqDlMbps) ? 'CONFORME' : 'REPROVADO';
-    document.getElementById('auditDlStatus').style.color = (d.dlAvg >= d.reqDlMbps) ? '#16a34a' : '#dc2626';
+    document.getElementById('auditDlStatus').innerText = d.dlPassed ? 'CONFORME' : 'REPROVADO';
+    document.getElementById('auditDlStatus').style.color = d.dlPassed ? '#16a34a' : '#dc2626';
 
+    // 2. Upload
     document.getElementById('auditUlMeta').innerText = `≥ ${d.reqUlMbps.toFixed(1)} Mbps`;
     document.getElementById('auditUlMedido').innerText = `${d.ulAvg.toFixed(1)} Mbps`;
-    document.getElementById('auditUlPct').innerText = `${((d.ulAvg / cfg.cirVal) * 100).toFixed(1)}%`;
-    document.getElementById('auditUlStatus').innerText = (d.ulAvg >= d.reqUlMbps) ? 'CONFORME' : 'REPROVADO';
-    document.getElementById('auditUlStatus').style.color = (d.ulAvg >= d.reqUlMbps) ? '#16a34a' : '#dc2626';
+    document.getElementById('auditUlPct').innerText = `${((d.ulAvg / cfg.cirUlVal) * 100).toFixed(1)}%`;
+    document.getElementById('auditUlStatus').innerText = d.ulPassed ? 'CONFORME' : 'REPROVADO';
+    document.getElementById('auditUlStatus').style.color = d.ulPassed ? '#16a34a' : '#dc2626';
 
-    document.getElementById('auditPing').innerText = `${d.pingAvg.toFixed(0)} ms`;
+    // 3. Latência RTT
+    document.getElementById('auditRttMeta').innerText = `≤ ${p.maxRtt} ms`;
+    document.getElementById('auditPing').innerText = `${d.pingAvg.toFixed(1)} ms`;
+    document.getElementById('auditRttPct').innerText = d.rttPassed ? 'OK' : 'VIOLADO';
+    document.getElementById('auditRttStatus').innerText = d.rttPassed ? 'CONFORME' : 'REPROVADO';
+    document.getElementById('auditRttStatus').style.color = d.rttPassed ? '#16a34a' : '#dc2626';
+
+    // 4. Jitter
+    document.getElementById('auditJitterMeta').innerText = `≤ ${p.maxJitter} ms`;
+    document.getElementById('auditJitterMedido').innerText = `${d.jitter.toFixed(1)} ms`;
+    document.getElementById('auditJitterStatus').innerText = d.jitterPassed ? 'CONFORME' : 'REPROVADO';
+    document.getElementById('auditJitterStatus').style.color = d.jitterPassed ? '#16a34a' : '#dc2626';
+
+    // 5. Perda de Pacotes
+    document.getElementById('auditLossMeta').innerText = `< ${p.maxLoss.toFixed(1)}%`;
+    document.getElementById('auditLossMedido').innerText = `${d.lossPct.toFixed(1)}%`;
+    document.getElementById('auditLossStatus').innerText = d.lossPassed ? 'CONFORME' : 'REPROVADO';
+    document.getElementById('auditLossStatus').style.color = d.lossPassed ? '#16a34a' : '#dc2626';
+
+    // 6. Bufferbloat
     document.getElementById('auditBloat').innerText = `+Δ ${d.deltaBloat.toFixed(0)} ms`;
-    document.getElementById('auditBloatStatus').innerText = d.deltaBloat <= 50 ? 'CONFORME' : 'ALERTA';
-    document.getElementById('auditBloatStatus').style.color = d.deltaBloat <= 50 ? '#16a34a' : '#d97706';
+    const bloatOk = d.deltaBloat <= 50;
+    document.getElementById('auditBloatStatus').innerText = bloatOk ? 'CONFORME' : 'ESTABILIDADE MODERADA';
+    document.getElementById('auditBloatStatus').style.color = bloatOk ? '#16a34a' : '#d97706';
 
-    const vTitle = document.getElementById('auditVerdictBoxTitle');
-    const vText = document.getElementById('auditVerdictBoxText');
+    // Parecer Conclusivo
+    const boxTitle = document.getElementById('auditVerdictBoxTitle');
+    const boxText = document.getElementById('auditVerdictBoxText');
     if (d.isApproved) {
-      vTitle.innerText = 'RESULTADO DO TESTE: CIRCUITO VALIDADO E APROVADO';
-      vTitle.style.color = '#16a34a';
-      vText.innerText = `O enlace atende integralmente à RFP do projeto ${p.name}, cumprindo todas as metas de taxa de transferência exigidas em contrato. Circuito validado e aprovado no teste de campo.`;
+      boxTitle.innerText = 'PARECER TÉCNICO CONCLUSIVO — CIRCUITO APROVADO';
+      boxTitle.style.color = '#16a34a';
+      boxText.innerHTML = `O circuito auditado atende integralmente a todos os parâmetros técnicos, de capacidade, latência e qualidade exigidos na RFP do projeto <strong>${p.fullName}</strong>, estando o enlace validado e apto para ativação definitiva da OS.`;
     } else {
-      vTitle.innerText = 'RESULTADO DO TESTE: CIRCUITO NÃO CONFORME (REPROVADO)';
-      vTitle.style.color = '#dc2626';
-      vText.innerText = `O enlace foi reprovado pois não alcançou os níveis de serviço acordados na RFP do projeto ${p.name}. Necessário acionamento da operadora para correção da entrega de banda antes da ativação.`;
+      boxTitle.innerText = 'PARECER TÉCNICO CONCLUSIVO — CIRCUITO NÃO CONFORME (REPROVADO NO ANS)';
+      boxTitle.style.color = '#dc2626';
+      boxText.innerHTML = `O circuito auditado violou um ou mais parâmetros mínimos estabelecidos no Acordo de Nível de Serviço (ANS) do projeto <strong>${p.fullName}</strong>. É mandatório o rebalanceamento de rota, policer ou reparo junto à operadora antes da assinatura do termo de entrega da OS.`;
     }
-
-    // rodapé digital dispensando assinatura física
   }
 
   function printReport() {
@@ -1293,22 +1520,28 @@
   // MOTOR DE MEDIÇÃO MULTI-STREAM
   async function measurePing(signal) {
     const samples = [];
-    for (let i = 0; i < 8; i++) {
+    const totalProbes = 20;
+    let failedProbes = 0;
+    for (let i = 0; i < totalProbes; i++) {
       if (signal.aborted) break;
       const t0 = performance.now();
       try {
         await fetch(`https://speed.cloudflare.com/__down?bytes=0&r=${Math.random()}`, { signal, cache: 'no-store' });
         const dt = performance.now() - t0;
-        if (dt > 0 && dt < 2000) samples.push(dt);
-      } catch (_) {}
-      await new Promise(r => setTimeout(r, 60));
+        if (dt > 0 && dt < 2500) samples.push(dt);
+        else failedProbes++;
+      } catch (_) {
+        failedProbes++;
+      }
+      await new Promise(r => setTimeout(r, 40));
     }
+    const lossPct = (failedProbes / totalProbes) * 100;
     samples.sort((a, b) => a - b);
     const avg = samples.length ? samples.reduce((a, b) => a + b, 0) / samples.length : 25;
     let jitter = 0;
     for (let i = 1; i < samples.length; i++) jitter += Math.abs(samples[i] - samples[i - 1]);
     jitter = samples.length > 1 ? jitter / (samples.length - 1) : 1.5;
-    return { avg, jitter };
+    return { avg, jitter, lossPct };
   }
 
   class ActiveLatencyPinger {
