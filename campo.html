@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SPARC — Validação de Links & Aceite de Projetos (Bradesco Dedicado/Banda Larga • O Boticário)</title>
+  <link rel="preconnect" href="https://speed.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://speed.cloudflare.com">
   <style>
     :root, [data-theme="slate"] {
       --bg: #131722;
@@ -1273,9 +1275,14 @@
     redrawCanvas();
 
     try {
-      // 1. LATÊNCIA, JITTER E PERDA DE PACOTES (ANS)
-      setStatus('running', 'MEDINDO LATÊNCIA, JITTER E PERDA...');
-      const pingRes = await measurePing(signal);
+      // 1. LATÊNCIA, JITTER E PERDA DE PACOTES (ANS) COM FEEDBACK DINÂMICO
+      setStatus('running', 'ANALISANDO LATÊNCIA E JITTER...');
+      const pingRes = await measurePing(signal, (curAvg, curJitter, curLoss, curIdx, total) => {
+        document.getElementById('txtPing').innerText = curAvg.toFixed(1);
+        document.getElementById('txtQualityVal').innerHTML = `${curJitter.toFixed(1)} <span style="font-size: 14px; color: var(--text-muted);">ms</span>`;
+        document.getElementById('txtQualityLoss').innerText = `Perda: ${curLoss.toFixed(1)}% (Meta: < ${p.maxLoss}%)`;
+        setStatus('running', `ANALISANDO QUALIDADE DO LINK (${curIdx}/${total})...`);
+      });
       document.getElementById('txtPing').innerText = pingRes.avg.toFixed(1);
       document.getElementById('txtQualityVal').innerHTML = `${pingRes.jitter.toFixed(1)} <span style="font-size: 14px; color: var(--text-muted);">ms</span>`;
       document.getElementById('txtQualityLoss').innerText = `Perda: ${pingRes.lossPct.toFixed(1)}% (Meta: < ${p.maxLoss}%)`;
@@ -1502,10 +1509,10 @@
     window.print();
   }
 
-  // MOTOR DE MEDIÇÃO MULTI-STREAM
-  async function measurePing(signal) {
+  // MOTOR DE MEDIÇÃO MULTI-STREAM COM FEEDBACK INSTANTÂNEO ZERO-DELAY
+  async function measurePing(signal, onProbe) {
     const samples = [];
-    const totalProbes = 20;
+    const totalProbes = 10;
     let failedProbes = 0;
     for (let i = 0; i < totalProbes; i++) {
       if (signal.aborted) break;
@@ -1513,12 +1520,22 @@
       try {
         await fetch(`https://speed.cloudflare.com/__down?bytes=0&r=${Math.random()}`, { signal, cache: 'no-store' });
         const dt = performance.now() - t0;
-        if (dt > 0 && dt < 2500) samples.push(dt);
-        else failedProbes++;
+        if (dt > 0 && dt < 2500) {
+          samples.push(dt);
+          if (typeof onProbe === 'function') {
+            const curAvg = samples.reduce((a, b) => a + b, 0) / samples.length;
+            let curJitter = 0;
+            for (let j = 1; j < samples.length; j++) curJitter += Math.abs(samples[j] - samples[j - 1]);
+            curJitter = samples.length > 1 ? curJitter / (samples.length - 1) : 1.0;
+            onProbe(curAvg, curJitter, (failedProbes / (i + 1)) * 100, i + 1, totalProbes);
+          }
+        } else {
+          failedProbes++;
+        }
       } catch (_) {
         failedProbes++;
       }
-      await new Promise(r => setTimeout(r, 40));
+      if (i < totalProbes - 1) await new Promise(r => setTimeout(r, 10));
     }
     const lossPct = (failedProbes / totalProbes) * 100;
     samples.sort((a, b) => a - b);
@@ -1869,6 +1886,11 @@
   // Inicializa tema salvo ou padrão 'slate' (menos escuro e neutro)
   const initialTheme = localStorage.getItem('sparc_theme') || 'slate';
   setTheme(initialTheme);
+
+  // Pré-aquecimento em background do canal TLS e socket keep-alive (Zero Cold-Start)
+  setTimeout(() => {
+    fetch('https://speed.cloudflare.com/__down?bytes=0', { cache: 'no-store' }).catch(() => {});
+  }, 400);
 </script>
 
 </body>
