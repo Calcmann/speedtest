@@ -407,7 +407,7 @@
     .kpi-card.dl::after { background: var(--green); }
     .kpi-card.ul::after { background: var(--blue); }
     .kpi-card.lat::after { background: var(--cyan); }
-    .kpi-card.bloat::after { background: var(--amber); }
+    .kpi-card.quality::after { background: #a855f7; }
 
     .kpi-title {
       font-size: 11px;
@@ -758,22 +758,22 @@
         <span style="color: var(--cyan);">TEMPO REAL</span>
       </div>
       <div class="kpi-val" id="txtPing">-- <span style="font-size: 16px; font-weight: 700; color: var(--text-muted);">ms</span></div>
-      <div class="kpi-target" id="txtJitter">Jitter: -- ms • Perda: 0%</div>
+      <div class="kpi-target" id="txtPingTarget">Meta ANS: ≤ 60 ms</div>
       <div class="progress-bar-wrap">
         <div class="progress-bar" id="pbPing" style="background: var(--cyan); width: 100%;"></div>
       </div>
     </div>
 
-    <!-- BUFFERBLOAT / QUALIDADE -->
-    <div class="kpi-card bloat">
+    <!-- QUALIDADE DO ENLACE (JITTER & PERDA DE PACOTES — ANS) -->
+    <div class="kpi-card quality">
       <div class="kpi-title">
-        <span>🛡️ Estabilidade sob Carga</span>
-        <span id="txtBloatGradeBadge" style="color: var(--amber); font-weight: 800;">BUFFERBLOAT</span>
+        <span>📶 Jitter &amp; Perda</span>
+        <span id="txtQualityBadge" style="color: #a855f7; font-weight: 800;">QUALIDADE ANS</span>
       </div>
-      <div class="kpi-val" id="txtBloatDelta">-- <span style="font-size: 16px; font-weight: 700; color: var(--text-muted);">ms</span></div>
-      <div class="kpi-target" id="txtBloatDesc">Qualidade sob saturação contínua</div>
+      <div class="kpi-val" id="txtQualityVal">-- <span style="font-size: 16px; font-weight: 700; color: var(--text-muted);">ms</span></div>
+      <div class="kpi-target" id="txtQualityLoss">Jitter ≤ 50ms • Perda &lt; 2%</div>
       <div class="progress-bar-wrap">
-        <div class="progress-bar" id="pbBloat" style="background: var(--amber); width: 100%;"></div>
+        <div class="progress-bar" id="pbQuality" style="background: #a855f7; width: 100%;"></div>
       </div>
     </div>
   </div>
@@ -879,20 +879,14 @@
           <td style="padding: 8px; text-align: right;">--</td>
           <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditJitterStatus">--</td>
         </tr>
-        <tr style="border-bottom: 1px solid #e2e8f0;">
+        <tr style="border-bottom: 1.5px solid #0f172a;">
           <td style="padding: 8px; font-weight: bold;">Perda de Pacotes (Packet Loss)</td>
           <td style="padding: 8px; text-align: right;" id="auditLossMeta">&lt; 2,0%</td>
           <td style="padding: 8px; text-align: right;" id="auditLossMedido">--</td>
           <td style="padding: 8px; text-align: right;">--</td>
           <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditLossStatus">--</td>
         </tr>
-        <tr style="border-bottom: 1.5px solid #0f172a;">
-          <td style="padding: 8px; font-weight: bold;">Estabilidade sob Carga (Bufferbloat)</td>
-          <td style="padding: 8px; text-align: right;">Fila Controlada</td>
-          <td style="padding: 8px; text-align: right;" id="auditBloat">--</td>
-          <td style="padding: 8px; text-align: right;">--</td>
-          <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditBloatStatus">--</td>
-        </tr>
+
       </tbody>
     </table>
 
@@ -1079,6 +1073,8 @@
 
     const dlTargetEl = document.getElementById('txtDlTarget');
     const ulTargetEl = document.getElementById('txtUlTarget');
+    const pingTargetEl = document.getElementById('txtPingTarget');
+    const qualityLossEl = document.getElementById('txtQualityLoss');
 
     const dlMin = (cirDl * p.dlPctReq).toFixed(1);
     const ulMin = (p.isAsymmetric && p.name.includes('Boticário'))
@@ -1095,6 +1091,8 @@
         ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Simétrico 1:1)`;
       }
     }
+    if (pingTargetEl) pingTargetEl.innerText = `Meta ANS: ≤ ${p.maxRtt} ms`;
+    if (qualityLossEl) qualityLossEl.innerText = `Jitter ≤ ${p.maxJitter}ms • Perda < ${p.maxLoss}%`;
   }
 
   function getCurrentConfig() {
@@ -1262,41 +1260,25 @@
     redrawCanvas();
 
     try {
-      // 1. LATÊNCIA BASE
-      setStatus('running', 'MEDINDO LATÊNCIA...');
+      // 1. LATÊNCIA, JITTER E PERDA DE PACOTES (ANS)
+      setStatus('running', 'MEDINDO LATÊNCIA, JITTER E PERDA...');
       const pingRes = await measurePing(signal);
-      document.getElementById('txtPing').innerHTML = `${pingRes.avg.toFixed(0)} <span style="font-size: 14px; color: var(--text-muted);">ms</span>`;
-      document.getElementById('txtJitter').innerText = `Jitter: ${pingRes.jitter.toFixed(1)} ms • Perda: 0%`;
+      document.getElementById('txtPing').innerText = pingRes.avg.toFixed(1);
+      document.getElementById('txtQualityVal').innerHTML = `${pingRes.jitter.toFixed(1)} <span style="font-size: 14px; color: var(--text-muted);">ms</span>`;
+      document.getElementById('txtQualityLoss').innerText = `Perda: ${pingRes.lossPct.toFixed(1)}% (Meta: < ${p.maxLoss}%)`;
+      signal.throwIfAborted();
 
       // 2. DOWNLOAD (15 segundos)
       setStatus('running', 'TESTANDO DOWNLOAD...');
-      const pingerDl = new ActiveLatencyPinger(110);
-      pingerDl.start();
-      let dlSamples = [];
       let dlRes = { avg: 0, peak: 0 };
-      try {
-        dlRes = await runDownloadTest(signal, 15);
-      } finally {
-        dlSamples = pingerDl.stop();
-      }
+      dlRes = await runDownloadTest(signal, 15);
+      signal.throwIfAborted();
 
       // 3. UPLOAD (15 segundos)
       setStatus('running', 'TESTANDO UPLOAD...');
-      const pingerUl = new ActiveLatencyPinger(110);
-      pingerUl.start();
-      let ulSamples = [];
       let ulRes = { avg: 0, peak: 0 };
-      try {
-        ulRes = await runUploadTest(signal, 15);
-      } finally {
-        ulSamples = pingerUl.stop();
-      }
-
-      // 4. BUFFERBLOAT
-      const allSamples = [...dlSamples, ...ulSamples];
-      const deltaBloat = computeBloatDelta(allSamples, pingRes.avg);
-      document.getElementById('txtBloatDelta').innerHTML = `+Δ ${deltaBloat.toFixed(0)} <span style="font-size: 14px; color: var(--text-muted);">ms</span>`;
-      document.getElementById('txtBloatDesc').innerText = deltaBloat <= 20 ? 'Excelente (Sem Bufferbloat)' : (deltaBloat <= 80 ? 'Moderado' : 'Fila Saturada');
+      ulRes = await runUploadTest(signal, 15);
+      signal.throwIfAborted();
 
       // 5. AUDITORIA CONTRATUAL DO PROJETO (5 PILARES DO ANS)
       const profKey = document.getElementById('cbProjetoPerfil').value;
@@ -1334,8 +1316,7 @@
         lossPassed,
         pingAvg: pingRes.avg,
         jitter: pingRes.jitter,
-        lossPct: pingRes.lossPct,
-        deltaBloat
+        lossPct: pingRes.lossPct
       });
 
       lastCompletedConfig = getCurrentConfig();
@@ -1348,7 +1329,6 @@
         pingAvg: pingRes.avg,
         jitter: pingRes.jitter,
         lossPct: pingRes.lossPct,
-        deltaBloat,
         isApproved,
         reqDlMbps,
         reqUlMbps,
@@ -1493,11 +1473,7 @@
     document.getElementById('auditLossStatus').innerText = d.lossPassed ? 'CONFORME' : 'REPROVADO';
     document.getElementById('auditLossStatus').style.color = d.lossPassed ? '#16a34a' : '#dc2626';
 
-    // 6. Bufferbloat
-    document.getElementById('auditBloat').innerText = `+Δ ${d.deltaBloat.toFixed(0)} ms`;
-    const bloatOk = d.deltaBloat <= 50;
-    document.getElementById('auditBloatStatus').innerText = bloatOk ? 'CONFORME' : 'ESTABILIDADE MODERADA';
-    document.getElementById('auditBloatStatus').style.color = bloatOk ? '#16a34a' : '#d97706';
+
 
     // Parecer Conclusivo
     const boxTitle = document.getElementById('auditVerdictBoxTitle');
@@ -1544,39 +1520,7 @@
     return { avg, jitter, lossPct };
   }
 
-  class ActiveLatencyPinger {
-    constructor(intervalMs = 110) {
-      this.intervalMs = intervalMs;
-      this.samples = [];
-      this.timer = null;
-      this.running = false;
-    }
-    start() {
-      this.samples = [];
-      this.running = true;
-      const probe = async () => {
-        if (!this.running) return;
-        const t0 = performance.now();
-        const ctrl = new AbortController();
-        const tid = setTimeout(() => ctrl.abort(), 1400);
-        try {
-          await fetch(`https://speed.cloudflare.com/__down?bytes=0&r=${Math.random()}`, { signal: ctrl.signal, cache: 'no-store' });
-          clearTimeout(tid);
-          const dt = performance.now() - t0;
-          if (this.running && dt > 0 && dt < 2000) this.samples.push(dt);
-        } catch (_) {
-          clearTimeout(tid);
-        }
-      };
-      probe();
-      this.timer = setInterval(probe, this.intervalMs);
-    }
-    stop() {
-      this.running = false;
-      if (this.timer) clearInterval(this.timer);
-      return this.samples;
-    }
-  }
+  
 
   function computeBloatDelta(samples, basePing) {
     if (!samples.length) return 0;
