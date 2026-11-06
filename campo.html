@@ -615,13 +615,13 @@
   <div class="project-card">
     <div class="project-grid">
       <!-- LINHA 1 - COLUNA 1: NÚMERO DA OS / CHAMADO -->
-      <div>
+      <div id="boxCampoOs">
         <label class="select-label" for="txtOsNumero">📋 Número da OS / Chamado (Opcional):</label>
         <input type="text" id="txtOsNumero" placeholder="Ex: OS-BRAD-2026-9021" class="select-control" oninput="checkConfigConsistency()" />
       </div>
 
-      <!-- LINHA 1 - COLUNA 2: AGÊNCIA / PRÉDIO -->
-      <div>
+      <!-- LINHA 1 - COLUNA 2: AGÊNCIA / PRÉDIO (SOMENTE BRADESCO) -->
+      <div id="boxCampoAgencia">
         <label class="select-label" for="txtAgencia">🏢 Agência / Prédio (Opcional):</label>
         <input type="text" id="txtAgencia" placeholder="Ex: Agência 0123 - Centro" class="select-control" oninput="checkConfigConsistency()" />
       </div>
@@ -839,7 +839,7 @@
       <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px;">
         <div><strong>Cliente / Projeto:</strong> <span id="auditProjeto">--</span></div>
         <div><strong>Ordem de Serviço (OS):</strong> <span id="auditOsNumero">--</span></div>
-        <div><strong>Agência / Prédio:</strong> <span id="auditAgencia">--</span></div>
+        <div id="rowAuditAgencia"><strong>Agência / Prédio:</strong> <span id="auditAgencia">--</span></div>
         <div><strong>Banda Contratada (CIR):</strong> <span id="auditCir">--</span></div>
       </div>
       <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px;">
@@ -989,6 +989,7 @@
     initCanvas();
     updateProfileExplaining();
     toggleAsymmetricControls();
+    updateAgenciaFieldVisibility();
     updateTargetsDisplay();
     await discoverGeo();
 
@@ -1030,8 +1031,38 @@
   function onPerfilChange() {
     updateProfileExplaining();
     toggleAsymmetricControls();
+    updateAgenciaFieldVisibility();
     updateTargetsDisplay();
     checkConfigConsistency();
+  }
+
+  function updateAgenciaFieldVisibility() {
+    const profKey = document.getElementById('cbProjetoPerfil')?.value || 'bradesco_dedicado';
+    const isBrad = profKey.startsWith('bradesco');
+    const boxAgencia = document.getElementById('boxCampoAgencia');
+    const boxOs = document.getElementById('boxCampoOs');
+    const inputOs = document.getElementById('txtOsNumero');
+    const rowAuditAgencia = document.getElementById('rowAuditAgencia');
+
+    if (boxAgencia && boxOs) {
+      if (isBrad) {
+        boxAgencia.style.display = 'block';
+        boxOs.style.gridColumn = 'span 1';
+        if (inputOs) inputOs.placeholder = 'Ex: OS-BRAD-2026-9021';
+      } else {
+        boxAgencia.style.display = 'none';
+        boxOs.style.gridColumn = '1 / -1';
+        if (inputOs) {
+          inputOs.placeholder = (profKey === 'boticario')
+            ? 'Ex: OS-BOT-2026-9021 ou Chamado'
+            : 'Ex: OS-2026-9021 ou Nº do Chamado';
+        }
+      }
+    }
+
+    if (rowAuditAgencia) {
+      rowAuditAgencia.style.display = isBrad ? 'block' : 'none';
+    }
   }
 
   function toggleAsymmetricControls() {
@@ -1127,6 +1158,7 @@
   function hasConfigMismatch() {
     if (!lastCompletedConfig) return false;
     const cur = getCurrentConfig();
+    const isBrad = cur.profileKey && cur.profileKey.startsWith('bradesco');
     return (
       cur.cirPreset !== lastCompletedConfig.cirPreset ||
       (cur.cirPreset === 'custom' && cur.customCir !== lastCompletedConfig.customCir) ||
@@ -1134,7 +1166,7 @@
       (cur.ulPreset === 'custom' && cur.customUlCir !== lastCompletedConfig.customUlCir) ||
       cur.profileKey !== lastCompletedConfig.profileKey ||
       cur.osNumero !== lastCompletedConfig.osNumero ||
-      cur.agencia !== lastCompletedConfig.agencia
+      (isBrad && cur.agencia !== lastCompletedConfig.agencia)
     );
   }
 
@@ -1439,7 +1471,12 @@
 
     document.getElementById('auditProjeto').innerText = p.fullName;
     document.getElementById('auditOsNumero').innerText = cfg.osNumero || 'Não informada';
-    document.getElementById('auditAgencia').innerText = cfg.agencia || 'Não informada';
+    const isBrad = cfg.profileKey && cfg.profileKey.startsWith('bradesco');
+    const rowAuditAgencia = document.getElementById('rowAuditAgencia');
+    if (rowAuditAgencia) rowAuditAgencia.style.display = isBrad ? 'block' : 'none';
+    if (document.getElementById('auditAgencia')) {
+      document.getElementById('auditAgencia').innerText = cfg.agencia || 'Não informada';
+    }
 
     if (p.isAsymmetric && !p.name.includes('Boticário')) {
       document.getElementById('auditCir').innerText = `${cfg.cirVal}M Down / ${cfg.cirUlVal}M Up (Assimétrico)`;
