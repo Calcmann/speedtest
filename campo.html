@@ -603,6 +603,18 @@
 
   <!-- CARD PRINCIPAL: DEFINIÇÃO DO PROJETO E BANDA (EVIDENCIADOS PARA O TÉCNICO) -->
   <div class="project-card">
+    <!-- DADOS DA ORDEM DE SERVIÇO & AGÊNCIA (REGISTRO FORMAL NA OS — TOPO DA CÉLULA) -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed var(--card-border);">
+      <div>
+        <label class="select-label" for="txtOsNumero" style="font-size: 11px; margin-bottom: 5px;">📋 Número da OS / Chamado (Opcional):</label>
+        <input type="text" id="txtOsNumero" placeholder="Ex: OS-BRAD-2026-9021" class="select-control" style="padding: 8px 12px; font-size: 12px;" oninput="checkConfigConsistency()" />
+      </div>
+      <div>
+        <label class="select-label" for="txtAgencia" style="font-size: 11px; margin-bottom: 5px;">🏢 Agência / Prédio (Opcional):</label>
+        <input type="text" id="txtAgencia" placeholder="Ex: Agência 0123 - Centro" class="select-control" style="padding: 8px 12px; font-size: 12px;" oninput="checkConfigConsistency()" />
+      </div>
+    </div>
+
     <div class="project-grid">
       <!-- CONTROLE 1: BANDA CONTRATADA (CIR) -->
       <div>
@@ -667,18 +679,6 @@
           <input type="number" id="txtCustomUlCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; background: var(--input-bg); border: 1.5px solid var(--input-border); color: var(--text-main); padding: 8px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; text-align: right;" oninput="onCustomUlCirInput()" />
           <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">Mbps</span>
         </div>
-      </div>
-    </div>
-
-    <!-- DADOS DA ORDEM DE SERVIÇO & AGÊNCIA (REGISTRO FORMAL NA OS) -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--card-border);">
-      <div>
-        <label class="select-label" for="txtOsNumero" style="font-size: 10px; margin-bottom: 4px;">📋 Número da OS / Chamado (Opcional):</label>
-        <input type="text" id="txtOsNumero" placeholder="Ex: OS-BRAD-2026-9021" class="select-control" style="padding: 7px 10px; font-size: 12px;" oninput="checkConfigConsistency()" />
-      </div>
-      <div>
-        <label class="select-label" for="txtAgencia" style="font-size: 10px; margin-bottom: 4px;">🏢 Agência / Prédio (Opcional):</label>
-        <input type="text" id="txtAgencia" placeholder="Ex: Agência 0123 - Centro" class="select-control" style="padding: 7px 10px; font-size: 12px;" oninput="checkConfigConsistency()" />
       </div>
     </div>
 
