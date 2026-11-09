@@ -528,42 +528,46 @@
       font-size: 11px;
     }
 
-    /* PRINT AUDIT SUMMARY (A4 OFICIAL) */
+    /* PRINT AUDIT SUMMARY (A4 OFICIAL EM PÁGINA ÚNICA) */
     #printAuditSummary {
       display: none;
     }
+    @page {
+      size: A4 portrait;
+      margin: 8mm 10mm;
+    }
     @media print {
-      body {
+      html, body {
         background: #fff !important;
         color: #0f172a !important;
         padding: 0 !important;
+        margin: 0 !important;
+        height: auto !important;
       }
-      .container { max-width: 100% !important; }
-      .header, .project-card, .hero-action-bar, .chart-card, #configMismatchWarning, .topology-strip, .nav-toggle-btn {
+      .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+      }
+      .header, .project-card, .hero-action-bar, .chart-card, #configMismatchWarning, .topology-strip, .nav-toggle-btn, .kpi-grid, .verdict-card {
         display: none !important;
       }
       #printAuditSummary {
         display: block !important;
         background: #fff !important;
-        border: 2px solid #0f172a !important;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
+        border: 1.5px solid #0f172a !important;
+        border-radius: 6px;
+        padding: 14px 18px !important;
+        margin: 0 !important;
         color: #0f172a !important;
+        box-sizing: border-box !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
-      .kpi-card {
-        background: #fff !important;
-        border: 1px solid #94a3b8 !important;
-        color: #0f172a !important;
-        box-shadow: none !important;
-      }
-      .kpi-val { color: #0f172a !important; }
-      .kpi-target { color: #334155 !important; }
-      .verdict-card {
-        display: block !important;
-        background: #fff !important;
-        color: #0f172a !important;
-        border-width: 2px !important;
+      #printAuditSummary * {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
     }
   </style>
@@ -824,9 +828,9 @@
 
   <!-- LAUDO PDF FORMAL (EXIBIDO EXCLUSIVAMENTE NA IMPRESSÃO/PDF) -->
   <div id="printAuditSummary">
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 14px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f172a; padding-bottom: 6px; margin-bottom: 10px;">
       <div>
-        <h1 style="font-size: 18px; font-weight: 900; text-transform: uppercase;">Comprovante de Teste &amp; Validação de Circuito</h1>
+        <h1 style="font-size: 17px; font-weight: 900; text-transform: uppercase; margin: 0 0 2px 0;">Comprovante de Teste &amp; Validação de Circuito</h1>
         <div style="font-size: 11px; color: #475569;">SPARC Telemetria de Enlaces • Aceite Oficial de Campo</div>
       </div>
       <div style="text-align: right; font-size: 11px;">
@@ -835,14 +839,14 @@
       </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; font-size: 11.5px; line-height: 1.5;">
-      <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; font-size: 11px; line-height: 1.45;">
+      <div style="border: 1px solid #cbd5e1; padding: 8px 10px; border-radius: 6px;">
         <div><strong>Cliente / Projeto:</strong> <span id="auditProjeto">--</span></div>
         <div><strong>Ordem de Serviço (OS):</strong> <span id="auditOsNumero">--</span></div>
         <div id="rowAuditAgencia"><strong>Agência / Prédio:</strong> <span id="auditAgencia">--</span></div>
         <div><strong>Banda Contratada (CIR):</strong> <span id="auditCir">--</span></div>
       </div>
-      <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px;">
+      <div style="border: 1px solid #cbd5e1; padding: 8px 10px; border-radius: 6px;">
         <div><strong>Critério da RFP / ANS:</strong> <span id="auditRfpRegra">--</span></div>
         <div><strong>IP Público do Link:</strong> <span id="auditIp">--</span></div>
         <div><strong>Operadora / ASN:</strong> <span id="auditIsp">--</span></div>
@@ -850,65 +854,65 @@
       </div>
     </div>
 
-    <table style="width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 16px;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
       <thead>
         <tr style="background: #f1f5f9; border-bottom: 1.5px solid #0f172a;">
-          <th style="padding: 8px; text-align: left;">Parâmetro Auditado (ANS / SLA)</th>
-          <th style="padding: 8px; text-align: right;">Meta Contratual RFP</th>
-          <th style="padding: 8px; text-align: right;">Medição Efetiva</th>
-          <th style="padding: 8px; text-align: right;">% Atingido</th>
-          <th style="padding: 8px; text-align: center;">Conformidade</th>
+          <th style="padding: 6px 8px; text-align: left;">Parâmetro Auditado (ANS / SLA)</th>
+          <th style="padding: 6px 8px; text-align: right;">Meta Contratual RFP</th>
+          <th style="padding: 6px 8px; text-align: right;">Medição Efetiva</th>
+          <th style="padding: 6px 8px; text-align: right;">% Atingido</th>
+          <th style="padding: 6px 8px; text-align: center;">Conformidade</th>
         </tr>
       </thead>
       <tbody>
         <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 8px; font-weight: bold;">Capacidade Download</td>
-          <td style="padding: 8px; text-align: right;" id="auditDlMeta">--</td>
-          <td style="padding: 8px; text-align: right;" id="auditDlMedido">--</td>
-          <td style="padding: 8px; text-align: right;" id="auditDlPct">--</td>
-          <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditDlStatus">--</td>
+          <td style="padding: 6px 8px; font-weight: bold;">Capacidade Download</td>
+          <td style="padding: 6px 8px; text-align: right;" id="auditDlMeta">--</td>
+          <td style="padding: 6px 8px; text-align: right;" id="auditDlMedido">--</td>
+          <td style="padding: 6px 8px; text-align: right;" id="auditDlPct">--</td>
+          <td style="padding: 6px 8px; text-align: center; font-weight: bold;" id="auditDlStatus">--</td>
         </tr>
         <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 8px; font-weight: bold;">Capacidade Upload</td>
-          <td style="padding: 8px; text-align: right;" id="auditUlMeta">--</td>
-          <td style="padding: 8px; text-align: right;" id="auditUlMedido">--</td>
-          <td style="padding: 8px; text-align: right;" id="auditUlPct">--</td>
-          <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditUlStatus">--</td>
+          <td style="padding: 6px 8px; font-weight: bold;">Capacidade Upload</td>
+          <td style="padding: 6px 8px; text-align: right;" id="auditUlMeta">--</td>
+          <td style="padding: 6px 8px; text-align: right;" id="auditUlMedido">--</td>
+          <td style="padding: 6px 8px; text-align: right;" id="auditUlPct">--</td>
+          <td style="padding: 6px 8px; text-align: center; font-weight: bold;" id="auditUlStatus">--</td>
         </tr>
         <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 8px; font-weight: bold;">Latência Média (RTT)</td>
-          <td style="padding: 8px; text-align: right;" id="auditRttMeta">≤ 60 ms</td>
-          <td style="padding: 8px; text-align: right;" id="auditPing">--</td>
-          <td style="padding: 8px; text-align: right;" id="auditRttPct">--</td>
-          <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditRttStatus">--</td>
+          <td style="padding: 6px 8px; font-weight: bold;">Latência Média (RTT)</td>
+          <td style="padding: 6px 8px; text-align: right;" id="auditRttMeta">≤ 60 ms</td>
+          <td style="padding: 6px 8px; text-align: right;" id="auditPing">--</td>
+          <td style="padding: 6px 8px; text-align: right;" id="auditRttPct">--</td>
+          <td style="padding: 6px 8px; text-align: center; font-weight: bold;" id="auditRttStatus">--</td>
         </tr>
         <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 8px; font-weight: bold;">Variação de Jitter</td>
-          <td style="padding: 8px; text-align: right;" id="auditJitterMeta">≤ 50 ms</td>
-          <td style="padding: 8px; text-align: right;" id="auditJitterMedido">--</td>
-          <td style="padding: 8px; text-align: right;">--</td>
-          <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditJitterStatus">--</td>
+          <td style="padding: 6px 8px; font-weight: bold;">Variação de Jitter</td>
+          <td style="padding: 6px 8px; text-align: right;" id="auditJitterMeta">≤ 50 ms</td>
+          <td style="padding: 6px 8px; text-align: right;" id="auditJitterMedido">--</td>
+          <td style="padding: 6px 8px; text-align: right;">--</td>
+          <td style="padding: 6px 8px; text-align: center; font-weight: bold;" id="auditJitterStatus">--</td>
         </tr>
         <tr style="border-bottom: 1.5px solid #0f172a;">
-          <td style="padding: 8px; font-weight: bold;">Perda de Pacotes (Packet Loss)</td>
-          <td style="padding: 8px; text-align: right;" id="auditLossMeta">&lt; 2,0%</td>
-          <td style="padding: 8px; text-align: right;" id="auditLossMedido">--</td>
-          <td style="padding: 8px; text-align: right;">--</td>
-          <td style="padding: 8px; text-align: center; font-weight: bold;" id="auditLossStatus">--</td>
+          <td style="padding: 6px 8px; font-weight: bold;">Perda de Pacotes (Packet Loss)</td>
+          <td style="padding: 6px 8px; text-align: right;" id="auditLossMeta">&lt; 2,0%</td>
+          <td style="padding: 6px 8px; text-align: right;" id="auditLossMedido">--</td>
+          <td style="padding: 6px 8px; text-align: right;">--</td>
+          <td style="padding: 6px 8px; text-align: center; font-weight: bold;" id="auditLossStatus">--</td>
         </tr>
 
       </tbody>
     </table>
 
-    <div style="border: 2px solid #0f172a; padding: 12px; border-radius: 6px; margin-bottom: 30px;">
-      <div style="font-size: 13px; font-weight: 900; text-transform: uppercase; margin-bottom: 4px;" id="auditVerdictBoxTitle">PARECER TÉCNICO CONCLUSIVO</div>
-      <div style="font-size: 11.5px; line-height: 1.45;" id="auditVerdictBoxText">
+    <div style="border: 1.5px solid #0f172a; padding: 9px 12px; border-radius: 6px; margin-bottom: 10px;">
+      <div style="font-size: 12px; font-weight: 900; text-transform: uppercase; margin-bottom: 3px;" id="auditVerdictBoxTitle">PARECER TÉCNICO CONCLUSIVO</div>
+      <div style="font-size: 11px; line-height: 1.4;" id="auditVerdictBoxText">
         O circuito auditado atende rigorosamente a todos os parâmetros técnicos e percentuais exigidos na RFP do projeto, estando o enlace validado e apto para ativação.
       </div>
     </div>
 
     <!-- RODAPÉ DIGITAL (SEM CAMPOS DE ASSINATURA FÍSICA) -->
-    <div style="margin-top: 25px; border-top: 1px solid #cbd5e1; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #64748b;">
+    <div style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 9.5px; color: #64748b;">
       <div>⚡ SPARC Web Telemetry • Comprovante Digital de Validação de Banda &amp; SLA</div>
       <div>Documento Digital de Apoio Técnico • Gerado Automaticamente</div>
     </div>
