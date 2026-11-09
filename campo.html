@@ -697,8 +697,8 @@
       <div>
         <label class="select-label" for="cbProjetoPerfil">🏢 Perfil do Projeto / Cliente (RFP):</label>
         <select id="cbProjetoPerfil" class="select-control" onchange="onPerfilChange()">
-          <option value="bradesco_dedicado" selected>🏦 Banco Bradesco — Internet Dedicada (PPB-030-B: Simétrico 100% • RTT ≤ 60ms)</option>
-          <option value="bradesco_bandalarga">🏦 Banco Bradesco — Banda Larga (PPB-030-A: Assimétrico OS • RTT ≤ 80ms)</option>
+          <option value="bradesco_dedicado" selected>🏦 Banco Bradesco — Internet Dedicada (PPB-030-B: Simétrico L4 ≥ 95% RFC 6349 • RTT ≤ 60ms)</option>
+          <option value="bradesco_bandalarga">🏦 Banco Bradesco — Banda Larga (PPB-030-A: Assimétrico OS ≥ 80% Anatel • RTT ≤ 80ms)</option>
           <option value="boticario">🌸 O Boticário (RFP Varejo: Download ≥ 80% • Upload ≥ 20%)</option>
           <option value="rfc6349">📋 Padrão Telecom RFC 6349 (Download ≥ 95% • Upload ≥ 95%)</option>
         </select>
@@ -976,27 +976,27 @@
       fullName: 'Banco Bradesco — Internet Dedicada (PPB-030-B)',
       icon: '🏦',
       isAsymmetric: false, // 100% Simétrico
-      dlPctReq: 1.00,      // 100% CIR nominal
-      ulPctReq: 1.00,      // 100% CIR nominal (1:1 rigoroso)
+      dlPctReq: 0.95,      // 95% CIR nominal no L4 conforme RFC 6349
+      ulPctReq: 0.95,      // 95% CIR nominal no L4 (1:1 rigoroso)
       maxRtt: 60,          // RFP Bradesco: Latência ≤ 60 ms
       maxJitter: 50,       // RFP Bradesco: Jitter ≤ 50 ms
       maxLoss: 2.0,        // RFP Bradesco: Perda < 2,0%
       title: 'Critério Oficial Bradesco — Internet Dedicada (PPB-030-B):',
-      desc: 'SLA Crítico Simétrico <strong>PPB-030-B</strong>: Exige <strong>100% da banda contratada em Download E Upload (1:1 Simétrico)</strong>, com <strong>Latência RTT ≤ 60 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
+      desc: 'SLA Crítico Simétrico <strong>PPB-030-B</strong>: Exige <strong>no mínimo 95% da banda contratada em Download e Upload na Camada 4 (1:1 Simétrico conforme RFC 6349)</strong>, com <strong>Latência RTT ≤ 60 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
     },
     bradesco_bandalarga: {
       name: 'Bradesco Banda Larga',
       fullName: 'Banco Bradesco — Banda Larga (PPB-030-A)',
       icon: '🏦',
       isAsymmetric: true,  // Assimétrico
-      dlPctReq: 1.00,      // 100% do Download contratado na OS
-      ulPctReq: 1.00,      // 100% do Upload contratado na OS
+      dlPctReq: 0.80,      // 80% do Download contratado na OS (Piso Regulatório Anatel)
+      ulPctReq: 0.80,      // 80% do Upload contratado na OS (Piso Regulatório Anatel)
       defaultUlRatio: 0.50,// Padrão 50% do Download se automático
       maxRtt: 80,          // RFP Bradesco: Latência ≤ 80 ms
       maxJitter: 50,       // RFP Bradesco: Jitter ≤ 50 ms
       maxLoss: 2.0,        // RFP Bradesco: Perda < 2,0%
       title: 'Critério Oficial Bradesco — Banda Larga (PPB-030-A):',
-      desc: 'Acesso <strong>assimétrico</strong> conforme especificado na OS. Exige cumprimento integral da velocidade contratada de Download e Upload, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
+      desc: 'Acesso <strong>assimétrico</strong> conforme especificado na OS com garantia de <strong>no mínimo 80% da velocidade contratada de Download e Upload (Piso Regulatório Anatel)</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
     },
     boticario: {
       name: 'O Boticário',
@@ -1522,13 +1522,13 @@
 
     if (p.isAsymmetric && !p.name.includes('Boticário')) {
       document.getElementById('auditCir').innerText = `${cfg.cirVal}M Down / ${cfg.cirUlVal}M Up (Assimétrico)`;
-      document.getElementById('auditRfpRegra').innerText = `DL 100% (${cfg.cirVal}M) • UL 100% (${cfg.cirUlVal}M) • RTT ≤ ${p.maxRtt}ms`;
+      document.getElementById('auditRfpRegra').innerText = `DL ≥ ${(p.dlPctReq * 100).toFixed(0)}% • UL ≥ ${(p.ulPctReq * 100).toFixed(0)}% (Anatel) • RTT ≤ ${p.maxRtt}ms`;
     } else if (p.isAsymmetric) {
       document.getElementById('auditCir').innerText = `${cfg.cirVal} Mbps (Assimétrico Varejo)`;
       document.getElementById('auditRfpRegra').innerText = `DL ≥ 80% • UL ≥ 20% • RTT ≤ ${p.maxRtt}ms`;
     } else {
       document.getElementById('auditCir').innerText = `${cfg.cirVal} Mbps (Simétrico 1:1)`;
-      document.getElementById('auditRfpRegra').innerText = `DL 100% • UL 100% (Simétrico) • RTT ≤ ${p.maxRtt}ms`;
+      document.getElementById('auditRfpRegra').innerText = `L4 ≥ ${(p.dlPctReq * 100).toFixed(0)}% (RFC 6349 Simétrico) • RTT ≤ ${p.maxRtt}ms`;
     }
 
     document.getElementById('auditIp').innerText = clientGeo?.ip || 'Detectado';
