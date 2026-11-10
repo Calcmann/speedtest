@@ -718,7 +718,7 @@
 
       <!-- LINHA 3 - COLUNA 2: NOTA INFORMATIVA DO UPLOAD ASSIMÉTRICO -->
       <div id="boxAsymmetricInfo" style="display: none; align-self: end; padding: 10px 12px; background: rgba(0,0,0,0.14); border: 1px dashed var(--card-border); border-radius: 8px; font-size: 11px; color: var(--text-muted); line-height: 1.4;">
-        <strong style="color: var(--wine-accent);">💡 Upload do Enlace:</strong> Padrão igual à banda de Download (100% simétrico). Se a OS indicar taxa reduzida, selecione a opção contratada ou personalizada.
+        <strong style="color: var(--wine-accent);">💡 Upload do Enlace:</strong> Pré-seleção padrão de <strong>35% do Download</strong> (típico de links assimétricos). Se a OS indicar outra capacidade (ex: 50%, 100% simétrico, Claro 35M), selecione a opção desejada.
       </div>
     </div>
 
@@ -979,7 +979,7 @@
       isAsymmetric: true,  // Assimétrico
       dlPctReq: 0.80,      // 80% do Download contratado na OS (Piso Regulatório Anatel)
       ulPctReq: 0.80,      // 80% do Upload contratado na OS (Piso Regulatório Anatel)
-      defaultUlRatio: 1.0, // Padrão 100% da banda de Download (Mesma do Download)
+      defaultUlRatio: 0.35,// Padrão 35% da banda de Download (Assimétrico)
       maxRtt: 80,          // RFP Bradesco: Latência ≤ 80 ms
       maxJitter: 50,       // RFP Bradesco: Jitter ≤ 50 ms
       maxLoss: 2.0,        // RFP Bradesco: Perda < 2,0%
@@ -1037,8 +1037,10 @@
     const cirDl = getCirNominal();
     const prevVal = preferredVal !== null ? preferredVal : sel.value;
 
-    const candidateTiers = new Set();
+    const def35 = parseFloat((cirDl * 0.35).toFixed(1));
     const half = Math.round(cirDl * 0.5);
+
+    const candidateTiers = new Set();
     if (half > 0 && half < cirDl) candidateTiers.add(half);
 
     ASYM_STANDARD_TIERS.forEach(t => {
@@ -1047,13 +1049,24 @@
 
     const sortedTiers = Array.from(candidateTiers).sort((a, b) => b - a);
 
-    let html = '';
-    // OPÇÃO PADRÃO: MESMA DA BANDA DE DOWNLOAD (100% SIMÉTRICO)
-    const dlLabel = cirDl >= 1000 ? (cirDl / 1000).toFixed(1) + ' Gbps' : cirDl + ' Mbps';
-    const isDlDefaultSel = (!prevVal || prevVal === 'same_dl' || prevVal === 'auto' || parseFloat(prevVal) === cirDl);
-    html += `<option value="same_dl" ${isDlDefaultSel ? 'selected' : ''}>⚡ ${dlLabel} (Padrão: Mesma do Download — 100%)</option>`;
+    // Pré-seleção padrão: 35% do Download (default_35)
+    const is35DefaultSel = (!prevVal || prevVal === 'default_35' || prevVal === 'auto' || parseFloat(prevVal) === def35);
+    const isDlSel = (!is35DefaultSel && (prevVal === 'same_dl' || parseFloat(prevVal) === cirDl));
 
+    let html = '';
+    // 1. OPÇÃO PADRÃO PRÉ-SELECIONADA: 35% DO DOWNLOAD
+    const label35 = def35 >= 1000 ? (def35 / 1000).toFixed(1) + ' Gbps' : def35 + ' Mbps';
+    html += `<option value="default_35" ${is35DefaultSel ? 'selected' : ''}>⚡ ${label35} (Padrão: 35% do Download — Assimétrico)</option>`;
+
+    // 2. OPÇÃO 100% SIMÉTRICA (MESMA DO DOWNLOAD)
+    const dlLabel = cirDl >= 1000 ? (cirDl / 1000).toFixed(1) + ' Gbps' : cirDl + ' Mbps';
+    html += `<option value="same_dl" ${isDlSel ? 'selected' : ''}>🔄 ${dlLabel} (100% — Simétrico / Mesma do Download)</option>`;
+
+    // 3. DEMAIS TIERS ASSIMÉTRICOS DE MERCADO
     sortedTiers.forEach(tier => {
+      // Se coincide com o valor de 35%, já está destacado na opção padrão
+      if (Math.abs(tier - def35) < 0.1) return;
+
       const pct = Math.round((tier / cirDl) * 100);
       let desc = '';
       if (tier === 35) {
@@ -1064,11 +1077,11 @@
         desc = `${pct}% do Download`;
       }
       const label = `${tier >= 1000 ? (tier / 1000).toFixed(1) + ' Gbps' : tier + ' Mbps'}${desc ? ' (' + desc + ')' : ''}`;
-      const isSel = (!isDlDefaultSel && prevVal && prevVal !== 'same_dl' && prevVal !== 'auto' && parseFloat(prevVal) === tier);
+      const isSel = (!is35DefaultSel && !isDlSel && prevVal && prevVal !== 'default_35' && prevVal !== 'same_dl' && prevVal !== 'auto' && parseFloat(prevVal) === tier);
       html += `<option value="${tier}" ${isSel ? 'selected' : ''}>${label}</option>`;
     });
 
-    const isCustomSel = (!isDlDefaultSel && prevVal === 'custom');
+    const isCustomSel = (!is35DefaultSel && !isDlSel && prevVal === 'custom');
     html += `<option value="custom" ${isCustomSel ? 'selected' : ''}>✏️ Personalizado (Mbps)...</option>`;
 
     sel.innerHTML = html;
@@ -1189,17 +1202,20 @@
   function getUlCirNominal(p, cirDl) {
     if (!p.isAsymmetric || p.name.includes('Boticário')) return cirDl; // 1:1 simétrico ou cálculo Boticário
     const el = document.getElementById('cbUlCirBanda');
-    if (!el) return cirDl;
+    if (!el) return parseFloat((cirDl * (p.defaultUlRatio || 0.35)).toFixed(1));
     const val = el.value;
-    if (!val || val === 'same_dl' || val === 'auto') {
+    if (val === 'default_35' || val === 'auto' || !val) {
+      return parseFloat((cirDl * 0.35).toFixed(1));
+    }
+    if (val === 'same_dl') {
       return cirDl;
     }
     if (val === 'custom') {
       const num = parseFloat(document.getElementById('txtCustomUlCir')?.value);
-      return (num && num > 0) ? num : cirDl;
+      return (num && num > 0) ? num : parseFloat((cirDl * 0.35).toFixed(1));
     }
     const parsed = parseFloat(val);
-    return (parsed && parsed > 0) ? parsed : cirDl;
+    return (parsed && parsed > 0) ? parsed : parseFloat((cirDl * 0.35).toFixed(1));
   }
 
   function updateProfileExplaining() {
@@ -1231,9 +1247,11 @@
       if (p.isAsymmetric && p.name.includes('Boticário')) {
         ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (${(p.ulPctReq * 100).toFixed(0)}% do CIR)`;
       } else if (p.isAsymmetric) {
-        const ulFormatted = cirUl >= 1000 ? (cirUl / 1000).toFixed(1) + 'G' : cirUl.toFixed(0) + 'M';
-        if (cirUl === cirDl) {
-          ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Upload OS: ${ulFormatted} • Padrão 80%)`;
+        const ulFormatted = cirUl >= 1000 ? (cirUl / 1000).toFixed(1) + 'G' : cirUl.toFixed(1).replace(/\.0$/, '') + 'M';
+        if (Math.abs(cirUl - (cirDl * 0.35)) < 0.1) {
+          ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Upload OS: ${ulFormatted} • Padrão 35%)`;
+        } else if (cirUl === cirDl) {
+          ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Upload OS: ${ulFormatted} • Simétrico 100%)`;
         } else {
           ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Upload OS: ${ulFormatted} Assimétrico • 80%)`;
         }
@@ -1255,7 +1273,7 @@
       cirUlVal: cirUl,
       cirPreset: document.getElementById('cbCirBanda').value,
       customCir: document.getElementById('txtCustomCir')?.value || '',
-      ulPreset: document.getElementById('cbUlCirBanda')?.value || 'same_dl',
+      ulPreset: document.getElementById('cbUlCirBanda')?.value || 'default_35',
       customUlCir: document.getElementById('txtCustomUlCir')?.value || '',
       profileKey: profKey,
       profileName: p.name,
