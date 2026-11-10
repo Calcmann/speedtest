@@ -670,7 +670,7 @@
 
       <!-- LINHA 2 - COLUNA 1: BANDA CONTRATADA (CIR) -->
       <div>
-        <label class="select-label" for="cbCirBanda">🎯 Banda Contratada do Link (CIR):</label>
+        <label class="select-label" for="cbCirBanda" id="lblCirBanda">🎯 Banda Contratada do Link (CIR):</label>
         <div style="display: flex; gap: 6px; align-items: center;">
           <select id="cbCirBanda" class="select-control" onchange="onCirChange()">
             <option value="10">10 Mbps</option>
@@ -698,39 +698,27 @@
         <label class="select-label" for="cbProjetoPerfil">🏢 Perfil do Projeto / Cliente (RFP):</label>
         <select id="cbProjetoPerfil" class="select-control" onchange="onPerfilChange()">
           <option value="bradesco_dedicado" selected>🏦 Banco Bradesco — Internet Dedicada (PPB-030-B: Simétrico L4 ≥ 95% RFC 6349 • RTT ≤ 60ms)</option>
-          <option value="bradesco_bandalarga">🏦 Banco Bradesco — Banda Larga (PPB-030-A: Assimétrico OS ≥ 80% Anatel • RTT ≤ 80ms)</option>
+          <option value="bradesco_bandalarga">🏦 Banco Bradesco — Banda Larga Assimétrica (PPB-030-A: OS ≥ 80% Anatel • RTT ≤ 80ms)</option>
           <option value="boticario">🌸 O Boticário (RFP Varejo: Download ≥ 80% • Upload ≥ 20%)</option>
           <option value="rfc6349">📋 Padrão Telecom RFC 6349 (Download ≥ 95% • Upload ≥ 95%)</option>
         </select>
       </div>
-    </div>
 
-    <!-- CONTROLE ADICIONAL: UPLOAD CONTRATADO PARA LINKS ASSIMÉTRICOS -->
-    <div id="boxAsymmetricUpload" style="display: none; margin-top: 12px; background: rgba(0,0,0,0.12); border: 1px dashed var(--card-border); border-radius: 8px; padding: 10px 14px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
-        <label class="select-label" for="cbUlCirBanda" style="margin-bottom: 0; color: var(--wine-label);">📤 Upload Contratado da OS (Assimétrico):</label>
-        <span style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Capacidade indicada na OS / Provedor</span>
-      </div>
-      <div style="display: flex; gap: 6px; align-items: center;">
-        <select id="cbUlCirBanda" class="select-control" onchange="onUlCirChange()">
-          <option value="auto" selected>⚡ Automático (Padrão do Perfil / Provedor)</option>
-          <option value="5">5 Mbps</option>
-          <option value="10">10 Mbps</option>
-          <option value="20">20 Mbps</option>
-          <option value="50">50 Mbps</option>
-          <option value="100">100 Mbps</option>
-          <option value="150">150 Mbps</option>
-          <option value="200">200 Mbps</option>
-          <option value="250">250 Mbps</option>
-          <option value="300">300 Mbps</option>
-          <option value="500">500 Mbps</option>
-          <option value="1000">1.0 Gbps</option>
-          <option value="custom">✏️ Personalizado (Mbps)...</option>
-        </select>
-        <div id="boxCustomUlCir" style="display: none; align-items: center; gap: 4px;">
-          <input type="number" id="txtCustomUlCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; height: 42px; box-sizing: border-box; background: var(--input-bg); border: 1.5px solid var(--input-border); color: var(--text-main); padding: 0 8px; border-radius: 8px; font-size: 13px; font-weight: bold; text-align: right;" oninput="onCustomUlCirInput()" />
-          <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">Mbps</span>
+      <!-- LINHA 3 - COLUNA 1: UPLOAD CONTRATADO DA OS (EXIBIDO SOMENTE EM BRADESCO BANDA LARGA ASSIMÉTRICA) -->
+      <div id="boxAsymmetricUpload" style="display: none;">
+        <label class="select-label" for="cbUlCirBanda" style="color: var(--wine-label);">📤 Upload Contratado da OS (Assimétrico):</label>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <select id="cbUlCirBanda" class="select-control" onchange="onUlCirChange()"></select>
+          <div id="boxCustomUlCir" style="display: none; align-items: center; gap: 4px;">
+            <input type="number" id="txtCustomUlCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; height: 42px; box-sizing: border-box; background: var(--input-bg); border: 1.5px solid var(--input-border); color: var(--text-main); padding: 0 8px; border-radius: 8px; font-size: 13px; font-weight: bold; text-align: right;" oninput="onCustomUlCirInput()" />
+            <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">Mbps</span>
+          </div>
         </div>
+      </div>
+
+      <!-- LINHA 3 - COLUNA 2: NOTA INFORMATIVA DO UPLOAD ASSIMÉTRICO -->
+      <div id="boxAsymmetricInfo" style="display: none; align-self: end; padding: 10px 12px; background: rgba(0,0,0,0.14); border: 1px dashed var(--card-border); border-radius: 8px; font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+        <strong style="color: var(--wine-accent);">💡 Upload do Enlace:</strong> Padrão igual à banda de Download (100% simétrico). Se a OS indicar taxa reduzida, selecione a opção contratada ou personalizada.
       </div>
     </div>
 
@@ -985,17 +973,17 @@
       desc: 'SLA Crítico Simétrico <strong>PPB-030-B</strong>: Exige <strong>no mínimo 95% da banda contratada em Download e Upload na Camada 4 (1:1 Simétrico conforme RFC 6349)</strong>, com <strong>Latência RTT ≤ 60 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
     },
     bradesco_bandalarga: {
-      name: 'Bradesco Banda Larga',
-      fullName: 'Banco Bradesco — Banda Larga (PPB-030-A)',
+      name: 'Bradesco Banda Larga Assimétrica',
+      fullName: 'Banco Bradesco — Banda Larga Assimétrica (PPB-030-A)',
       icon: '🏦',
       isAsymmetric: true,  // Assimétrico
       dlPctReq: 0.80,      // 80% do Download contratado na OS (Piso Regulatório Anatel)
       ulPctReq: 0.80,      // 80% do Upload contratado na OS (Piso Regulatório Anatel)
-      defaultUlRatio: 0.50,// Padrão 50% do Download se automático
+      defaultUlRatio: 1.0, // Padrão 100% da banda de Download (Mesma do Download)
       maxRtt: 80,          // RFP Bradesco: Latência ≤ 80 ms
       maxJitter: 50,       // RFP Bradesco: Jitter ≤ 50 ms
       maxLoss: 2.0,        // RFP Bradesco: Perda < 2,0%
-      title: 'Critério Oficial Bradesco — Banda Larga (PPB-030-A):',
+      title: 'Critério Oficial Bradesco — Banda Larga Assimétrica (PPB-030-A):',
       desc: 'Acesso <strong>assimétrico</strong> conforme especificado na OS com garantia de <strong>no mínimo 80% da velocidade contratada de Download e Upload (Piso Regulatório Anatel)</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
     },
     boticario: {
@@ -1040,17 +1028,78 @@
     });
   });
 
+  const ASYM_STANDARD_TIERS = [600, 500, 350, 300, 250, 200, 150, 100, 75, 50, 35, 30, 25, 20, 15, 10, 5, 2, 1];
+
+  function populateAsymmetricUploadOptions(preferredVal = null) {
+    const sel = document.getElementById('cbUlCirBanda');
+    if (!sel) return;
+
+    const cirDl = getCirNominal();
+    const prevVal = preferredVal !== null ? preferredVal : sel.value;
+
+    const candidateTiers = new Set();
+    const half = Math.round(cirDl * 0.5);
+    if (half > 0 && half < cirDl) candidateTiers.add(half);
+
+    ASYM_STANDARD_TIERS.forEach(t => {
+      if (t < cirDl) candidateTiers.add(t);
+    });
+
+    const sortedTiers = Array.from(candidateTiers).sort((a, b) => b - a);
+
+    let html = '';
+    // OPÇÃO PADRÃO: MESMA DA BANDA DE DOWNLOAD (100% SIMÉTRICO)
+    const dlLabel = cirDl >= 1000 ? (cirDl / 1000).toFixed(1) + ' Gbps' : cirDl + ' Mbps';
+    const isDlDefaultSel = (!prevVal || prevVal === 'same_dl' || prevVal === 'auto' || parseFloat(prevVal) === cirDl);
+    html += `<option value="same_dl" ${isDlDefaultSel ? 'selected' : ''}>⚡ ${dlLabel} (Padrão: Mesma do Download — 100%)</option>`;
+
+    sortedTiers.forEach(tier => {
+      const pct = Math.round((tier / cirDl) * 100);
+      let desc = '';
+      if (tier === 35) {
+        desc = `Padrão Claro / NET HFC — ${pct}%`;
+      } else if (tier === half) {
+        desc = `50% do Download`;
+      } else if (pct >= 5) {
+        desc = `${pct}% do Download`;
+      }
+      const label = `${tier >= 1000 ? (tier / 1000).toFixed(1) + ' Gbps' : tier + ' Mbps'}${desc ? ' (' + desc + ')' : ''}`;
+      const isSel = (!isDlDefaultSel && prevVal && prevVal !== 'same_dl' && prevVal !== 'auto' && parseFloat(prevVal) === tier);
+      html += `<option value="${tier}" ${isSel ? 'selected' : ''}>${label}</option>`;
+    });
+
+    const isCustomSel = (!isDlDefaultSel && prevVal === 'custom');
+    html += `<option value="custom" ${isCustomSel ? 'selected' : ''}>✏️ Personalizado (Mbps)...</option>`;
+
+    sel.innerHTML = html;
+
+    const boxCustom = document.getElementById('boxCustomUlCir');
+    if (boxCustom) {
+      boxCustom.style.display = (sel.value === 'custom') ? 'flex' : 'none';
+    }
+  }
+
   function onCirChange() {
     const val = document.getElementById('cbCirBanda').value;
     const box = document.getElementById('boxCustomCir');
     const txt = document.getElementById('txtCustomCir');
     if (box) box.style.display = (val === 'custom') ? 'flex' : 'none';
     if (val === 'custom' && txt) txt.focus();
+
+    const profKey = document.getElementById('cbProjetoPerfil').value;
+    if (profKey === 'bradesco_bandalarga') {
+      populateAsymmetricUploadOptions();
+    }
+
     updateTargetsDisplay();
     checkConfigConsistency();
   }
 
   function onCustomCirInput() {
+    const profKey = document.getElementById('cbProjetoPerfil').value;
+    if (profKey === 'bradesco_bandalarga') {
+      populateAsymmetricUploadOptions();
+    }
     updateTargetsDisplay();
     checkConfigConsistency();
   }
@@ -1109,10 +1158,22 @@
 
   function toggleAsymmetricControls() {
     const profKey = document.getElementById('cbProjetoPerfil').value;
-    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bradesco_dedicado;
+    const isAsymBrad = (profKey === 'bradesco_bandalarga');
     const boxAsym = document.getElementById('boxAsymmetricUpload');
+    const boxAsymInfo = document.getElementById('boxAsymmetricInfo');
+    const lblCir = document.getElementById('lblCirBanda');
+
     if (boxAsym) {
-      boxAsym.style.display = p.isAsymmetric ? 'block' : 'none';
+      boxAsym.style.display = isAsymBrad ? 'block' : 'none';
+    }
+    if (boxAsymInfo) {
+      boxAsymInfo.style.display = isAsymBrad ? 'block' : 'none';
+    }
+    if (lblCir) {
+      lblCir.innerText = isAsymBrad ? '🎯 Banda de Download Contratada (CIR):' : '🎯 Banda Contratada do Link (CIR):';
+    }
+    if (isAsymBrad) {
+      populateAsymmetricUploadOptions();
     }
   }
 
@@ -1126,18 +1187,19 @@
   }
 
   function getUlCirNominal(p, cirDl) {
-    if (!p.isAsymmetric) return cirDl; // 1:1 simétrico
+    if (!p.isAsymmetric || p.name.includes('Boticário')) return cirDl; // 1:1 simétrico ou cálculo Boticário
     const el = document.getElementById('cbUlCirBanda');
-    if (!el) return cirDl * (p.defaultUlRatio || 0.5);
+    if (!el) return cirDl;
     const val = el.value;
-    if (val === 'auto') {
-      return cirDl * (p.defaultUlRatio || 0.5);
+    if (!val || val === 'same_dl' || val === 'auto') {
+      return cirDl;
     }
     if (val === 'custom') {
       const num = parseFloat(document.getElementById('txtCustomUlCir')?.value);
-      return (num && num > 0) ? num : (cirDl * 0.5);
+      return (num && num > 0) ? num : cirDl;
     }
-    return parseFloat(val) || (cirDl * 0.5);
+    const parsed = parseFloat(val);
+    return (parsed && parsed > 0) ? parsed : cirDl;
   }
 
   function updateProfileExplaining() {
@@ -1169,7 +1231,12 @@
       if (p.isAsymmetric && p.name.includes('Boticário')) {
         ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (${(p.ulPctReq * 100).toFixed(0)}% do CIR)`;
       } else if (p.isAsymmetric) {
-        ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Upload OS: ${cirUl.toFixed(0)}M)`;
+        const ulFormatted = cirUl >= 1000 ? (cirUl / 1000).toFixed(1) + 'G' : cirUl.toFixed(0) + 'M';
+        if (cirUl === cirDl) {
+          ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Upload OS: ${ulFormatted} • Padrão 80%)`;
+        } else {
+          ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Upload OS: ${ulFormatted} Assimétrico • 80%)`;
+        }
       } else {
         ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Simétrico 1:1)`;
       }
@@ -1188,7 +1255,7 @@
       cirUlVal: cirUl,
       cirPreset: document.getElementById('cbCirBanda').value,
       customCir: document.getElementById('txtCustomCir')?.value || '',
-      ulPreset: document.getElementById('cbUlCirBanda')?.value || 'auto',
+      ulPreset: document.getElementById('cbUlCirBanda')?.value || 'same_dl',
       customUlCir: document.getElementById('txtCustomUlCir')?.value || '',
       profileKey: profKey,
       profileName: p.name,
@@ -1201,11 +1268,12 @@
     if (!lastCompletedConfig) return false;
     const cur = getCurrentConfig();
     const isBrad = cur.profileKey && cur.profileKey.startsWith('bradesco');
+    const isAsym = (cur.profileKey === 'bradesco_bandalarga');
     return (
       cur.cirPreset !== lastCompletedConfig.cirPreset ||
       (cur.cirPreset === 'custom' && cur.customCir !== lastCompletedConfig.customCir) ||
-      cur.ulPreset !== lastCompletedConfig.ulPreset ||
-      (cur.ulPreset === 'custom' && cur.customUlCir !== lastCompletedConfig.customUlCir) ||
+      (isAsym && cur.ulPreset !== lastCompletedConfig.ulPreset) ||
+      (isAsym && cur.ulPreset === 'custom' && cur.customUlCir !== lastCompletedConfig.customUlCir) ||
       cur.profileKey !== lastCompletedConfig.profileKey ||
       cur.osNumero !== lastCompletedConfig.osNumero ||
       (isBrad && cur.agencia !== lastCompletedConfig.agencia)
@@ -1238,15 +1306,16 @@
     if (txtCustom && lastCompletedConfig.customCir) txtCustom.value = lastCompletedConfig.customCir;
     onCirChange();
 
+    document.getElementById('cbProjetoPerfil').value = lastCompletedConfig.profileKey;
+    onPerfilChange();
+
     if (document.getElementById('cbUlCirBanda')) {
+      populateAsymmetricUploadOptions(lastCompletedConfig.ulPreset);
       document.getElementById('cbUlCirBanda').value = lastCompletedConfig.ulPreset;
       const txtCustomUl = document.getElementById('txtCustomUlCir');
       if (txtCustomUl && lastCompletedConfig.customUlCir) txtCustomUl.value = lastCompletedConfig.customUlCir;
       onUlCirChange();
     }
-
-    document.getElementById('cbProjetoPerfil').value = lastCompletedConfig.profileKey;
-    onPerfilChange();
 
     if (document.getElementById('txtOsNumero')) document.getElementById('txtOsNumero').value = lastCompletedConfig.osNumero || '';
     if (document.getElementById('txtAgencia')) document.getElementById('txtAgencia').value = lastCompletedConfig.agencia || '';
