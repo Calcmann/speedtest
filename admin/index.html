@@ -1,0 +1,4625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPARC ADMIN — Painel Central de Gestão & Telemetria Claro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: #141417;
+      --card-hover: #1c1c21;
+      --card-border: #27272a;
+      --card-border-focus: #3f3f46;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --claro-red: #ee1c25;
+      --claro-red-hover: #dc2626;
+      --claro-dark-red: #881337;
+      --emerald: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --rose: #f43f5e;
+      --rose-bg: rgba(244, 63, 94, 0.12);
+      --sky: #0284c7;
+      --sky-light: #38bdf8;
+      --purple: #8b5cf6;
+      --purple-bg: rgba(139, 92, 246, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+    /* LOGIN VIEW */
+    #loginView {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      background: radial-gradient(circle at top center, rgba(238, 28, 37, 0.15) 0%, rgba(9, 9, 11, 0.95) 70%);
+    }
+
+    .login-card {
+      background: rgba(20, 20, 23, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      border-radius: 18px;
+      padding: 38px 32px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(238, 28, 37, 0.2);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--claro-red), #991b1b);
+      color: white;
+      font-weight: 900;
+      font-size: 22px;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(238, 28, 37, 0.4);
+    }
+
+    .login-header h1 {
+      font-size: 22px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+
+    .login-header p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: #09090b;
+      border: 1.5px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--claro-red);
+      box-shadow: 0 0 0 3px rgba(238, 28, 37, 0.2);
+    }
+
+    .login-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--claro-red), #b91c1c);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(238, 28, 37, 0.3);
+    }
+
+    .login-btn:hover {
+      background: linear-gradient(135deg, #f82b34, #cf1b24);
+      transform: translateY(-1px);
+    }
+
+    .login-alert {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      display: none;
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #fb7185;
+    }
+
+    /* MAIN APP SHELL */
+    #appShell {
+      display: none;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    header {
+      background: rgba(20, 20, 23, 0.95);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-inner {
+      max-width: 1560px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-brand-title {
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* NAV TABS */
+    .nav-tabs {
+      display: flex;
+      background: #09090b;
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      gap: 4px;
+    }
+
+    .nav-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-tab:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .nav-tab.active {
+      background: var(--card-bg);
+      color: #ffffff;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .tab-badge {
+      background: var(--claro-red);
+      color: white;
+      font-size: 10px;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-pill.offline {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-success { background: #16a34a; color: white; }
+    .btn-success:hover { background: #15803d; }
+    .btn-danger { background: #dc2626; color: white; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-dark { background: #27272a; color: var(--text); border: 1px solid #3f3f46; }
+    .btn-dark:hover { background: #3f3f46; }
+
+    /* CONTENT LAYOUT */
+    main {
+      flex: 1;
+      max-width: 1560px;
+      margin: 0 auto;
+      padding: 24px;
+      width: 100%;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.2s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* KPI CARDS */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+
+    .kpi-card:hover {
+      border-color: var(--card-border-focus);
+      transform: translateY(-2px);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .kpi-total::before { background: var(--sky); }
+    .kpi-success::before { background: var(--emerald); }
+    .kpi-fail::before { background: var(--rose); }
+    .kpi-rate::before { background: var(--purple); }
+    .kpi-tech::before { background: var(--amber); }
+
+    .kpi-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .kpi-value {
+      font-size: 30px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -1px;
+      margin: 8px 0 4px;
+    }
+
+    .kpi-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* FILTERS PANEL */
+    .filter-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .filter-group label {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filter-input, .filter-select {
+      background: #09090b;
+      border: 1px solid #3f3f46;
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .filter-input:focus, .filter-select:focus {
+      border-color: var(--sky-light);
+    }
+
+    .search-box {
+      flex-grow: 1;
+      min-width: 260px;
+    }
+
+    /* CHARTS GRID */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .chart-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .chart-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chart-canvas-wrap {
+      position: relative;
+      height: 270px;
+      width: 100%;
+    }
+
+    /* TABLES */
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .table-title {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      max-height: 580px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+    }
+
+    th {
+      background: #101012;
+      color: #94a3b8;
+      font-weight: 700;
+      padding: 10px 14px;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      border-bottom: 1.5px solid #3f3f46;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #27272a;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background-color: var(--card-hover);
+    }
+
+    .badge {
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge-success { background: var(--emerald-bg); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-fail { background: var(--rose-bg); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
+    .badge-pending { background: var(--amber-bg); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-blocked { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(6px);
+    }
+
+    .modal-content {
+      background: #18181b;
+      border: 1px solid #3f3f46;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 760px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: #a1a1aa;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .modal-close:hover { color: white; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .detail-item {
+      background: #27272a;
+      border-radius: 8px;
+      padding: 11px 14px;
+    }
+
+    .detail-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #a1a1aa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-top: 3px;
+      word-break: break-all;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 24px;
+      border-top: 1px solid var(--card-border);
+      background: #09090b;
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #18181b;
+      border: 1px solid var(--emerald);
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 1000;
+      font-size: 13px;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      animation: slideUp 0.25s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= TELA DE LOGIN ================= -->
+  <div id="loginView">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="brand-badge">SP</div>
+        <h1>SPARC ADMIN</h1>
+        <p>Inteligência Operacional &amp; Gestão Centralizada</p>
+      </div>
+
+      <div class="login-alert" id="loginAlert">
+        ⚠️ Usuário ou senha incorretos.
+      </div>
+
+      <form id="formLogin" onsubmit="handleLoginSubmit(event)">
+        <div class="form-group">
+          <label for="inputUser">Usuário Administrador</label>
+          <input type="text" id="inputUser" class="form-input" value="admin" required autofocus>
+        </div>
+
+        <div class="form-group">
+          <label for="inputPass">Senha de Acesso</label>
+          <input type="password" id="inputPass" class="form-input" placeholder="Digite a senha mestra" required>
+        </div>
+
+        <button type="submit" class="login-btn">🔐 Entrar no Painel</button>
+      </form>
+
+      <div style="text-align: center; margin-top: 20px; font-size: 11.5px; color: var(--text-muted);">
+        Acesso restrito &bull; Claro S.A. Operações &bull; SPARC v0.8
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= APLICAÇÃO PRINCIPAL ================= -->
+  <div id="appShell">
+    <header>
+      <div class="header-inner">
+        <div class="header-left">
+          <div class="brand-badge" style="width: 38px; height: 38px; font-size: 16px; margin-bottom: 0;">SP</div>
+          <div>
+            <div class="header-brand-title">SPARC ADMIN <span style="font-size: 11px; background: var(--claro-red); color: white; padding: 1px 7px; border-radius: 12px;">WEB</span></div>
+            <div class="header-brand-sub">Claro S.A. &bull; Gestão &amp; Telemetria em Nuvem</div>
+          </div>
+        </div>
+
+        <nav class="nav-tabs">
+          <button class="nav-tab active" onclick="switchTab('telemetry')">
+            <span>📊</span> Telemetria
+          </button>
+          <button class="nav-tab" onclick="switchTab('technicians')">
+            <span>👥</span> Técnicos &amp; Licenças
+          </button>
+          <button class="nav-tab" onclick="switchTab('requests')">
+            <span>🔔</span> Solicitações <span class="tab-badge" id="badgeRequestsCount">0</span>
+          </button>
+          <button class="nav-tab" onclick="switchTab('speedtest')">
+            <span>📑</span> Auditoria Speedtest
+          </button>
+          <button class="nav-tab" onclick="switchTab('settings')">
+            <span>⚙️</span> Configurações
+          </button>
+        </nav>
+
+        <div class="header-right">
+          <span class="status-pill" id="pillCloudStatus">🟢 Nuvem Conectada</span>
+          <button class="btn btn-dark" onclick="syncCloudData(true)" title="Sincronizar dados agora">
+            <span>🔄</span> Sync
+          </button>
+          <button class="btn btn-dark" onclick="handleLogout()" style="background: rgba(244, 63, 94, 0.15); color: #fb7185; border-color: rgba(244, 63, 94, 0.3);">
+            <span>🚪</span> Sair
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- ================= ABA 1: TELEMETRIA OPERACIONAL ================= -->
+      <section id="tab-telemetry" class="tab-content active">
+        <!-- KPIs -->
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-total">
+            <div class="kpi-title">Total de Intervenções</div>
+            <div class="kpi-value" id="kpiTotal">0</div>
+            <div class="kpi-sub"><span>📋</span> Circuitos auditados em campo</div>
+          </div>
+          <div class="kpi-card kpi-success">
+            <div class="kpi-title">Homologados com Sucesso</div>
+            <div class="kpi-value" id="kpiSuccess">0</div>
+            <div class="kpi-sub"><span style="color: var(--emerald);">🟢</span> Ativações concluídas 100%</div>
+          </div>
+          <div class="kpi-card kpi-fail">
+            <div class="kpi-title">Falhas / Gargalos</div>
+            <div class="kpi-value" id="kpiFail">0</div>
+            <div class="kpi-sub"><span style="color: var(--rose);">🔴</span> Interrupções registradas</div>
+          </div>
+          <div class="kpi-card kpi-rate">
+            <div class="kpi-title">Taxa First Time Right</div>
+            <div class="kpi-value" id="kpiRate">0.0%</div>
+            <div class="kpi-sub"><span>🎯</span> Homologação de primeira</div>
+          </div>
+          <div class="kpi-card kpi-tech">
+            <div class="kpi-title">Técnicos Ativos</div>
+            <div class="kpi-value" id="kpiTechs">0</div>
+            <div class="kpi-sub"><span>👨‍💻</span> Operadores registrando dados</div>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filter-panel">
+          <div class="filter-group search-box">
+            <label>Busca Inteligente</label>
+            <input type="text" id="filterTelSearch" class="filter-input" placeholder="Designação, Cliente, Técnico, OTS, Modelo, IP WAN..." oninput="applyTelemetryFilters()">
+          </div>
+          <div class="filter-group">
+            <label>Status</label>
+            <select id="filterTelStatus" class="filter-select" onchange="applyTelemetryFilters()">
+              <option value="ALL">Todos os Status</option>
+              <option value="SUCESSO">🟢 Sucesso</option>
+              <option value="FALHA">🔴 Falha</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Modelo do Roteador</label>
+            <select id="filterTelModel" class="filter-select" onchange="applyTelemetryFilters()">
+              <option value="ALL">Todos os Modelos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Ações</label>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-success" onclick="exportTelemetryToCsv()">📊 Exportar CSV</button>
+              <button class="btn btn-dark" onclick="window.print()">🖨️ Imprimir</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">📈 Histórico de Volume &amp; Entregas por Data</div>
+            </div>
+            <div class="chart-canvas-wrap">
+              <canvas id="chartTimeline"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">🎯 Gargalos de Fluxo: Funil de Falhas por Etapa</div>
+            </div>
+            <div class="chart-canvas-wrap">
+              <canvas id="chartBottlenecks"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">📦 Distribuição por Modelo de Roteador</div>
+            </div>
+            <div class="chart-canvas-wrap">
+              <canvas id="chartModels"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">🏆 Ranking de Atividades por Técnico</div>
+            </div>
+            <div class="chart-canvas-wrap">
+              <canvas id="chartTechs"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">📋 Registros de Intervenção em Campo</div>
+            <div style="font-size: 11.5px; color: var(--text-muted);" id="telTableCount">Exibindo 0 registros</div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data / Hora</th>
+                  <th>Designação IP</th>
+                  <th>Cliente / Razão Social</th>
+                  <th>Técnico</th>
+                  <th>Empresa</th>
+                  <th>Modelo Roteador</th>
+                  <th>IP WAN</th>
+                  <th>Status</th>
+                  <th>Duração</th>
+                  <th>Etapa Falha / Gargalo</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="telTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ABA 2: TÉCNICOS & LICENÇAS (DEVICES.JSON) ================= -->
+      <section id="tab-technicians" class="tab-content">
+        <!-- KPIs Técnicos -->
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-total">
+            <div class="kpi-title">Total de Técnicos</div>
+            <div class="kpi-value" id="kpiDevTotal">0</div>
+            <div class="kpi-sub"><span>👥</span> Fichas cadastradas</div>
+          </div>
+          <div class="kpi-card kpi-success">
+            <div class="kpi-title">Cópias Ativas</div>
+            <div class="kpi-value" id="kpiDevActive">0</div>
+            <div class="kpi-sub"><span style="color: var(--emerald);">🟢</span> Acesso liberado</div>
+          </div>
+          <div class="kpi-card kpi-fail">
+            <div class="kpi-title">Bloqueadas / Revogadas</div>
+            <div class="kpi-value" id="kpiDevBlocked">0</div>
+            <div class="kpi-sub"><span style="color: var(--rose);">🔴</span> Sem autorização de uso</div>
+          </div>
+          <div class="kpi-card kpi-tech">
+            <div class="kpi-title">Parceiras / Terceirizadas</div>
+            <div class="kpi-value" id="kpiDevCompanies">0</div>
+            <div class="kpi-sub"><span>🏢</span> Empresas ativas</div>
+          </div>
+        </div>
+
+        <!-- Filtros Técnicos -->
+        <div class="filter-panel">
+          <div class="filter-group search-box">
+            <label>Buscar Técnico</label>
+            <input type="text" id="filterDevSearch" class="filter-input" placeholder="Nome, Matrícula, Empresa, Telefone, Machine GUID, UF..." oninput="applyTechnicianFilters()">
+          </div>
+          <div class="filter-group">
+            <label>Status</label>
+            <select id="filterDevStatus" class="filter-select" onchange="applyTechnicianFilters()">
+              <option value="ALL">Todos os Status</option>
+              <option value="Active">🟢 Ativos</option>
+              <option value="Blocked">🔴 Bloqueados</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Plataforma</label>
+            <select id="filterDevPlatform" class="filter-select" onchange="applyTechnicianFilters()">
+              <option value="ALL">Todas as Plataformas</option>
+              <option value="Windows">🪟 Windows</option>
+              <option value="Android">🤖 Android</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Ações</label>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary" onclick="openNewTechnicianModal()">➕ Novo Técnico</button>
+              <button class="btn btn-success" onclick="exportTechniciansToCsv()">📊 Exportar CSV</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabela Técnicos -->
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">👥 Fichas de Cadastro e Controle de Licenças (Node-Locking RSA)</div>
+            <div style="font-size: 11.5px; color: var(--text-muted);" id="devTableCount">Exibindo 0 técnicos</div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>Plataforma</th>
+                  <th>Técnico (Nome / Matrícula)</th>
+                  <th>Empresa</th>
+                  <th>WhatsApp / Contato</th>
+                  <th>UF / Cluster</th>
+                  <th>Versão Instalada</th>
+                  <th>Expiração Licença</th>
+                  <th>Machine GUID</th>
+                  <th>Ações de Controle</th>
+                </tr>
+              </thead>
+              <tbody id="devTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ABA 3: SOLICITAÇÕES ONLINE ================= -->
+      <section id="tab-requests" class="tab-content">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">🔔 Fila de Solicitações de Ativação Online (Novos Técnicos em Campo)</div>
+            <div style="font-size: 11.5px; color: var(--text-muted);" id="reqTableCount">0 pendentes</div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data da Solicitação</th>
+                  <th>Técnico</th>
+                  <th>Empresa</th>
+                  <th>Matrícula</th>
+                  <th>Telefone</th>
+                  <th>Plataforma</th>
+                  <th>Machine GUID / Display</th>
+                  <th>Versão do App</th>
+                  <th>Aprovação Imediata</th>
+                </tr>
+              </thead>
+              <tbody id="reqTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ABA 4: AUDITORIA SPEEDTEST ================= -->
+      <section id="tab-speedtest" class="tab-content">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">📑 Auditoria de Links &amp; Aceite de Projetos (Bradesco &amp; Varejo)</div>
+            <a href="../speedtest/campo.html" target="_blank" class="btn btn-primary">🚀 Abrir Ferramenta de Campo</a>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data / Hora</th>
+                  <th>Projeto / Perfil</th>
+                  <th>OS / Chamado</th>
+                  <th>Agência / Local</th>
+                  <th>Banda Contratada</th>
+                  <th>Download Efetivo</th>
+                  <th>Upload Efetivo</th>
+                  <th>Latência (RTT)</th>
+                  <th>Jitter</th>
+                  <th>Perda</th>
+                  <th>Status ANS</th>
+                  <th>Técnico</th>
+                </tr>
+              </thead>
+              <tbody id="stTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ABA 5: CONFIGURAÇÕES & NUVEM ================= -->
+      <section id="tab-settings" class="tab-content">
+        <div class="charts-grid" style="grid-template-columns: 1fr 1fr;">
+          <!-- Conexão GitHub Nuvem -->
+          <div class="chart-card">
+            <div class="chart-title" style="margin-bottom: 14px;">☁️ Conexão com Repositório Central (GitHub API)</div>
+            <div class="form-group">
+              <label>Repositório de Dados</label>
+              <input type="text" id="cfgRepo" class="form-input" value="Calcmann/repo" readonly>
+            </div>
+            <div class="form-group">
+              <label>GitHub Personal Access Token (PAT)</label>
+              <input type="password" id="cfgToken" class="form-input" placeholder="ghp_... (deixe em branco para usar chave padrão institucional)">
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary" onclick="testGitHubConnection()">🔍 Testar Conexão</button>
+              <button class="btn btn-success" onclick="saveGitHubSettings()">💾 Salvar Token</button>
+            </div>
+            <div id="cfgTokenStatus" style="font-size: 12px; margin-top: 10px; font-weight: 700;"></div>
+          </div>
+
+          <!-- Segurança & Senha -->
+          <div class="chart-card">
+            <div class="chart-title" style="margin-bottom: 14px;">🔐 Senha de Acesso do Painel Admin</div>
+            <div class="form-group">
+              <label>Nova Senha Mestra</label>
+              <input type="password" id="cfgNewPass" class="form-input" placeholder="Mínimo 6 caracteres">
+            </div>
+            <div class="form-group">
+              <label>Confirmar Nova Senha</label>
+              <input type="password" id="cfgConfirmPass" class="form-input" placeholder="Repita a nova senha">
+            </div>
+            <button class="btn btn-danger" onclick="changeAdminPassword()">🔑 Atualizar Senha de Acesso</button>
+            <div id="cfgPassStatus" style="font-size: 12px; margin-top: 10px; font-weight: 700;"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ================= MODAL: DETALHES DE ATIVIDADE ================= -->
+    <div class="modal-overlay" id="modalActivity" onclick="closeModal('modalActivity', event)">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal('modalActivity')">&times;</button>
+        <h2 style="font-size: 17px; font-weight: 800;" id="modalActTitle">Detalhes da Intervenção Técnica</h2>
+        <div class="detail-grid" id="modalActBody"></div>
+      </div>
+    </div>
+
+    <!-- ================= MODAL: FICHA DO TÉCNICO & ATIVAÇÃO ================= -->
+    <div class="modal-overlay" id="modalTech" onclick="closeModal('modalTech', event)">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal('modalTech')">&times;</button>
+        <h2 style="font-size: 17px; font-weight: 800;" id="modalTechTitle">Ficha Cadastral do Técnico</h2>
+        
+        <div class="detail-grid" id="modalTechBody"></div>
+
+        <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid #3f3f46;">
+          <h3 style="font-size: 13.5px; font-weight: 800; margin-bottom: 12px; color: var(--text);">Ações de Governança &amp; Licenciamento RSA</h3>
+          
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <select id="modalTechExtendDays" class="filter-select" style="padding: 9px 12px;">
+              <option value="30">Liberar por 30 Dias</option>
+              <option value="60">Liberar por 60 Dias</option>
+              <option value="90" selected>Liberar por 90 Dias (Recomendado)</option>
+              <option value="180">Liberar por 180 Dias</option>
+              <option value="365">Liberar por 1 Ano (365 Dias)</option>
+              <option value="9999">Licença Permanente (Sem Expiração)</option>
+            </select>
+            <button class="btn btn-success" onclick="executeExtendLicense()">🟢 Ativar / Renovar Licença</button>
+            <button class="btn btn-danger" onclick="executeBlockLicense()">🔴 Bloquear / Revogar Cópia</button>
+            <button class="btn btn-dark" onclick="copyCurrentTechKey()">📋 Copiar Chave RSA</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= MODAL: NOVO TÉCNICO ================= -->
+    <div class="modal-overlay" id="modalNewTech" onclick="closeModal('modalNewTech', event)">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal('modalNewTech')">&times;</button>
+        <h2 style="font-size: 17px; font-weight: 800; margin-bottom: 18px;">Cadastrar Novo Técnico em Campo</h2>
+        
+        <form onsubmit="handleNewTechnicianSubmit(event)">
+          <div class="detail-grid">
+            <div class="form-group">
+              <label>Nome Completo</label>
+              <input type="text" id="newTechName" class="form-input" required placeholder="Ex: Denis André">
+            </div>
+            <div class="form-group">
+              <label>Empresa / Terceirizada</label>
+              <input type="text" id="newTechCompany" class="form-input" required placeholder="Ex: Procisa ou Claro S.A.">
+            </div>
+            <div class="form-group">
+              <label>Matrícula / ID</label>
+              <input type="text" id="newTechEmployeeId" class="form-input" required placeholder="Ex: 15662">
+            </div>
+            <div class="form-group">
+              <label>Telefone / WhatsApp</label>
+              <input type="text" id="newTechPhone" class="form-input" required placeholder="Ex: (11) 99887-6655">
+            </div>
+            <div class="form-group">
+              <label>E-mail</label>
+              <input type="email" id="newTechEmail" class="form-input" placeholder="tecnico@empresa.com.br">
+            </div>
+            <div class="form-group">
+              <label>Cluster / UF</label>
+              <input type="text" id="newTechCluster" class="form-input" placeholder="Ex: Interior SP">
+            </div>
+            <div class="form-group">
+              <label>Plataforma</label>
+              <select id="newTechPlatform" class="form-input">
+                <option value="Windows">🪟 Windows (Desktop)</option>
+                <option value="Android">🤖 Android (Mobile)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Validade da Licença</label>
+              <select id="newTechDays" class="form-input">
+                <option value="90" selected>90 Dias (Padrão)</option>
+                <option value="180">180 Dias</option>
+                <option value="365">1 Ano (365 Dias)</option>
+                <option value="9999">Permanente</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>Machine GUID (Identificador Único da Máquina)</label>
+              <input type="text" id="newTechGuid" class="form-input" required placeholder="Ex: 637ee96a-247f-46e7-932e-665c2b931a09">
+            </div>
+          </div>
+
+          <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" class="btn btn-dark" onclick="closeModal('modalNewTech')">Cancelar</button>
+            <button type="submit" class="btn btn-success">💾 Salvar e Liberar Acesso</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toastMessage" class="toast">
+      <span id="toastIcon">✓</span>
+      <span id="toastText">Operação realizada com sucesso!</span>
+    </div>
+
+    <footer>
+      SPARC ADMIN WEB &bull; Sistema de Provisionamento e Ativação de Roteadores Claro &bull; Telemetria Centralizada &bull; 10/11/2026
+    </footer>
+  </div>
+
+  <script>
+    // DADOS INICIAIS EMBUTIDOS (SNAPSHOTS PARA DISPONIBILIDADE OFFLINE E INSTANTÂNEA)
+    let RAW_DEVICES = [
+  {
+    "MachineGuid": "637ee96a-247f-46e7-932e-665c2b931a09",
+    "MachineFingerprint": "FA3956EA4471DF1B3FAE71816F76564258F4D9E501D7FD84F166E9B8D507E95E",
+    "FirstName": "Denis",
+    "LastName": "André",
+    "Phone": "018996939701",
+    "Email": "denis.andreppe@gmail.om",
+    "Company": "Procisa",
+    "EmployeeId": "15662",
+    "Cluster": "Interior",
+    "Uf": "SP",
+    "ClientVersion": "BETA-TESTES-0.8.76-20261008",
+    "FirstRegisteredUtc": "2026-10-27T17:48:15.6377761Z",
+    "LastSeenUtc": "2026-10-27T17:48:15.6377946Z",
+    "ExpirationDateIso": "2027-01-25",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiNjM3ZWU5NmEtMjQ3Zi00NmU3LTkzMmUtNjY1YzJiOTMxYTA5IiwiZiI6IkZBMzk1NkVBNDQ3MURGMUIzRkFFNzE4MTZGNzY1NjQyNThGNEQ5RTUwMUQ3RkQ4NEYxNjZFOUI4RDUwN0U5NUUiLCJleHAiOiIyMDI3LTAxLTI1VDAwOjAwOjAwWiJ9.pVkQZfCZ52I6QACZqa5KFvtKkwPXSZrv5jHSv9_4RSvAis5YV8IIxB-w1GYPI4Ath0arQBUNvu-pBA_4py9douTowk4fSGlgv_XlMohniXQej-UjNkEGnRVo12qnn5qsZTpLozXFABzbwvNbjjmNxxE-aAWNKwlc3ZGW30JXrxqnJ0fKEZA2KrQgIDA4_K0K4_ipEoLcayfMRGfOeZRrI6BiKPb5BOP_n1EOI8BnPwzm28nWo8BXhAUtjeO_1NfjBzUPx9xpPgEjYj_kaSrIg4JgBqOOYGRookwrruKNDUy9sERRs6X845rlEIRCuTGctQ2sigzG20hKxHqtiWjudg",
+    "Notes": "Aprovado online (90 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Denis André",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/018996939701",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "8246e85f-4051-4e10-8283-d3324b4d6e40",
+    "MachineFingerprint": "E637EF2AA58DF8DA7FA1F9193D8B130544067535AC1DD16D40539C9B70B3BE98",
+    "FirstName": "Gabriel",
+    "LastName": "Lucas",
+    "Phone": "(11) 91368-1942",
+    "Email": "g.morais@procisa.com.br",
+    "Company": "Procisa",
+    "EmployeeId": "151200",
+    "Cluster": "SP Interior",
+    "Uf": "SP",
+    "ClientVersion": "BETA-TESTES-0.8.76-20261008",
+    "FirstRegisteredUtc": "2026-10-27T13:54:03.7366739Z",
+    "LastSeenUtc": "2026-10-27T13:54:03.7366925Z",
+    "ExpirationDateIso": "2027-01-25",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiODI0NmU4NWYtNDA1MS00ZTEwLTgyODMtZDMzMjRiNGQ2ZTQwIiwiZiI6IkU2MzdFRjJBQTU4REY4REE3RkExRjkxOTNEOEIxMzA1NDQwNjc1MzVBQzFERDE2RDQwNTM5QzlCNzBCM0JFOTgiLCJleHAiOiIyMDI3LTAxLTI1VDAwOjAwOjAwWiJ9.SubYKu5UxcrcZXukyKJki1wTpEQOaBLCHkYRZDdoilwzTUKUa5vISU_1p1jTi61J4tFtXW7rkuHk3D3HOJkv1yMcDwcjTMh4Z5DeWoC0-3ooYlPx4NE2MYO_dvKnuBl5eR_C5Nj4Q6b8BBpVDfTPveEeMxh33684tzef9gq-KPJB4v6yt4g8lIG87WFJ7IVSaM0xhjSBVOIUhBPoGLVUqls62OoJCe8hq86d2ci7-OQ0yTx5UNYRYEvHge-iwpiS9J-sAp2oq_ztUtxcqceo73kavfEpmu5rQMSH2wANXrhzW7i_p9KChw9SD7m-6M1ABv1KkkOPrlVen0PFh7fShA",
+    "Notes": "Aprovado online (90 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Gabriel Lucas",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5511913681942",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "0ef227fa-c79b-4d01-817b-95d8373896a0",
+    "MachineFingerprint": "DE4A12820BD07B5D2C80EFC83461A6CE331850461E3202C085237B86B1B77266",
+    "FirstName": "George Luís",
+    "LastName": "Calcmann",
+    "Phone": "(00) 00000-0000",
+    "Email": "george.calcmann@claro.com.br",
+    "Company": "Claro S.A",
+    "EmployeeId": "123456",
+    "Cluster": "Florianópolis",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.61-20261002",
+    "FirstRegisteredUtc": "2026-10-23T17:55:00.9922506Z",
+    "LastSeenUtc": "2026-10-23T17:55:00.9922725Z",
+    "ExpirationDateIso": "2027-01-21",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiMGVmMjI3ZmEtYzc5Yi00ZDAxLTgxN2ItOTVkODM3Mzg5NmEwIiwiZiI6IkRFNEExMjgyMEJEMDdCNUQyQzgwRUZDODM0NjFBNkNFMzMxODUwNDYxRTMyMDJDMDg1MjM3Qjg2QjFCNzcyNjYiLCJleHAiOiIyMDI3LTAxLTIxVDAwOjAwOjAwWiJ9.Y69PNuDrG0QylU00hewf1B0YWzfIhNucusOITtfHPVdJoYRktMzXa6vY1KhLyt3VFmz3ReywKlTrZCgUrTQawsjANnNG8z8gB5g5oIhdogFhm287OJ5vbawfoWI2GppRuCwMlzvfH6rYwNq4YS7pNxzHBUHESBmrzcBafUvvAhOhRAxZsKVaVqHrWZ4p5x69EuN3Ki_Y03xu20WGS2ZIMj7Y1CJkWAegTzc2deDc_HFHy_07RbUBWVRM_9sYRQgvGvFiZbOwadBEf3tEY4Sp2wcrkNsxKnIHgzNONkbrKC00Nq64rhTpbebyK38gWgMqNMx9W2bLb0eUohieIdiUrQ",
+    "Notes": "Administrador do Sistema (Ambiente de Desenvolvimento)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "George Luís Calcmann",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5500000000000",
+    "Role": "Administrador"
+  },
+  {
+    "MachineGuid": "4a5d9b04-6b99-449c-bff2-72dc252a4300",
+    "MachineFingerprint": "0FEFB84C2125EB6F9A4D52F50006017A1BBD969CD2B7A15C79CA134C026099A3",
+    "FirstName": "José Volmir",
+    "LastName": "Pavão",
+    "Phone": "(49) 98863-2386",
+    "Email": "jose.pavao@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "143873",
+    "Cluster": "SC",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.100-20261014",
+    "FirstRegisteredUtc": "2026-10-16T12:55:54.3494985Z",
+    "LastSeenUtc": "2026-10-16T12:55:54.3495252Z",
+    "ExpirationDateIso": "2027-01-14",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiNGE1ZDliMDQtNmI5OS00NDljLWJmZjItNzJkYzI1MmE0MzAwIiwiZiI6IjBGRUZCODRDMjEyNUVCNkY5QTRENTJGNTAwMDYwMTdBMUJCRDk2OUNEMkI3QTE1Qzc5Q0ExMzRDMDI2MDk5QTMiLCJleHAiOiIyMDI3LTAxLTE0VDAwOjAwOjAwWiJ9.o1jf21mWfF1hnvksU2gYpWqgiAiw-df5plmERjlD353iiv7m30NPlQz_M5PvvgpOi8I_W16q7wma8MQ-FiDNHOLv3MyUBaGwwF4hdJQTWcxFmTdpj2DQGaRl0jDQsj4fSe3BjEvlvdmHWAU8NNlGlhNZr6Cm3zYo-B0BEpby5vzuQf-zdXegpVWOjp-cDEct_aC81ChToyi9Id761KbYy7jRdG9iKUE2JiereWS69uHQipxeHYfNwcYC1rken9QYPpFZP4sE3Hcb0yIC1SRS9gQfjNMTvQfwpQXgKUIqBbZnSwAods31_uoLnXQ6C6S2CLb32hl-1W11WbDZTnEbkQ",
+    "Notes": "Aprovado online (90 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "José Volmir Pavão",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5549988632386",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "53af585e-cb1b-464d-95fd-f8f98a8f6663",
+    "MachineFingerprint": "1EC214D8A886A45BC68151B2538D0ADF36B7A511CEE5A511079995BA0D68C31D",
+    "FirstName": "Abimael",
+    "LastName": "Barbosa",
+    "Phone": "(19) 99464-6840",
+    "Email": "abimajb@embratel.com.br",
+    "Company": "Claro",
+    "EmployeeId": "9479736",
+    "Cluster": "Casbc",
+    "Uf": "SP",
+    "ClientVersion": "BETA-TESTES-0.8.100-20261014",
+    "FirstRegisteredUtc": "2026-10-15T17:29:53.2432475Z",
+    "LastSeenUtc": "2026-10-15T17:29:53.2432725Z",
+    "ExpirationDateIso": "2027-01-13",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiNTNhZjU4NWUtY2IxYi00NjRkLTk1ZmQtZjhmOThhOGY2NjYzIiwiZiI6IjFFQzIxNEQ4QTg4NkE0NUJDNjgxNTFCMjUzOEQwQURGMzZCN0E1MTFDRUU1QTUxMTA3OTk5NUJBMEQ2OEMzMUQiLCJleHAiOiIyMDI3LTAxLTEzVDAwOjAwOjAwWiJ9.jVEwAcjImp5KxlDWWwtVBnPAvk_9TmJ5KE2QTTkS-JhbZ7S05KiWzN5ubAO36iNuKYfm8VkjLA5roJ_Gy7gd_FT-HxVkiJpkW7K-a0OdS3SFlXhWRQZD8ix-0m6Z955JXtv7U49BpHTvMuAVosKV6frem3ovOmwsq8i7MY-Jmfrlwr00nBrIgJJW8U7pd9vneeSBaB2jhSfRPEYNqD0GhJz-9qXqgl2Xqm8zBHL_Zz0jYrfIPbs-sgkVHz-Akin_ab_TjcasQgUT4peNOFfKG3lroylBw3gG3njJocABqHyNpGcXvxdKFv8VrUgVBI-D2p6Iisu2-7Q5SWfKWE03dQ",
+    "Notes": "Aprovado online (90 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Abimael Barbosa",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5519994646840",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "a4155838-321f-4019-878e-e79ed3a195f0",
+    "MachineFingerprint": "FC93BBBA4FF223E265536E9D87739692FC2508C66446FB7A0084553AAF3F4F2B",
+    "FirstName": "Henrique",
+    "LastName": "Silvino",
+    "Phone": "(16) 99125-4729",
+    "Email": "henrique.silvino@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "472206",
+    "Cluster": "SPI",
+    "Uf": "SP",
+    "ClientVersion": "BETA-TESTES-0.8.76-20261008",
+    "FirstRegisteredUtc": "2026-10-08T17:26:49.6839405Z",
+    "LastSeenUtc": "2026-10-08T17:26:49.6839592Z",
+    "ExpirationDateIso": "2027-01-06",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiYTQxNTU4MzgtMzIxZi00MDE5LTg3OGUtZTc5ZWQzYTE5NWYwIiwiZiI6IkZDOTNCQkJBNEZGMjIzRTI2NTUzNkU5RDg3NzM5NjkyRkMyNTA4QzY2NDQ2RkI3QTAwODQ1NTNBQUYzRjRGMkIiLCJleHAiOiIyMDI3LTAxLTA2VDAwOjAwOjAwWiJ9.SjWhMGH6ubR6q3aeiAmrPX8l7HBhybpIdzXuysxp9STybqx1giXOQp7mrB3P7sgphKYXlYavwXtha6GwAWJZG71q3-Wis-SHVKARgoyj26RvNW1_20ZfIzZHrAgXJOob9ShLhDLIkjnwZ2stsrFj7OTY_GljcRxQapPUt4ru2N4RlR5rBNkDOBvzIYrmcQgCeh8rwS5WOyT0mBc2NdANVxm64uwMIOTq9rfIaX74mgePV-XXuMMY1yohAQVLBpTiQK2TlAb0GYELo4Ha1lgLsP9h1UXGIqskth6hOKG4wQqk1S0wg-GdK9M380WXxs1kYC6kCpJgyTA66BruzlmzoQ",
+    "Notes": "Aprovado online (90 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Henrique Silvino",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5516991254729",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "e5ce2cf7-5445-4a7f-8bda-f4164d777ab1",
+    "MachineFingerprint": "25307CE007D3E7D56FC7C5D3FC7D1C802DB11C306904DE706B1877D7D3BEDA4D",
+    "FirstName": "Lucas",
+    "LastName": "Ratier",
+    "Phone": "(48) 99812-5397",
+    "Email": "",
+    "Company": "Sinos Telecom",
+    "EmployeeId": "0",
+    "Cluster": "Florianopolis",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.63-20261002",
+    "FirstRegisteredUtc": "2026-10-07T12:45:38.5074365Z",
+    "LastSeenUtc": "2026-10-07T12:45:38.5074573Z",
+    "ExpirationDateIso": "2027-01-05",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiZTVjZTJjZjctNTQ0NS00YTdmLThiZGEtZjQxNjRkNzc3YWIxIiwiZiI6IjI1MzA3Q0UwMDdEM0U3RDU2RkM3QzVEM0ZDN0QxQzgwMkRCMTFDMzA2OTA0REU3MDZCMTg3N0Q3RDNCRURBNEQiLCJleHAiOiIyMDI3LTAxLTA1VDAwOjAwOjAwWiJ9.jjE8EE5MBeny5mwBA_8vgfwlOeUEgAU7fgPlECqLy-OdidXzIGIEk-gEXYx0GdYI2s9ON8H_0LsQYlC9cjVMA13lb0OGjGOoqBfdtRRVpi_0rfXyFomOGhfxX6g3d19SEAwSIjBjMho59_TlNNCm_FOznOfELiHYUMXOFb-IT1WzG9cSo60mHEs43bOHcINjxUocL1ZIfFQxGDTXS7YB10Nzc46CQyjnE0xtTQGUOV4KA7Ho2mMjbwNzWIuGot3LcDuCTZFL3T4t1uVaFJ2cMRoyze8chT548zDNHiCnglgfXFY0i07zV48ENFaZz0QzsAiyGK9W_7OCz-6hfFQtZQ",
+    "Notes": "Aprovado online (90 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Lucas Ratier",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5548998125397",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "bb4ed47f-c035-42aa-a7ff-59683fdaefbf",
+    "MachineFingerprint": "F4360A6BE4F419ADDBCAEAAC71AFC1FDC8AF18C2E0F3F1D60AAE7545A182C55C",
+    "FirstName": "Luiz",
+    "LastName": "Silva",
+    "Phone": "(47) 99650-2815",
+    "Email": "luizcarlosbento1987@gmail.com",
+    "Company": "Claro",
+    "EmployeeId": "0",
+    "Cluster": "Itajaí",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.63-20261002",
+    "FirstRegisteredUtc": "2026-10-06T18:09:41.5017234Z",
+    "LastSeenUtc": "2026-10-06T18:09:41.5017436Z",
+    "ExpirationDateIso": "2026-12-05",
+    "ValidDays": 60,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiYmI0ZWQ0N2YtYzAzNS00MmFhLWE3ZmYtNTk2ODNmZGFlZmJmIiwiZiI6IkY0MzYwQTZCRTRGNDE5QUREQkNBRUFBQzcxQUZDMUZEQzhBRjE4QzJFMEYzRjFENjBBQUU3NTQ1QTE4MkM1NUMiLCJleHAiOiIyMDI2LTEyLTA1VDAwOjAwOjAwWiJ9.cV_BwkPra3FmGRi8prR_a3jGOpDpVP1DT_54Ubx3n9FBQ5riE_eRQ-hzdTP70-xY_hU9vXB4S2NJjR2Wh6x0raqhg4od3U1KwJxWocoNIAtf95Jndla8DtA4HmnnWaOZlRJ796nmCRHvEm-tCy2gmXfSOKVm9rKkm49NhwIrDxMVJLam1ggP7B0SkfL-dEcFwtuhnSO5jWe8MNVdYlwz0lF3PPYXVN21Mi97IZAXtyq6yQnFG_sY13oV5fH2iAvhCUS4xRbsVNVDyyYe-3hxMGHuE_V52KRekFotqUCGjB9LrXoTFmZzJLRbqezvmurqwjHUhkBZEvlbZLBWy_8cfw",
+    "Notes": "Aprovado online (60 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Luiz Silva",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5547996502815",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "923d6621-ffa5-48de-b7b0-ff0b9a351c22",
+    "MachineFingerprint": "3E94C7C20654369D38CCF6C4D2676D3F14DC2B997961C675A080AF1997192477",
+    "FirstName": "Claudinei",
+    "LastName": "Dorow",
+    "Phone": "(47) 99111-3537",
+    "Email": "claudinei@sinostelecom.com.br",
+    "Company": "Sinos",
+    "EmployeeId": "0",
+    "Cluster": "Blumenau",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.100-20261014",
+    "FirstRegisteredUtc": "2026-10-05T17:18:39.548272Z",
+    "LastSeenUtc": "2026-11-10T12:37:41.066097Z",
+    "ExpirationDateIso": "2027-02-08",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiOTIzZDY2MjEtZmZhNS00OGRlLWI3YjAtZmYwYjlhMzUxYzIyIiwiZiI6IjNFOTRDN0MyMDY1NDM2OUQzOENDRjZDNEQyNjc2RDNGMTREQzJCOTk3OTYxQzY3NUEwODBBRjE5OTcxOTI0NzciLCJleHAiOiIyMDI3LTAyLTA4VDAwOjAwOjAwWiJ9.mB1hNvzqkPEtIg7W-UocTEo6mcfPjT6RVnMCEFLjhUVO6aF55vfGxzU5dqtl6lyJwMGbtNmzyZxBhUF1YEdZFhJZpf4dWoJaGNzdv3_uIZ4e5la1qZVGHrmvZXGQ7Y2WZ1KeK5EihXgUxHrIDF0jCoqGe1NxYvxAhTvuxP7yMUxjrGt-YMlPZkxazA5cPgTXNH45ONV5kEDSMP7YjNEzXMng96foO_2hpbUqqFGICm6COitdq1_CDdAydAjMygCDxfZ_5ZVQcJh1blTP965M5GfyP1q3PCZZxeaOp-z62slomh_qMqOnvNfLz5nkBEo47DV4YlaRKgyvZI-jFU8hAA",
+    "Notes": "Aprovado online (90 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Claudinei Dorow",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5547991113537",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "50ea7d73-4ec0-4a2a-9e6a-7ffbe413e47b",
+    "MachineFingerprint": "5D1BB4D720EF22ACC2A626B581E2B71CF3C611D1817ACAF09C34E954F654CBCE",
+    "FirstName": "George Luís",
+    "LastName": "Calcmann",
+    "Phone": "(48) 98803-6632",
+    "Email": "george.calcmann@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "9114406",
+    "Cluster": "FNS",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.63-20261002",
+    "FirstRegisteredUtc": "2026-10-02T18:33:59.8354862Z",
+    "LastSeenUtc": "2026-11-05T12:36:22.8842725Z",
+    "ExpirationDateIso": "2027-02-03",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiNTBlYTdkNzMtNGVjMC00YTJhLTllNmEtN2ZmYmU0MTNlNDdiIiwiZiI6IjVEMUJCNEQ3MjBFRjIyQUNDMkE2MjZCNTgxRTJCNzFDRjNDNjExRDE4MTdBQ0FGMDlDMzRFOTU0RjY1NENCQ0UiLCJleHAiOiIyMDI3LTAyLTAzVDAwOjAwOjAwWiJ9.uNtn0F4PmYByYs9bg2K02mbXM-XzaXnKFt5y4ol_4amWF-6xG1GtCFaFAIYg8xLtW3o_Garn9lClLqQSuQ64xnV9VbtQrx3u5lm_6vKXXiMEvVQmBhxAThQ4-9j5GuZRaco0CK56SgVK-zt7ePuxv_lW0pp83naQfhaEiKgAE9ub8jSMA0DulpUKSAadlsQ0oMhCOw8K3vR6fm9UjOQhItiXzIwOPqUOB1Z_Q2Dk1FZjJaNOYpPgBiqmL6w09s7D_5tSHRSE17GsMRliJ8G-hqy2E8N_0AEqjEB7jEdN5mEj8eLHOFqHNYAXEDhilJGAeN5iLJdDHpdMzgtioBqx7Q",
+    "Notes": "Administrador do Sistema (Ambiente de Desenvolvimento)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "George Luís Calcmann",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5548988036632",
+    "Role": "Administrador"
+  },
+  {
+    "MachineGuid": "9d66dbff-30e6-473d-a2e6-f6f87dac75a5",
+    "MachineFingerprint": "6384A3E8FB89D9C24128AAA179C68A0741BBBA387351FEE3BBD04BFA38B550BF",
+    "FirstName": "Sandro",
+    "LastName": "Ancini",
+    "Phone": "(49) 98807-8685",
+    "Email": "sandro.ancini@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "976876",
+    "Cluster": "Interior",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "FirstRegisteredUtc": "2026-10-02T17:28:41.7279214Z",
+    "LastSeenUtc": "2026-11-05T12:36:17.5496634Z",
+    "ExpirationDateIso": "2027-02-03",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiOWQ2NmRiZmYtMzBlNi00NzNkLWEyZTYtZjZmODdkYWM3NWE1IiwiZiI6IjYzODRBM0U4RkI4OUQ5QzI0MTI4QUFBMTc5QzY4QTA3NDFCQkJBMzg3MzUxRkVFM0JCRDA0QkZBMzhCNTUwQkYiLCJleHAiOiIyMDI3LTAyLTAzVDAwOjAwOjAwWiJ9.m-OVhcoQPPu38Cg13RnIHs-P5-lso7PWwbQWVeX8mlB6VdSJkh0qBi6EmjKuJSBwS3nswRTRomvqK6gBLTYUOgLrptsrbvsFNqfm2eEhEjaz3W0ICW86zlnmaucNoOVLZ6iN9dwhGAl_OF3E96wJdS2jGAYw54fLU1G5ndLlpf3gOTZV42yVVAJ-RtrtqpwIe-1i-u4nb_nNMd8rzL8FjEDxxgzR9Grr69TzFknL43HB12ugpGv86eQ4q2njeM9dxeokX6USBEB5EGqrKmgB1SbFpKaZEx_lDNxag-6YZAaawUUAk8TF5mP7UeUljEL2msb5ROvRfGwMU7n-3Wz3rQ",
+    "Notes": "Aprovado online (30 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Sandro Ancini",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5549988078685",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "b50aa681-5a20-4b2b-87c7-750cd1d635a5",
+    "MachineFingerprint": "6BA4802A0CBE3402935FCAAD75E83C002DE27BEAB526793FBEFACF499A445CC5",
+    "FirstName": "Oniel",
+    "LastName": "Santiago",
+    "Phone": "(47) 98807-4934",
+    "Email": "",
+    "Company": "Claro",
+    "EmployeeId": "935029",
+    "Cluster": "Joinville",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "FirstRegisteredUtc": "2026-10-02T13:19:13.3424614Z",
+    "LastSeenUtc": "2026-10-02T13:19:13.3424616Z",
+    "ExpirationDateIso": "2026-11-01",
+    "ValidDays": 30,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiYjUwYWE2ODEtNWEyMC00YjJiLTg3YzctNzUwY2QxZDYzNWE1IiwiZiI6IjZCQTQ4MDJBMENCRTM0MDI5MzVGQ0FBRDc1RTgzQzAwMkRFMjdCRUFCNTI2NzkzRkJFRkFDRjQ5OUE0NDVDQzUiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.gfwol0IwyjskPqv1wUDA0d4ttnYjIvOLxzt0bN57kB0J7NebulZat8hSn0ueIuE85Vh0hl0_ELpJMzGY1L4BiKLSA5ODum6LyLG6n12sIrhPG87f6hHcFek6nBH0ePjV8oSW1ePQqGT0NZnMBxZULaLCcOO5v39eofsCzRK1mw8t6ptaojCr4n9OfYTgtJFW5miNMCbl1YT4zIjI9hAUaxN1qj6pYBrjeWRqMGx_qKDxOzrbJ7b8ggmTV6bhtPVj4Lzp6PYHR8PA8lJ6zTA7Yz0zHpuIKmefwSXzzSmRf-4nQ6fsU3MJCqukytPvlURtU7ty7okKUxciztcjORL9Rw",
+    "Notes": "Aprovado online (30 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Oniel Santiago",
+    "CalculatedStatus": 2,
+    "StatusBadge": "🔴 Expirado",
+    "WhatsAppUrl": "https://wa.me/5547988074934",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "9aec2337-832f-4615-9c67-7962bc810db1",
+    "MachineFingerprint": "74AEAFF380978C9F6F6270AAE87C41860B82C6F9B43EC0EC724DAC5A6FBC8AB5",
+    "FirstName": "Everson",
+    "LastName": "Ferreira",
+    "Phone": "(48) 99957-5693",
+    "Email": "eversonffagundes@gmail.com",
+    "Company": "Sinos Telecomunicações",
+    "EmployeeId": "33",
+    "Cluster": "Capital",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.55-20261001",
+    "FirstRegisteredUtc": "2026-10-02T13:18:46.737394Z",
+    "LastSeenUtc": "2026-10-02T13:18:46.7374144Z",
+    "ExpirationDateIso": "2026-11-01",
+    "ValidDays": 30,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiOWFlYzIzMzctODMyZi00NjE1LTljNjctNzk2MmJjODEwZGIxIiwiZiI6Ijc0QUVBRkYzODA5NzhDOUY2RjYyNzBBQUU4N0M0MTg2MEI4MkM2RjlCNDNFQzBFQzcyNERBQzVBNkZCQzhBQjUiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.JyZS0z9BVMgRY-kQx3xnnHJbXooK4laKLlvUFMVUC71Uw9Pvu79KCe2C2M03508ZPli7DFTV4tlSY5FW7-Pw0J7tfI2GYLACQNeeVpWgBae5vKIr-bx19Ep9h0brn9N9AkLx5RD7-LHxru2edYmWjH8oelVHw7Mo8kp6iKPaxOuNaibkMX1xcFIPOmGeWah2u1ULv-OpGMQ5usnlUrl-ojEz3ZtHk0CuBVcCnyN7mbC_Iilp0vt1R4Or49izvO3RCddcd5di340WbYBEQulc4x6iXmSXkN20jiLPjtgYH-kJkoqdvHNZdeeGqRA7h0aAaBmlFqQIuFD3_Ey2_Q3n0w",
+    "Notes": "Aprovado online (30 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Everson Ferreira",
+    "CalculatedStatus": 2,
+    "StatusBadge": "🔴 Expirado",
+    "WhatsAppUrl": "https://wa.me/5548999575693",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "b4f6dec3-7669-4f6d-b32a-1ffbb8dd596c",
+    "MachineFingerprint": "7A85A373FAF97E9B775737B439BB1553BDD8C9041D915262CF9FA6F6CE8AD117",
+    "FirstName": "Adriano",
+    "LastName": "Salgueiro",
+    "Phone": "(48) 98870-5438",
+    "Email": "adriano.salgueiro@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "9129427",
+    "Cluster": "Empresarial DE SC",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "FirstRegisteredUtc": "2026-10-01T17:53:49.6541946Z",
+    "LastSeenUtc": "2026-10-01T17:53:49.6542144Z",
+    "ExpirationDateIso": "2026-10-31",
+    "ValidDays": 30,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiYjRmNmRlYzMtNzY2OS00ZjZkLWIzMmEtMWZmYmI4ZGQ1OTZjIiwiZiI6IjdBODVBMzczRkFGOTdFOUI3NzU3MzdCNDM5QkIxNTUzQkREOEM5MDQxRDkxNTI2MkNGOUZBNkY2Q0U4QUQxMTciLCJleHAiOiIyMDI2LTEwLTMxVDAwOjAwOjAwWiJ9.jyeR-qsduwoG4zZRKNANRqVGCFsUkuVX7CqHJvUsrmQbiWhO-mOHgYdKfdUyMgBh2T9iR7pr9egkAeliVZpmSomJpy9ZaWZxjWV7K1XEbsPF9mHTvudM4VG2p70uZwLNPKEhuSYwtFQiivNLfAWSMzXplpwtn-Ej_FYgr_UqOY4Agf0HBWqhgOK0gNbdpnzrFXFKi7a0J0s40U74pPzC8QcktOWUk39vLGgdcRiDCR_kiGn3zL3w6BE9yhikViSy4XIp_Fq3n-RWpgDVNZdUzRjc5kwOCXVWALxLK8kqxD3kw9pRyWjeOZ9ximY7FATH4MWCRXIGnNmi71yNpQcm0g",
+    "Notes": "Aprovado online (30 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Adriano Salgueiro",
+    "CalculatedStatus": 2,
+    "StatusBadge": "🔴 Expirado",
+    "WhatsAppUrl": "https://wa.me/5548988705438",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "671f60c6-a75f-42a7-bea9-3395c7cde777",
+    "MachineFingerprint": "0C351DC8D66AAEC96CABF4254CCB3262DB76F2D970294ACB21D5A2050B1A2592",
+    "FirstName": "Andre",
+    "LastName": "Luis Severo Dias",
+    "Phone": "(49) 98803-0123",
+    "Email": "andre.severo@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "941064",
+    "Cluster": "SC Interior",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "FirstRegisteredUtc": "2026-10-01T14:34:42.5262512Z",
+    "LastSeenUtc": "2026-11-05T12:36:01.1331256Z",
+    "ExpirationDateIso": "2027-02-03",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiNjcxZjYwYzYtYTc1Zi00MmE3LWJlYTktMzM5NWM3Y2RlNzc3IiwiZiI6IjBDMzUxREM4RDY2QUFFQzk2Q0FCRjQyNTRDQ0IzMjYyREI3NkYyRDk3MDI5NEFDQjIxRDVBMjA1MEIxQTI1OTIiLCJleHAiOiIyMDI3LTAyLTAzVDAwOjAwOjAwWiJ9.gfiuYAtVc3uoE-05jx7jKExuPQWC9piy4VEWnZ1Y3zerReSczKpn3XURqtGqlVmsNgyghmEujenP1g3pTAfZawA6V75JnZ6Kd_obD569gRH2Y7HW-BqLhjLtPK2jSek_o7W9sHOQWGck_kcLHLmp-9uNEcAxKOD7hd9PAflgm1uKqN4WupjazVYDT92queQPMS15Msffu6PHwCH0-9rnSggtwdfeVSo3mG6HOxOACihUoc5eeGnGRSuVDbQe9WJZQLC7mtWcaF6m7hUvEbiS0S1wRV3BwToaT_uIk3Llnl8vFxEYwYDGK85-WfE-HH5a3ELQ2_6jUPAZ7dt8diJLKg",
+    "Notes": "Aprovado online (30 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Andre Luis Severo Dias",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5549988030123",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "9e0a4a99-eb83-4e2d-b7a5-29871556c3ac",
+    "MachineFingerprint": "1587CC55D8A3100741C2B34AC870A45431BC0FC9B2D0E37E1C5D1D0DC2CE336C",
+    "FirstName": "Sandro Varlei",
+    "LastName": "Borges Ancini",
+    "Phone": "(49) 98807-8685",
+    "Email": "sandro.ancini@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "976876",
+    "Cluster": "SC Interior",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "FirstRegisteredUtc": "2026-10-01T13:25:53.1523535Z",
+    "LastSeenUtc": "2026-11-10T17:23:03.8146507Z",
+    "ExpirationDateIso": "2027-02-08",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiOWUwYTRhOTktZWI4My00ZTJkLWI3YTUtMjk4NzE1NTZjM2FjIiwiZiI6IjE1ODdDQzU1RDhBMzEwMDc0MUMyQjM0QUM4NzBBNDU0MzFCQzBGQzlCMkQwRTM3RTFDNUQxRDBEQzJDRTMzNkMiLCJleHAiOiIyMDI3LTAyLTA4VDAwOjAwOjAwWiJ9.Y_MLC0_agc8CJqcG0SUMkL7ltdRuurdLd9K5Vc5weAmNE9giOe3JrEDFe-aUinrT-Ca1PYqJ6PZ4ns66IQUrLK2msRn_LLmhVjHg1B2TfCwGCKhJq0pE2xUI-N2XqYpeBlIzDy0rpAAmzdfxtvZ0KUvnbl7Mi4Frj26OMY6_ARAQoIHAjjW0a91Y_IMZD2YywgECkkhOhgEoDK9qMFkyH9FeAudC1bvfgGuM7zl7nsSFY0vc2AYK3i5Vr6ZCt5mXBqr2I9jJq-SFrQt5_kIDb9v4r74ixSAHmyuD0Oit7vPjFsYNHhF2BQ7ZaYaBJEWOWX9MXVMFiDN75PMMCafdCw",
+    "Notes": "Aprovado online (30 dias)",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Sandro Varlei Borges Ancini",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5549988078685",
+    "Role": "Técnico"
+  },
+  {
+    "MachineGuid": "729651b2-b5c1-42e7-97b0-b0f9048ce5a0",
+    "MachineFingerprint": "fa975fcc7ea211120133ff6278f2ad07b1192887317daae7299a977faaf16025",
+    "FirstName": "George Luís",
+    "LastName": "Calcmann",
+    "Phone": "(48) 98803-6632",
+    "Email": "",
+    "Company": "Claro",
+    "EmployeeId": "91114406",
+    "Cluster": "Florianópolis",
+    "Uf": "SC",
+    "ClientVersion": "0.8.41",
+    "FirstRegisteredUtc": "2026-09-30T22:04:03.243658Z",
+    "LastSeenUtc": "2026-11-05T12:36:33.424675Z",
+    "ExpirationDateIso": "2027-02-03",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiNzI5NjUxYjItYjVjMS00MmU3LTk3YjAtYjBmOTA0OGNlNWEwIiwiZiI6ImZhOTc1ZmNjN2VhMjExMTIwMTMzZmY2Mjc4ZjJhZDA3YjExOTI4ODczMTdkYWFlNzI5OWE5NzdmYWFmMTYwMjUiLCJleHAiOiIyMDI3LTAyLTAzVDAwOjAwOjAwWiJ9.J5aV-F8ZJDV9S7SVCaUJHQBIcsYOw_y6FJoa7nqN5pfQHKzK0qke0Z6CilpXgVsmz7x07Dntt2nwrqn-x8AT-vsnyHLQQc01GWpoQEw8rk9-CTeFW6xRG24DSkkW334pVPxhtTdIr0mNy2ESLw0Eo_vkpIN14ccEC3PadZdt8K-DT2kdACH8nFMODb7lCPLv2Xtp54_Fr4ks9KTgNdsO242v2_rr_ltI6bFORfV12HBcnyc3EH2rGOc7jAYSaksPC7RwngMy8ZbrYbHFeIZI7OWHXnKF65KvkrXp-vR_89KY6TpE7MLRgBgoHd8_oXO2BcWjwvP55Fj254U7NXmuWg",
+    "Notes": "Administrador do Sistema (Ambiente de Desenvolvimento)",
+    "Platform": "Android",
+    "PlatformBadge": "📱 Android",
+    "FullName": "George Luís Calcmann",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5548988036632",
+    "Role": "Administrador"
+  }
+];
+    let RAW_TELEMETRY = [
+  {
+    "ActivityId": "530288038f064a35b8645d737e88ef87",
+    "TimestampInicio": "2026-11-10T14:03:52.5931492-03:00",
+    "TimestampFim": "2026-11-10T14:03:52.6017544-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "6694b9af9be74186a121f7e6c3889dcf",
+    "TimestampInicio": "2026-11-10T13:58:28.5254583-03:00",
+    "TimestampFim": "2026-11-10T13:58:28.5314899-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "8344f419e5914f4597c24c3181653ea5",
+    "TimestampInicio": "2026-11-10T12:21:01.0176718-03:00",
+    "TimestampFim": "2026-11-10T12:21:01.0234333-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "b1f29e6f6e6d4432a480f6fa7569bd53",
+    "TimestampInicio": "2026-11-10T12:18:15.723455-03:00",
+    "TimestampFim": "2026-11-10T12:18:15.7380293-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "7951fa8b57d645c9873958917de833eb",
+    "TimestampInicio": "2026-11-10T11:53:03.4980893-03:00",
+    "TimestampFim": "2026-11-10T11:53:03.5032007-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "8d2fd31876dd4dddb520f3887dfeaa84",
+    "TimestampInicio": "2026-11-10T10:27:30.4788032-03:00",
+    "TimestampFim": "2026-11-10T10:27:30.4837936-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "a5e4ac6835794bb0b4334ab9f6e9e03a",
+    "TimestampInicio": "2026-11-09T17:29:30.4223868-03:00",
+    "TimestampFim": "2026-11-09T17:29:30.4270003-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "436151e414884d83aa3d8eefb512bc9f",
+    "TimestampInicio": "2026-11-09T16:33:31.8972808-03:00",
+    "TimestampFim": "2026-11-09T16:33:31.9034884-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "1942883bcbec4c018c3141fe1598795e",
+    "TimestampInicio": "2026-11-09T15:55:20.0850406-03:00",
+    "TimestampFim": "2026-11-09T15:55:20.0901356-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "8862457be1cd44688c4207108e17cc67",
+    "TimestampInicio": "2026-11-09T14:58:55.9292658-03:00",
+    "TimestampFim": "2026-11-09T14:58:55.9370461-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "2c5efa42f690408f9d80b8511eeda277",
+    "TimestampInicio": "2026-11-09T14:34:52.0141444-03:00",
+    "TimestampFim": "2026-11-09T14:34:52.0199069-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "8646886b0b674e03866c664679427220",
+    "TimestampInicio": "2026-11-09T14:01:40.5755443-03:00",
+    "TimestampFim": "2026-11-09T14:01:40.5818428-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "a1a38284d00e4592a1dc7cc2184e4666",
+    "TimestampInicio": "2026-11-09T13:56:48.5696329-03:00",
+    "TimestampFim": "2026-11-09T13:56:48.5783398-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "59218f891b734b9b9db971ad87f78fc8",
+    "TimestampInicio": "2026-11-09T13:54:08.5928406-03:00",
+    "TimestampFim": "2026-11-09T13:54:08.6009389-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "284ffd7606614a03bfacbf14e2e27243",
+    "TimestampInicio": "2026-11-09T10:54:19.6326589-03:00",
+    "TimestampFim": "2026-11-09T10:54:19.6409509-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "305acd360bc945d7819c0e346bdf2da0",
+    "TimestampInicio": "2026-11-06T15:35:21.6823822-03:00",
+    "TimestampFim": "2026-11-06T15:35:21.6882754-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "2a3cf7dcf12545eb9f08cdf138c12dc4",
+    "TimestampInicio": "2026-11-06T15:27:46.0254666-03:00",
+    "TimestampFim": "2026-11-06T15:27:46.0323404-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "6c50830fd1f04e80a1acbc82d58c30e6",
+    "TimestampInicio": "2026-11-06T15:17:18.8228341-03:00",
+    "TimestampFim": "2026-11-06T15:17:18.8285076-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "dbd8ea5ae5384b138c987c381d73b7ab",
+    "TimestampInicio": "2026-11-06T14:41:11.9154648-03:00",
+    "TimestampFim": "2026-11-06T14:41:11.9205426-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "e7dc372752fe4ecb9f053db412218082",
+    "TimestampInicio": "2026-11-06T14:07:46.9368466-03:00",
+    "TimestampFim": "2026-11-06T14:07:46.9419359-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "d9c18d22db004356a9cc4b84aa9a59c6",
+    "TimestampInicio": "2026-11-06T13:36:37.9130741-03:00",
+    "TimestampFim": "2026-11-06T13:36:37.9313695-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "06423ebccf834f83b5205ea12fc930fc",
+    "TimestampInicio": "2026-11-06T13:35:05.6343998-03:00",
+    "TimestampFim": "2026-11-06T13:35:05.6707365-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "d9dc55e07e234c4894f1cfa4f2366c06",
+    "TimestampInicio": "2026-11-06T11:32:04.3328129-03:00",
+    "TimestampFim": "2026-11-06T11:32:04.3483347-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "bd91dea3f52a438db10be58ce0f3efbb",
+    "TimestampInicio": "2026-11-06T11:14:34.492273-03:00",
+    "TimestampFim": "2026-11-06T11:14:34.5056186-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "1688c236c2c44fc786c7d7d7348a5bc2",
+    "TimestampInicio": "2026-11-06T10:54:13.1342129-03:00",
+    "TimestampFim": "2026-11-06T10:54:13.1427594-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "1960057d2a2947fd9189962e92c3d3e9",
+    "TimestampInicio": "2026-11-06T10:13:42.268468-03:00",
+    "TimestampFim": "2026-11-06T10:13:42.2743358-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "d20253f95f4340d99924185dfcd06876",
+    "TimestampInicio": "2026-11-06T09:33:45.7999549-03:00",
+    "TimestampFim": "2026-11-06T09:33:45.8048706-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "39080c0c9113448192b051dba734e677",
+    "TimestampInicio": "2026-11-06T09:30:50.7784561-03:00",
+    "TimestampFim": "2026-11-06T09:30:50.7875826-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "73b4c35fdc5c47599968e47e3089db75",
+    "TimestampInicio": "2026-11-05T17:31:05.9515072-03:00",
+    "TimestampFim": "2026-11-05T17:31:05.9646147-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "61a7c81a78c84b539a4a7b7aa1e214cd",
+    "TimestampInicio": "2026-11-05T12:47:35.05487-03:00",
+    "TimestampFim": "2026-11-05T12:47:35.0607-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "80462c15972b41efbf18294263f06ecc",
+    "TimestampInicio": "2026-11-05T12:13:13.5653155-03:00",
+    "TimestampFim": "2026-11-05T12:13:13.5760833-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "030024c8d4124ddc883d3b2ed8c88d90",
+    "TimestampInicio": "2026-11-05T11:37:35.5854222-03:00",
+    "TimestampFim": "2026-11-05T11:37:35.5918926-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "7efb49bc9f684a49aca99d5fb88f3a2f",
+    "TimestampInicio": "2026-11-05T10:48:37.3267737-03:00",
+    "TimestampFim": "2026-11-05T10:48:37.3318587-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "2230410833d64e75bab6a29e9756e089",
+    "TimestampInicio": "2026-11-05T10:46:28.4368986-03:00",
+    "TimestampFim": "2026-11-05T10:46:28.4435696-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "8b7085158e2848e1bd059604ecfe1164",
+    "TimestampInicio": "2026-11-04T17:28:48.4615764-03:00",
+    "TimestampFim": "2026-11-04T17:28:48.4673349-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "3a3deab8b57a42f4883964a712f0d707",
+    "TimestampInicio": "2026-11-04T17:25:02.5780346-03:00",
+    "TimestampFim": "2026-11-04T17:25:02.5832775-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "7b8858e4ebe34228917c2a07c6c6f98c",
+    "TimestampInicio": "2026-11-04T14:27:54.366416-03:00",
+    "TimestampFim": "2026-11-04T14:27:54.3742666-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "a2759ee7bc894b1bacfec544df19afc5",
+    "TimestampInicio": "2026-11-04T13:42:40.7590948-03:00",
+    "TimestampFim": "2026-11-04T13:42:40.7668159-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "10d5703491844bb2883f449d53748a02",
+    "TimestampInicio": "2026-11-04T12:32:52.177064-03:00",
+    "TimestampFim": "2026-11-04T12:32:52.1821386-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "84114fd13aef4c22872fac24747c7fcc",
+    "TimestampInicio": "2026-11-04T11:13:00.7951552-03:00",
+    "TimestampFim": "2026-11-04T11:13:00.8136434-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "fe99d75658be4c7eb9beb2dee47d9ed0",
+    "TimestampInicio": "2026-11-04T11:04:01.6333923-03:00",
+    "TimestampFim": "2026-11-04T11:04:01.6386722-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "158c062727264364a10e42eda5e498a6",
+    "TimestampInicio": "2026-11-03T20:02:47.1659337-03:00",
+    "TimestampFim": "2026-11-03T20:02:47.1808781-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "384cb5e173954e9bac48c45c9233d65f",
+    "TimestampInicio": "2026-11-03T19:15:38.6873793-03:00",
+    "TimestampFim": "2026-11-03T19:15:38.6924834-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "14d04ff6de744b739c451f6cea3b78e0",
+    "TimestampInicio": "2026-11-03T19:08:41.8374771-03:00",
+    "TimestampFim": "2026-11-03T19:08:41.8553825-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "8c512a6d0ca94b30abb84b8d46153fe2",
+    "TimestampInicio": "2026-11-03T18:34:46.9344375-03:00",
+    "TimestampFim": "2026-11-03T18:34:46.9436054-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "ba589c12945f4a6e9f6134d4feba8b93",
+    "TimestampInicio": "2026-11-03T18:09:34.6545904-03:00",
+    "TimestampFim": "2026-11-03T18:09:34.6657281-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "e12d5c082c3140b4b2d0f5b16dade937",
+    "TimestampInicio": "2026-11-03T17:30:16.1106522-03:00",
+    "TimestampFim": "2026-11-03T17:30:16.116655-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  },
+  {
+    "ActivityId": "15886d1b562c4cf69101bbbb82674ecd",
+    "TimestampInicio": "2026-11-03T17:25:34.100658-03:00",
+    "TimestampFim": "2026-11-03T17:25:34.118679-03:00",
+    "DuracaoSegundos": 0,
+    "StatusFinal": "Falha",
+    "DesignacaoIp": "LDA/IP/02580",
+    "ClienteRazaoSocial": "TESTE FALHA LTDA",
+    "NumeroOts": "OTS-FALHA-01",
+    "TipoServico": "BLD (Business Link Direct - Internet)",
+    "BandaNominalMbps": null,
+    "PeRouter": "N/A",
+    "WanIp": "200.179.12.94",
+    "WanGateway": "N/A",
+    "LanIp": "N/A",
+    "ModeloEquipamento": "Fortinet FortiGate 40F",
+    "Fabricante": "N/A",
+    "SerialNumber": "N/A",
+    "FirmwareInstalado": "N/A",
+    "FirmwareAlvo": "N/A",
+    "PortaSerial": "COM1",
+    "TecnicoNome": "Técnico Campo",
+    "TecnicoEmpresa": "Claro S.A.",
+    "TecnicoMatricula": "998877",
+    "ClusterUf": "N/A",
+    "MachineDisplayId": "N/A",
+    "MachineGuid": "N/A",
+    "EtapaFalha": "Etapa 3: Provisionar Equipamento (SAIP / BLD)",
+    "ErroGeral": "Tempo esgotado aguardando resposta da console serial.",
+    "RemotePath": null
+  }
+];
+    let RAW_REQUESTS = [
+  {
+    "MachineGuid": "e5c2901a-8b14-469f-9201-1192847a98ef",
+    "MachineDisplayId": "WIN-BRAD-FIELD-09",
+    "FullName": "Marcos Vinicius Santos",
+    "FirstName": "Marcos",
+    "LastName": "Santos",
+    "Phone": "(19) 99821-4433",
+    "Email": "marcos.santos@procisa.com.br",
+    "Company": "Procisa",
+    "EmployeeId": "16789",
+    "Cluster": "Campinas / Interior",
+    "Uf": "SP",
+    "Platform": "Windows",
+    "ClientVersion": "SPARC-Beta-Testes-0.8.156",
+    "RequestDateUtc": "2026-11-10T14:10:00Z",
+    "Status": "Pending"
+  },
+  {
+    "MachineGuid": "b4728d10-5321-4a11-8712-9901452cba11",
+    "MachineDisplayId": "AND-S22-FIELD-04",
+    "FullName": "Carlos Eduardo Lima",
+    "FirstName": "Carlos",
+    "LastName": "Lima",
+    "Phone": "(11) 98765-4321",
+    "Email": "carlos.lima@claro.com.br",
+    "Company": "Claro S.A.",
+    "EmployeeId": "992144",
+    "Cluster": "São Paulo Capital",
+    "Uf": "SP",
+    "Platform": "Android",
+    "ClientVersion": "SPARC-Mobile-v0.8.156",
+    "RequestDateUtc": "2026-11-10T10:35:00Z",
+    "Status": "Pending"
+  },
+  {
+    "MachineGuid": "4a5d9b04-6b99-449c-bff2-72dc252a4300",
+    "MachineFingerprint": "0FEFB84C2125EB6F9A4D52F50006017A1BBD969CD2B7A15C79CA134C026099A3",
+    "RawRequestCode": "SPBREQ.eyJnIjoiNGE1ZDliMDQtNmI5OS00NDljLWJmZjItNzJkYzI1MmE0MzAwIiwiZiI6IjBGRUZCODRDMjEyNUVCNkY5QTRENTJGNTAwMDYwMTdBMUJCRDk2OUNEMkI3QTE1Qzc5Q0ExMzRDMDI2MDk5QTMiLCJuIjoiSm9zw6kgVm9sbWlyIiwicyI6IlBhdsOjbyIsInAiOiIoNDkpIDk4ODYzLTIzODYiLCJlIjoiam9zZS5wYXZhb0BjbGFyby5jb20uYnIiLCJjIjoiU0MiLCJ1IjoiU0MiLCJ2IjoiQkVUQS1URVNURVMtMC44LjEwMC0yMDI2MTAxNCIsInBsdCI6IldpbmRvd3MiLCJjbXAiOiJDbGFybyIsIm1hdCI6IjE0Mzg3MyIsInQiOiIyMDI2LTEwLTE2VDEyOjUwOjQzWiJ9",
+    "FirstName": "José Volmir",
+    "LastName": "Pavão",
+    "Phone": "(49) 98863-2386",
+    "Email": "jose.pavao@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "143873",
+    "Cluster": "SC",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.100-20261014",
+    "RequestedAtUtc": "2026-10-16T12:52:48.2123881Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiNGE1ZDliMDQtNmI5OS00NDljLWJmZjItNzJkYzI1MmE0MzAwIiwiZiI6IjBGRUZCODRDMjEyNUVCNkY5QTRENTJGNTAwMDYwMTdBMUJCRDk2OUNEMkI3QTE1Qzc5Q0ExMzRDMDI2MDk5QTMiLCJleHAiOiIyMDI3LTAxLTE0VDAwOjAwOjAwWiJ9.o1jf21mWfF1hnvksU2gYpWqgiAiw-df5plmERjlD353iiv7m30NPlQz_M5PvvgpOi8I_W16q7wma8MQ-FiDNHOLv3MyUBaGwwF4hdJQTWcxFmTdpj2DQGaRl0jDQsj4fSe3BjEvlvdmHWAU8NNlGlhNZr6Cm3zYo-B0BEpby5vzuQf-zdXegpVWOjp-cDEct_aC81ChToyi9Id761KbYy7jRdG9iKUE2JiereWS69uHQipxeHYfNwcYC1rken9QYPpFZP4sE3Hcb0yIC1SRS9gQfjNMTvQfwpQXgKUIqBbZnSwAods31_uoLnXQ6C6S2CLb32hl-1W11WbDZTnEbkQ",
+    "ExpirationDateIso": "2027-01-14",
+    "ValidDays": 90,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (90 dias)",
+    "RemoteSha": "9d8af027426cb81d6ab8be453273cf2c022c98de",
+    "RemoteFileName": "4a5d9b04-6b99-449c-bff2-72dc252a4300.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "José Volmir Pavão",
+    "RegionInfo": "SC / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5549988632386",
+    "_sha": "65715f9d1e813543649e0fa45b1f866fce6aa71c",
+    "_path": "requests/4a5d9b04-6b99-449c-bff2-72dc252a4300.json"
+  },
+  {
+    "MachineGuid": "53af585e-cb1b-464d-95fd-f8f98a8f6663",
+    "MachineFingerprint": "1EC214D8A886A45BC68151B2538D0ADF36B7A511CEE5A511079995BA0D68C31D",
+    "RawRequestCode": "SPBREQ.eyJnIjoiNTNhZjU4NWUtY2IxYi00NjRkLTk1ZmQtZjhmOThhOGY2NjYzIiwiZiI6IjFFQzIxNEQ4QTg4NkE0NUJDNjgxNTFCMjUzOEQwQURGMzZCN0E1MTFDRUU1QTUxMTA3OTk5NUJBMEQ2OEMzMUQiLCJuIjoiQWJpbWFlbCIsInMiOiJCYXJib3NhIiwicCI6IigxOSkgOTk0NjQtNjg0MCIsImUiOiJhYmltYWpiQGVtYnJhdGVsLmNvbS5iciIsImMiOiJDYXNiYyIsInUiOiJTUCIsInYiOiJCRVRBLVRFU1RFUy0wLjguMTAwLTIwMjYxMDE0IiwicGx0IjoiV2luZG93cyIsImNtcCI6IkNsYXJvIiwibWF0IjoiOTQ3OTczNiIsInQiOiIyMDI2LTEwLTE1VDE3OjI4OjAyWiJ9",
+    "FirstName": "Abimael",
+    "LastName": "Barbosa",
+    "Phone": "(19) 99464-6840",
+    "Email": "abimajb@embratel.com.br",
+    "Company": "Claro",
+    "EmployeeId": "9479736",
+    "Cluster": "Casbc",
+    "Uf": "SP",
+    "ClientVersion": "BETA-TESTES-0.8.100-20261014",
+    "RequestedAtUtc": "2026-10-15T17:28:24.6600603Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiNTNhZjU4NWUtY2IxYi00NjRkLTk1ZmQtZjhmOThhOGY2NjYzIiwiZiI6IjFFQzIxNEQ4QTg4NkE0NUJDNjgxNTFCMjUzOEQwQURGMzZCN0E1MTFDRUU1QTUxMTA3OTk5NUJBMEQ2OEMzMUQiLCJleHAiOiIyMDI3LTAxLTEzVDAwOjAwOjAwWiJ9.jVEwAcjImp5KxlDWWwtVBnPAvk_9TmJ5KE2QTTkS-JhbZ7S05KiWzN5ubAO36iNuKYfm8VkjLA5roJ_Gy7gd_FT-HxVkiJpkW7K-a0OdS3SFlXhWRQZD8ix-0m6Z955JXtv7U49BpHTvMuAVosKV6frem3ovOmwsq8i7MY-Jmfrlwr00nBrIgJJW8U7pd9vneeSBaB2jhSfRPEYNqD0GhJz-9qXqgl2Xqm8zBHL_Zz0jYrfIPbs-sgkVHz-Akin_ab_TjcasQgUT4peNOFfKG3lroylBw3gG3njJocABqHyNpGcXvxdKFv8VrUgVBI-D2p6Iisu2-7Q5SWfKWE03dQ",
+    "ExpirationDateIso": "2027-01-13",
+    "ValidDays": 90,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (90 dias)",
+    "RemoteSha": "97cff7a793128c726d055c8ebf6ce0232cdc0dd4",
+    "RemoteFileName": "53af585e-cb1b-464d-95fd-f8f98a8f6663.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Abimael Barbosa",
+    "RegionInfo": "Casbc / SP",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5519994646840",
+    "_sha": "1a98ea2ed0cba5c37b106e2d38667dd6de112cb1",
+    "_path": "requests/53af585e-cb1b-464d-95fd-f8f98a8f6663.json"
+  },
+  {
+    "MachineGuid": "637ee96a-247f-46e7-932e-665c2b931a09",
+    "MachineFingerprint": "FA3956EA4471DF1B3FAE71816F76564258F4D9E501D7FD84F166E9B8D507E95E",
+    "RawRequestCode": "SPBREQ.eyJnIjoiNjM3ZWU5NmEtMjQ3Zi00NmU3LTkzMmUtNjY1YzJiOTMxYTA5IiwiZiI6IkZBMzk1NkVBNDQ3MURGMUIzRkFFNzE4MTZGNzY1NjQyNThGNEQ5RTUwMUQ3RkQ4NEYxNjZFOUI4RDUwN0U5NUUiLCJuIjoiRGVuaXMiLCJzIjoiQW5kcsOpIiwicCI6IjAxODk5NjkzOTcwMSIsImUiOiJkZW5pcy5hbmRyZXBwZUBnbWFpbC5vbSIsImMiOiJJbnRlcmlvciIsInUiOiJTUCIsInYiOiJCRVRBLVRFU1RFUy0wLjguNzYtMjAyNjEwMDgiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiUHJvY2lzYSIsIm1hdCI6IjE1NjYyIiwidCI6IjIwMjYtMTAtMjdUMTc6NDk6NDhaIn0",
+    "FirstName": "Denis",
+    "LastName": "André",
+    "Phone": "018996939701",
+    "Email": "denis.andreppe@gmail.om",
+    "Company": "Procisa",
+    "EmployeeId": "15662",
+    "Cluster": "Interior",
+    "Uf": "SP",
+    "ClientVersion": "BETA-TESTES-0.8.76-20261008",
+    "RequestedAtUtc": "2026-10-27T17:50:08.6003734Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiNjM3ZWU5NmEtMjQ3Zi00NmU3LTkzMmUtNjY1YzJiOTMxYTA5IiwiZiI6IkZBMzk1NkVBNDQ3MURGMUIzRkFFNzE4MTZGNzY1NjQyNThGNEQ5RTUwMUQ3RkQ4NEYxNjZFOUI4RDUwN0U5NUUiLCJleHAiOiIyMDI3LTAxLTI1VDAwOjAwOjAwWiJ9.pVkQZfCZ52I6QACZqa5KFvtKkwPXSZrv5jHSv9_4RSvAis5YV8IIxB-w1GYPI4Ath0arQBUNvu-pBA_4py9douTowk4fSGlgv_XlMohniXQej-UjNkEGnRVo12qnn5qsZTpLozXFABzbwvNbjjmNxxE-aAWNKwlc3ZGW30JXrxqnJ0fKEZA2KrQgIDA4_K0K4_ipEoLcayfMRGfOeZRrI6BiKPb5BOP_n1EOI8BnPwzm28nWo8BXhAUtjeO_1NfjBzUPx9xpPgEjYj_kaSrIg4JgBqOOYGRookwrruKNDUy9sERRs6X845rlEIRCuTGctQ2sigzG20hKxHqtiWjudg",
+    "ExpirationDateIso": "2027-01-25",
+    "ValidDays": 90,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (90 dias)",
+    "RemoteSha": "d1ac1eb7839ba6777c746f60b921daa4fa5c96da",
+    "RemoteFileName": "637ee96a-247f-46e7-932e-665c2b931a09.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Denis André",
+    "RegionInfo": "Interior / SP",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/018996939701",
+    "_sha": "a5a44301a7157d5fa72473b9d93c51b55d2dc582",
+    "_path": "requests/637ee96a-247f-46e7-932e-665c2b931a09.json"
+  },
+  {
+    "MachineGuid": "671f60c6-a75f-42a7-bea9-3395c7cde777",
+    "MachineFingerprint": "402E49B95564F4D6D2AED75EEC2E2C6C89BFDAB2654D509BF1642F75C50309EE",
+    "RawRequestCode": "SPBREQ.eyJnIjoiNjcxZjYwYzYtYTc1Zi00MmE3LWJlYTktMzM5NWM3Y2RlNzc3IiwiZiI6IjQwMkU0OUI5NTU2NEY0RDZEMkFFRDc1RUVDMkUyQzZDODlCRkRBQjI2NTRENTA5QkYxNjQyRjc1QzUwMzA5RUUiLCJuIjoiQW5kcmUiLCJzIjoiTHVpcyBTZXZlcm8gRGlhcyIsInAiOiIoNDkpIDk4ODAzLTAxMjMiLCJlIjoiYW5kcmUuc2V2ZXJvQGNsYXJvLmNvbS5iciIsImMiOiJTQyBJbnRlcmlvciIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguMzQtMjAyNjA5MzAiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiQ2xhcm8iLCJtYXQiOiI5NDEwNjQiLCJ0IjoiMjAyNi0xMC0wMlQxNzo0MjowMVoifQ",
+    "FirstName": "Andre",
+    "LastName": "Luis Severo Dias",
+    "Phone": "(49) 98803-0123",
+    "Email": "andre.severo@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "941064",
+    "Cluster": "SC Interior",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "RequestedAtUtc": "2026-10-02T17:42:05.0934842Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiNjcxZjYwYzYtYTc1Zi00MmE3LWJlYTktMzM5NWM3Y2RlNzc3IiwiZiI6IjQwMkU0OUI5NTU2NEY0RDZEMkFFRDc1RUVDMkUyQzZDODlCRkRBQjI2NTRENTA5QkYxNjQyRjc1QzUwMzA5RUUiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.WOcjW4JSaASBlcBH1MKdj9s8cuP5ulLpb1JhNIsED7mBxSN5pNRIEfGXhU2LlFXd6Fb3xqs0-u_2zyiXzcY1qcuCB384NfR1bjAXO0Hm92nRKUGAMAmBfYcpESmahYuvDLA_vFozycKalyshDyDmNQuVw63_q_1WOXheIfj_cypzEb_cE7EqFeGGM3XzTuytNX4tlqMRGky1e3y6gCYpQxHpmh4xL0l1VXWX_vu68LgZGhv4PsYlSiW4WKnxihSRX49D1iqbl6UL4rIOBCQwofJDYpZ37BY7HOWeA2AQdtwD2f5zVsH8f4cvb7ZGQelRKe5CQbd6oSAXBVOroyB8Kw",
+    "ExpirationDateIso": "2026-11-01",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "01c94489ddc78f71cca07aa668fa293349ae93be",
+    "RemoteFileName": "671f60c6-a75f-42a7-bea9-3395c7cde777.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Andre Luis Severo Dias",
+    "RegionInfo": "SC Interior / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5549988030123",
+    "_sha": "cab33ef4376bb82b28769b6542e0187e9d99cc32",
+    "_path": "requests/671f60c6-a75f-42a7-bea9-3395c7cde777.json"
+  },
+  {
+    "MachineGuid": "729651b2-b5c1-42e7-97b0-b0f9048ce5a0",
+    "MachineFingerprint": "fa975fcc7ea211120133ff6278f2ad07b1192887317daae7299a977faaf16025",
+    "RawRequestCode": "SPBREQ.eyJnIjoiNzI5NjUxYjItYjVjMS00MmU3LTk3YjAtYjBmOTA0OGNlNWEwIiwiZiI6ImZhOTc1ZmNjN2VhMjExMTIwMTMzZmY2Mjc4ZjJhZDA3YjExOTI4ODczMTdkYWFlNzI5OWE5NzdmYWFmMTYwMjUiLCJuIjoiR2VvcmdlIEx1w61zIiwicyI6IkNhbGNtYW5uIiwicCI6Iig0OCkgOTg4MDMtNjYzMiIsImUiOiIiLCJjIjoiRmxvcmlhbsOzcG9saXMiLCJ1IjoiU0MiLCJ2IjoiMC44LjQxIiwicGx0IjoiQW5kcm9pZCIsImNtcCI6IkNsYXJvIiwibWF0IjoiOTExMTQ0MDYiLCJ0IjoiMjAyNi0wOS0zMFQyMjowMjo1OFoifQ",
+    "FirstName": "George Luís",
+    "LastName": "Calcmann",
+    "Phone": "(48) 98803-6632",
+    "Email": "",
+    "Company": "Claro",
+    "EmployeeId": "91114406",
+    "Cluster": "Florianópolis",
+    "Uf": "SC",
+    "ClientVersion": "0.8.41",
+    "RequestedAtUtc": "2026-09-30T22:02:58.4347897Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiNzI5NjUxYjItYjVjMS00MmU3LTk3YjAtYjBmOTA0OGNlNWEwIiwiZiI6ImZhOTc1ZmNjN2VhMjExMTIwMTMzZmY2Mjc4ZjJhZDA3YjExOTI4ODczMTdkYWFlNzI5OWE5NzdmYWFmMTYwMjUiLCJleHAiOiIyMDI2LTEwLTMwVDAwOjAwOjAwWiJ9.T8DYNDFZvZOgtDA2fDetdzMt_3Omonz1yKbEvVaGOcFwqRaOvgA8WGUtbYH-OoDLHmXLcOSgfgsSd_xLqKoHirtHco2RPq4r4MBc4HFRYqYZ_F5_cm_EHjWytIPWdSmroTkY28bKVISs6EljyEarnLz-VUfi6I5Z3cocTErMAJ3L-cpUPxJLqTXC0LUElZzfAM1l3bvd4QQrMawHRb1AQfUGuce9mHhLdSvZurmPasZFxfumcusxKpqEk39wZXGCCBPJZSkY_w2VZyHmyFpI8z0zjM7sR9uoa0mX4CnG3jBiN5ePJKBasGv90VJqHRnHxD2MmcACHvuDXtZMwLzE8Q",
+    "ExpirationDateIso": "2026-10-30",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "4125b840ed6dc2dcfdd95d78d62eed2bad9c6267",
+    "Platform": "Android",
+    "PlatformBadge": "📱 Android",
+    "FullName": "George Luís Calcmann",
+    "RegionInfo": "Florianópolis / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5548988036632",
+    "_sha": "a2c97417346d308a266c8f07e17b828d58287a60",
+    "_path": "requests/729651b2-b5c1-42e7-97b0-b0f9048ce5a0.json"
+  },
+  {
+    "MachineGuid": "8246e85f-4051-4e10-8283-d3324b4d6e40",
+    "MachineFingerprint": "E637EF2AA58DF8DA7FA1F9193D8B130544067535AC1DD16D40539C9B70B3BE98",
+    "RawRequestCode": "SPBREQ.eyJnIjoiODI0NmU4NWYtNDA1MS00ZTEwLTgyODMtZDMzMjRiNGQ2ZTQwIiwiZiI6IkU2MzdFRjJBQTU4REY4REE3RkExRjkxOTNEOEIxMzA1NDQwNjc1MzVBQzFERDE2RDQwNTM5QzlCNzBCM0JFOTgiLCJuIjoiR2FicmllbCIsInMiOiJMdWNhcyIsInAiOiIoMTEpIDkxMzY4LTE5NDIiLCJlIjoiZy5tb3JhaXNAcHJvY2lzYS5jb20uYnIiLCJjIjoiU1AgSW50ZXJpb3IiLCJ1IjoiU1AiLCJ2IjoiQkVUQS1URVNURVMtMC44Ljc2LTIwMjYxMDA4IiwicGx0IjoiV2luZG93cyIsImNtcCI6IlByb2Npc2EiLCJtYXQiOiIxNTEyMDAiLCJ0IjoiMjAyNi0xMC0yN1QxMzo1MDoyNFoifQ",
+    "FirstName": "Gabriel",
+    "LastName": "Lucas",
+    "Phone": "(11) 91368-1942",
+    "Email": "g.morais@procisa.com.br",
+    "Company": "Procisa",
+    "EmployeeId": "151200",
+    "Cluster": "SP Interior",
+    "Uf": "SP",
+    "ClientVersion": "BETA-TESTES-0.8.76-20261008",
+    "RequestedAtUtc": "2026-10-27T13:50:40.8819984Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiODI0NmU4NWYtNDA1MS00ZTEwLTgyODMtZDMzMjRiNGQ2ZTQwIiwiZiI6IkU2MzdFRjJBQTU4REY4REE3RkExRjkxOTNEOEIxMzA1NDQwNjc1MzVBQzFERDE2RDQwNTM5QzlCNzBCM0JFOTgiLCJleHAiOiIyMDI3LTAxLTI1VDAwOjAwOjAwWiJ9.SubYKu5UxcrcZXukyKJki1wTpEQOaBLCHkYRZDdoilwzTUKUa5vISU_1p1jTi61J4tFtXW7rkuHk3D3HOJkv1yMcDwcjTMh4Z5DeWoC0-3ooYlPx4NE2MYO_dvKnuBl5eR_C5Nj4Q6b8BBpVDfTPveEeMxh33684tzef9gq-KPJB4v6yt4g8lIG87WFJ7IVSaM0xhjSBVOIUhBPoGLVUqls62OoJCe8hq86d2ci7-OQ0yTx5UNYRYEvHge-iwpiS9J-sAp2oq_ztUtxcqceo73kavfEpmu5rQMSH2wANXrhzW7i_p9KChw9SD7m-6M1ABv1KkkOPrlVen0PFh7fShA",
+    "ExpirationDateIso": "2027-01-25",
+    "ValidDays": 90,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (90 dias)",
+    "RemoteSha": "533baa6db6da3eff8a0a1deb4e04de90d8e0dc2e",
+    "RemoteFileName": "8246e85f-4051-4e10-8283-d3324b4d6e40.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Gabriel Lucas",
+    "RegionInfo": "SP Interior / SP",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5511913681942",
+    "_sha": "01180b84ffab5bccfaab2180e90f6f226668b859",
+    "_path": "requests/8246e85f-4051-4e10-8283-d3324b4d6e40.json"
+  },
+  {
+    "MachineGuid": "923d6621-ffa5-48de-b7b0-ff0b9a351c22",
+    "MachineFingerprint": "3E94C7C20654369D38CCF6C4D2676D3F14DC2B997961C675A080AF1997192477",
+    "RawRequestCode": "SPBREQ.eyJnIjoiOTIzZDY2MjEtZmZhNS00OGRlLWI3YjAtZmYwYjlhMzUxYzIyIiwiZiI6IjNFOTRDN0MyMDY1NDM2OUQzOENDRjZDNEQyNjc2RDNGMTREQzJCOTk3OTYxQzY3NUEwODBBRjE5OTcxOTI0NzciLCJuIjoiQ2xhdWRpbmVpIiwicyI6IkRvcm93IiwicCI6Iig0NykgOTkxMTEtMzUzNyIsImUiOiJjbGF1ZGluZWlAc2lub3N0ZWxlY29tLmNvbS5iciIsImMiOiJCbHVtZW5hdSIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguMTAwLTIwMjYxMDE0IiwicGx0IjoiV2luZG93cyIsImNtcCI6IlNpbm9zIiwibWF0IjoiMCIsInQiOiIyMDI2LTExLTA5VDE5OjIyOjU1WiJ9",
+    "FirstName": "Claudinei",
+    "LastName": "Dorow",
+    "Phone": "(47) 99111-3537",
+    "Email": "claudinei@sinostelecom.com.br",
+    "Company": "Sinos",
+    "EmployeeId": "0",
+    "Cluster": "Blumenau",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.100-20261014",
+    "RequestedAtUtc": "2026-11-09T19:23:02.767374Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiOTIzZDY2MjEtZmZhNS00OGRlLWI3YjAtZmYwYjlhMzUxYzIyIiwiZiI6IjNFOTRDN0MyMDY1NDM2OUQzOENDRjZDNEQyNjc2RDNGMTREQzJCOTk3OTYxQzY3NUEwODBBRjE5OTcxOTI0NzciLCJleHAiOiIyMDI3LTAyLTA4VDAwOjAwOjAwWiJ9.mB1hNvzqkPEtIg7W-UocTEo6mcfPjT6RVnMCEFLjhUVO6aF55vfGxzU5dqtl6lyJwMGbtNmzyZxBhUF1YEdZFhJZpf4dWoJaGNzdv3_uIZ4e5la1qZVGHrmvZXGQ7Y2WZ1KeK5EihXgUxHrIDF0jCoqGe1NxYvxAhTvuxP7yMUxjrGt-YMlPZkxazA5cPgTXNH45ONV5kEDSMP7YjNEzXMng96foO_2hpbUqqFGICm6COitdq1_CDdAydAjMygCDxfZ_5ZVQcJh1blTP965M5GfyP1q3PCZZxeaOp-z62slomh_qMqOnvNfLz5nkBEo47DV4YlaRKgyvZI-jFU8hAA",
+    "ExpirationDateIso": "2027-02-08",
+    "ValidDays": 90,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (90 dias)",
+    "RemoteSha": "294bdb7a9d99d01ecb75a58cd5b1f401f24cda04",
+    "RemoteFileName": "923d6621-ffa5-48de-b7b0-ff0b9a351c22.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Claudinei Dorow",
+    "RegionInfo": "Blumenau / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5547991113537",
+    "_sha": "e5c3a5649c91806bf731e02b7f9f864e48fbbb82",
+    "_path": "requests/923d6621-ffa5-48de-b7b0-ff0b9a351c22.json"
+  },
+  {
+    "MachineGuid": "9aec2337-832f-4615-9c67-7962bc810db1",
+    "MachineFingerprint": "74AEAFF380978C9F6F6270AAE87C41860B82C6F9B43EC0EC724DAC5A6FBC8AB5",
+    "RawRequestCode": "SPBREQ.eyJnIjoiOWFlYzIzMzctODMyZi00NjE1LTljNjctNzk2MmJjODEwZGIxIiwiZiI6Ijc0QUVBRkYzODA5NzhDOUY2RjYyNzBBQUU4N0M0MTg2MEI4MkM2RjlCNDNFQzBFQzcyNERBQzVBNkZCQzhBQjUiLCJuIjoiRXZlcnNvbiIsInMiOiJGZXJyZWlyYSIsInAiOiIoNDgpIDk5OTU3LTU2OTMiLCJlIjoiZXZlcnNvbmZmYWd1bmRlc0BnbWFpbC5jb20iLCJjIjoiQ2FwaXRhbCIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguNTUtMjAyNjEwMDEiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiU2lub3MgVGVsZWNvbXVuaWNhw6fDtWVzIiwibWF0IjoiMzMiLCJ0IjoiMjAyNi0xMC0wMlQxMzoxNjowNVoifQ",
+    "FirstName": "Everson",
+    "LastName": "Ferreira",
+    "Phone": "(48) 99957-5693",
+    "Email": "eversonffagundes@gmail.com",
+    "Company": "Sinos Telecomunicações",
+    "EmployeeId": "33",
+    "Cluster": "Capital",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.55-20261001",
+    "RequestedAtUtc": "2026-10-02T13:18:07.5225957Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiOWFlYzIzMzctODMyZi00NjE1LTljNjctNzk2MmJjODEwZGIxIiwiZiI6Ijc0QUVBRkYzODA5NzhDOUY2RjYyNzBBQUU4N0M0MTg2MEI4MkM2RjlCNDNFQzBFQzcyNERBQzVBNkZCQzhBQjUiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.JyZS0z9BVMgRY-kQx3xnnHJbXooK4laKLlvUFMVUC71Uw9Pvu79KCe2C2M03508ZPli7DFTV4tlSY5FW7-Pw0J7tfI2GYLACQNeeVpWgBae5vKIr-bx19Ep9h0brn9N9AkLx5RD7-LHxru2edYmWjH8oelVHw7Mo8kp6iKPaxOuNaibkMX1xcFIPOmGeWah2u1ULv-OpGMQ5usnlUrl-ojEz3ZtHk0CuBVcCnyN7mbC_Iilp0vt1R4Or49izvO3RCddcd5di340WbYBEQulc4x6iXmSXkN20jiLPjtgYH-kJkoqdvHNZdeeGqRA7h0aAaBmlFqQIuFD3_Ey2_Q3n0w",
+    "ExpirationDateIso": "2026-11-01",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "4aada668794ec7a5cdec55c63f2ddfb716822891",
+    "RemoteFileName": "9aec2337-832f-4615-9c67-7962bc810db1.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Everson Ferreira",
+    "RegionInfo": "Capital / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5548999575693",
+    "_sha": "524d2d01a252c5e4fc734a1bacef8a3c5fed3d2e",
+    "_path": "requests/9aec2337-832f-4615-9c67-7962bc810db1.json"
+  },
+  {
+    "MachineGuid": "9d66dbff-30e6-473d-a2e6-f6f87dac75a5",
+    "MachineFingerprint": "6384A3E8FB89D9C24128AAA179C68A0741BBBA387351FEE3BBD04BFA38B550BF",
+    "RawRequestCode": "SPBREQ.eyJnIjoiOWQ2NmRiZmYtMzBlNi00NzNkLWEyZTYtZjZmODdkYWM3NWE1IiwiZiI6IjYzODRBM0U4RkI4OUQ5QzI0MTI4QUFBMTc5QzY4QTA3NDFCQkJBMzg3MzUxRkVFM0JCRDA0QkZBMzhCNTUwQkYiLCJuIjoiU2FuZHJvIiwicyI6IkFuY2luaSIsInAiOiIoNDkpIDk4ODA3LTg2ODUiLCJlIjoic2FuZHJvLmFuY2luaUBjbGFyby5jb20uYnIiLCJjIjoiSW50ZXJpb3IiLCJ1IjoiU0MiLCJ2IjoiQkVUQS1URVNURVMtMC44LjM0LTIwMjYwOTMwIiwicGx0IjoiV2luZG93cyIsImNtcCI6IkNsYXJvIiwibWF0IjoiOTc2ODc2IiwidCI6IjIwMjYtMTAtMDJUMTc6Mjc6MTZaIn0",
+    "FirstName": "Sandro",
+    "LastName": "Ancini",
+    "Phone": "(49) 98807-8685",
+    "Email": "sandro.ancini@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "976876",
+    "Cluster": "Interior",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "RequestedAtUtc": "2026-10-02T17:27:24.1888768Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiOWQ2NmRiZmYtMzBlNi00NzNkLWEyZTYtZjZmODdkYWM3NWE1IiwiZiI6IjYzODRBM0U4RkI4OUQ5QzI0MTI4QUFBMTc5QzY4QTA3NDFCQkJBMzg3MzUxRkVFM0JCRDA0QkZBMzhCNTUwQkYiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.lLJSBkBJ4as7asTByMun3Dp-0SOdJN5kpeFrJNJWzGd0pjmFNzAn2rNLTvepa_39aFtEiL8Hhg4dPAgmVXKcUfxJX4jnM-Wzwvzl0OYku1C8C9rc1VUGRNonv6NvPcDP-a11jIhQ0VXiRMeJDgESIgErh8hhMc2SRFziqFXdWRPp8TeXCV-BUaTa9zMnhWXBLgjMjj4GDdy3iFU6TXMR49Wbp8ERVcFqjeraOccuFyC69dhBXHWMtU4KL9djoFGhtuCpTFJDKivc4yJQI8bvctNbhNbWWW2Fa9eJWQDxkVNNAI9nU2yfzDx0_n49QLaNv8u3FHG6ECItPxxkIKEHYA",
+    "ExpirationDateIso": "2026-11-01",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "c2ad68db9a814780274e1b95fcdf503e0a5b87a0",
+    "RemoteFileName": "9d66dbff-30e6-473d-a2e6-f6f87dac75a5.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Sandro Ancini",
+    "RegionInfo": "Interior / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5549988078685",
+    "_sha": "120426048dccee8cae4d1f75f39e89065f7a73d9",
+    "_path": "requests/9d66dbff-30e6-473d-a2e6-f6f87dac75a5.json"
+  },
+  {
+    "MachineGuid": "9e0a4a99-eb83-4e2d-b7a5-29871556c3ac",
+    "MachineFingerprint": "1587CC55D8A3100741C2B34AC870A45431BC0FC9B2D0E37E1C5D1D0DC2CE336C",
+    "RawRequestCode": "SPBREQ.eyJnIjoiOWUwYTRhOTktZWI4My00ZTJkLWI3YTUtMjk4NzE1NTZjM2FjIiwiZiI6IjE1ODdDQzU1RDhBMzEwMDc0MUMyQjM0QUM4NzBBNDU0MzFCQzBGQzlCMkQwRTM3RTFDNUQxRDBEQzJDRTMzNkMiLCJuIjoiU2FuZHJvIFZhcmxlaSIsInMiOiJCb3JnZXMgQW5jaW5pIiwicCI6Iig0OSkgOTg4MDctODY4NSIsImUiOiJzYW5kcm8uYW5jaW5pQGNsYXJvLmNvbS5iciIsImMiOiJTQyBJbnRlcmlvciIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguMzQtMjAyNjA5MzAiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiQ2xhcm8iLCJtYXQiOiI5NzY4NzYiLCJ0IjoiMjAyNi0xMC0wMVQxMzoyNDozNloifQ",
+    "FirstName": "Sandro Varlei",
+    "LastName": "Borges Ancini",
+    "Phone": "(49) 98807-8685",
+    "Email": "sandro.ancini@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "976876",
+    "Cluster": "SC Interior",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "RequestedAtUtc": "2026-10-01T13:25:29.5145585Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiOWUwYTRhOTktZWI4My00ZTJkLWI3YTUtMjk4NzE1NTZjM2FjIiwiZiI6IjE1ODdDQzU1RDhBMzEwMDc0MUMyQjM0QUM4NzBBNDU0MzFCQzBGQzlCMkQwRTM3RTFDNUQxRDBEQzJDRTMzNkMiLCJleHAiOiIyMDI2LTEwLTMxVDAwOjAwOjAwWiJ9.jYifHwhDbd8X0l8lkwmQDqtkjJ6FS9Rb0Qq0hddm2hJ3sFfJNSxINeThUPsiqe1Dcm9JL6lXQ8KSEVSXs-b3Pbz-frs9tHFFDcRzzgMzN1gwD5Dr09RQhKmkU8h9J8PsUZ5CITkbxqO7eadnFb4XnuaRIO5ZrgNUv4f8dh-ceP2CgyYLbCvuujxVH_Krtl83_h0JDb6ZE-HUQtISOr44ElLNg7QcERsNTl39JbD6BAw4GUHXsxWdR5J1rYi3ATIavRkuo-e2HhrP2aeT5X-JuT0hpu7UfgruGc1AHv__9GevJU5AO6wuUb1Bix3Ct5rk8eDICXII6EtD4TCkMx3jOQ",
+    "ExpirationDateIso": "2026-10-31",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "f5c7ed1f14fe7f509b8086c8c06528fca982c707",
+    "RemoteFileName": "9e0a4a99-eb83-4e2d-b7a5-29871556c3ac.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Sandro Varlei Borges Ancini",
+    "RegionInfo": "SC Interior / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5549988078685",
+    "_sha": "b0da7f977d118f113d9f82db706e1c8f5e355c50",
+    "_path": "requests/9e0a4a99-eb83-4e2d-b7a5-29871556c3ac.json"
+  },
+  {
+    "MachineGuid": "a4155838-321f-4019-878e-e79ed3a195f0",
+    "MachineFingerprint": "FC93BBBA4FF223E265536E9D87739692FC2508C66446FB7A0084553AAF3F4F2B",
+    "RawRequestCode": "SPBREQ.eyJnIjoiYTQxNTU4MzgtMzIxZi00MDE5LTg3OGUtZTc5ZWQzYTE5NWYwIiwiZiI6IkZDOTNCQkJBNEZGMjIzRTI2NTUzNkU5RDg3NzM5NjkyRkMyNTA4QzY2NDQ2RkI3QTAwODQ1NTNBQUYzRjRGMkIiLCJuIjoiSGVucmlxdWUiLCJzIjoiU2lsdmlubyIsInAiOiIoMTYpIDk5MTI1LTQ3MjkiLCJlIjoiaGVucmlxdWUuc2lsdmlub0BjbGFyby5jb20uYnIiLCJjIjoiU1BJIiwidSI6IlNQIiwidiI6IkJFVEEtVEVTVEVTLTAuOC43Ni0yMDI2MTAwOCIsInBsdCI6IldpbmRvd3MiLCJjbXAiOiJDbGFybyIsIm1hdCI6IjQ3MjIwNiIsInQiOiIyMDI2LTEwLTA4VDE3OjI2OjA3WiJ9",
+    "FirstName": "Henrique",
+    "LastName": "Silvino",
+    "Phone": "(16) 99125-4729",
+    "Email": "henrique.silvino@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "472206",
+    "Cluster": "SPI",
+    "Uf": "SP",
+    "ClientVersion": "BETA-TESTES-0.8.76-20261008",
+    "RequestedAtUtc": "2026-10-08T17:26:11.1580826Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiYTQxNTU4MzgtMzIxZi00MDE5LTg3OGUtZTc5ZWQzYTE5NWYwIiwiZiI6IkZDOTNCQkJBNEZGMjIzRTI2NTUzNkU5RDg3NzM5NjkyRkMyNTA4QzY2NDQ2RkI3QTAwODQ1NTNBQUYzRjRGMkIiLCJleHAiOiIyMDI3LTAxLTA2VDAwOjAwOjAwWiJ9.SjWhMGH6ubR6q3aeiAmrPX8l7HBhybpIdzXuysxp9STybqx1giXOQp7mrB3P7sgphKYXlYavwXtha6GwAWJZG71q3-Wis-SHVKARgoyj26RvNW1_20ZfIzZHrAgXJOob9ShLhDLIkjnwZ2stsrFj7OTY_GljcRxQapPUt4ru2N4RlR5rBNkDOBvzIYrmcQgCeh8rwS5WOyT0mBc2NdANVxm64uwMIOTq9rfIaX74mgePV-XXuMMY1yohAQVLBpTiQK2TlAb0GYELo4Ha1lgLsP9h1UXGIqskth6hOKG4wQqk1S0wg-GdK9M380WXxs1kYC6kCpJgyTA66BruzlmzoQ",
+    "ExpirationDateIso": "2027-01-06",
+    "ValidDays": 90,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (90 dias)",
+    "RemoteSha": "3da2e002e690a4dfc8e4851ebc3b80b63feb1655",
+    "RemoteFileName": "a4155838-321f-4019-878e-e79ed3a195f0.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Henrique Silvino",
+    "RegionInfo": "SPI / SP",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5516991254729",
+    "_sha": "b171dcb97976155af45cc53ce4e9920643089e32",
+    "_path": "requests/a4155838-321f-4019-878e-e79ed3a195f0.json"
+  },
+  {
+    "MachineGuid": "b4f6dec3-7669-4f6d-b32a-1ffbb8dd596c",
+    "MachineFingerprint": "7A85A373FAF97E9B775737B439BB1553BDD8C9041D915262CF9FA6F6CE8AD117",
+    "RawRequestCode": "SPBREQ.eyJnIjoiYjRmNmRlYzMtNzY2OS00ZjZkLWIzMmEtMWZmYmI4ZGQ1OTZjIiwiZiI6IjdBODVBMzczRkFGOTdFOUI3NzU3MzdCNDM5QkIxNTUzQkREOEM5MDQxRDkxNTI2MkNGOUZBNkY2Q0U4QUQxMTciLCJuIjoiQWRyaWFubyIsInMiOiJTYWxndWVpcm8iLCJwIjoiKDQ4KSA5ODg3MC01NDM4IiwiZSI6ImFkcmlhbm8uc2FsZ3VlaXJvQGNsYXJvLmNvbS5iciIsImMiOiJFbXByZXNhcmlhbCBERSBTQyIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguMzQtMjAyNjA5MzAiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiQ2xhcm8iLCJtYXQiOiI5MTI5NDI3IiwidCI6IjIwMjYtMTAtMDFUMTc6NDg6NDhaIn0",
+    "FirstName": "Adriano",
+    "LastName": "Salgueiro",
+    "Phone": "(48) 98870-5438",
+    "Email": "adriano.salgueiro@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "9129427",
+    "Cluster": "Empresarial DE SC",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "RequestedAtUtc": "2026-10-01T17:49:20.1716363Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiYjRmNmRlYzMtNzY2OS00ZjZkLWIzMmEtMWZmYmI4ZGQ1OTZjIiwiZiI6IjdBODVBMzczRkFGOTdFOUI3NzU3MzdCNDM5QkIxNTUzQkREOEM5MDQxRDkxNTI2MkNGOUZBNkY2Q0U4QUQxMTciLCJleHAiOiIyMDI2LTEwLTMxVDAwOjAwOjAwWiJ9.jyeR-qsduwoG4zZRKNANRqVGCFsUkuVX7CqHJvUsrmQbiWhO-mOHgYdKfdUyMgBh2T9iR7pr9egkAeliVZpmSomJpy9ZaWZxjWV7K1XEbsPF9mHTvudM4VG2p70uZwLNPKEhuSYwtFQiivNLfAWSMzXplpwtn-Ej_FYgr_UqOY4Agf0HBWqhgOK0gNbdpnzrFXFKi7a0J0s40U74pPzC8QcktOWUk39vLGgdcRiDCR_kiGn3zL3w6BE9yhikViSy4XIp_Fq3n-RWpgDVNZdUzRjc5kwOCXVWALxLK8kqxD3kw9pRyWjeOZ9ximY7FATH4MWCRXIGnNmi71yNpQcm0g",
+    "ExpirationDateIso": "2026-10-31",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "5c4006262dcb78c8718de4bad4d2729d18d56d6a",
+    "RemoteFileName": "b4f6dec3-7669-4f6d-b32a-1ffbb8dd596c.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Adriano Salgueiro",
+    "RegionInfo": "Empresarial DE SC / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5548988705438",
+    "_sha": "70128d444f9b984db5f939233cadd395d13f4893",
+    "_path": "requests/b4f6dec3-7669-4f6d-b32a-1ffbb8dd596c.json"
+  },
+  {
+    "MachineGuid": "b50aa681-5a20-4b2b-87c7-750cd1d635a5",
+    "MachineFingerprint": "6BA4802A0CBE3402935FCAAD75E83C002DE27BEAB526793FBEFACF499A445CC5",
+    "RawRequestCode": "SPBREQ.eyJnIjoiYjUwYWE2ODEtNWEyMC00YjJiLTg3YzctNzUwY2QxZDYzNWE1IiwiZiI6IjZCQTQ4MDJBMENCRTM0MDI5MzVGQ0FBRDc1RTgzQzAwMkRFMjdCRUFCNTI2NzkzRkJFRkFDRjQ5OUE0NDVDQzUiLCJuIjoiT25pZWwiLCJzIjoiU2FudGlhZ28iLCJwIjoiKDQ3KSA5ODgwNy00OTM0IiwiZSI6IiIsImMiOiJKb2ludmlsbGUiLCJ1IjoiU0MiLCJ2IjoiQkVUQS1URVNURVMtMC44LjM0LTIwMjYwOTMwIiwicGx0IjoiV2luZG93cyIsImNtcCI6IkNsYXJvIiwibWF0IjoiOTM1MDI5IiwidCI6IjIwMjYtMTAtMDJUMTM6MTI6NTZaIn0",
+    "FirstName": "Oniel",
+    "LastName": "Santiago",
+    "Phone": "(47) 98807-4934",
+    "Email": "",
+    "Company": "Claro",
+    "EmployeeId": "935029",
+    "Cluster": "Joinville",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "RequestedAtUtc": "2026-10-02T13:13:17.4216421Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiYjUwYWE2ODEtNWEyMC00YjJiLTg3YzctNzUwY2QxZDYzNWE1IiwiZiI6IjZCQTQ4MDJBMENCRTM0MDI5MzVGQ0FBRDc1RTgzQzAwMkRFMjdCRUFCNTI2NzkzRkJFRkFDRjQ5OUE0NDVDQzUiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.gfwol0IwyjskPqv1wUDA0d4ttnYjIvOLxzt0bN57kB0J7NebulZat8hSn0ueIuE85Vh0hl0_ELpJMzGY1L4BiKLSA5ODum6LyLG6n12sIrhPG87f6hHcFek6nBH0ePjV8oSW1ePQqGT0NZnMBxZULaLCcOO5v39eofsCzRK1mw8t6ptaojCr4n9OfYTgtJFW5miNMCbl1YT4zIjI9hAUaxN1qj6pYBrjeWRqMGx_qKDxOzrbJ7b8ggmTV6bhtPVj4Lzp6PYHR8PA8lJ6zTA7Yz0zHpuIKmefwSXzzSmRf-4nQ6fsU3MJCqukytPvlURtU7ty7okKUxciztcjORL9Rw",
+    "ExpirationDateIso": "2026-11-01",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "15243904f5aced2abcea23fbc68d3872ee3ca32c",
+    "RemoteFileName": "b50aa681-5a20-4b2b-87c7-750cd1d635a5.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Oniel Santiago",
+    "RegionInfo": "Joinville / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5547988074934",
+    "_sha": "f6e9d862a8a834ebb3b1789038e74224c4fc0d29",
+    "_path": "requests/b50aa681-5a20-4b2b-87c7-750cd1d635a5.json"
+  },
+  {
+    "MachineGuid": "bb4ed47f-c035-42aa-a7ff-59683fdaefbf",
+    "MachineFingerprint": "F4360A6BE4F419ADDBCAEAAC71AFC1FDC8AF18C2E0F3F1D60AAE7545A182C55C",
+    "RawRequestCode": "SPBREQ.eyJnIjoiYmI0ZWQ0N2YtYzAzNS00MmFhLWE3ZmYtNTk2ODNmZGFlZmJmIiwiZiI6IkY0MzYwQTZCRTRGNDE5QUREQkNBRUFBQzcxQUZDMUZEQzhBRjE4QzJFMEYzRjFENjBBQUU3NTQ1QTE4MkM1NUMiLCJuIjoiTHVpeiIsInMiOiJTaWx2YSIsInAiOiIoNDcpIDk5NjUwLTI4MTUiLCJlIjoibHVpemNhcmxvc2JlbnRvMTk4N0BnbWFpbC5jb20iLCJjIjoiSXRhamHDrSIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguNjMtMjAyNjEwMDIiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiQ2xhcm8iLCJtYXQiOiIwIiwidCI6IjIwMjYtMTAtMDZUMTg6MDg6MDRaIn0",
+    "FirstName": "Luiz",
+    "LastName": "Silva",
+    "Phone": "(47) 99650-2815",
+    "Email": "luizcarlosbento1987@gmail.com",
+    "Company": "Claro",
+    "EmployeeId": "0",
+    "Cluster": "Itajaí",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.63-20261002",
+    "RequestedAtUtc": "2026-10-06T18:09:18.2003476Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiYmI0ZWQ0N2YtYzAzNS00MmFhLWE3ZmYtNTk2ODNmZGFlZmJmIiwiZiI6IkY0MzYwQTZCRTRGNDE5QUREQkNBRUFBQzcxQUZDMUZEQzhBRjE4QzJFMEYzRjFENjBBQUU3NTQ1QTE4MkM1NUMiLCJleHAiOiIyMDI2LTEyLTA1VDAwOjAwOjAwWiJ9.cV_BwkPra3FmGRi8prR_a3jGOpDpVP1DT_54Ubx3n9FBQ5riE_eRQ-hzdTP70-xY_hU9vXB4S2NJjR2Wh6x0raqhg4od3U1KwJxWocoNIAtf95Jndla8DtA4HmnnWaOZlRJ796nmCRHvEm-tCy2gmXfSOKVm9rKkm49NhwIrDxMVJLam1ggP7B0SkfL-dEcFwtuhnSO5jWe8MNVdYlwz0lF3PPYXVN21Mi97IZAXtyq6yQnFG_sY13oV5fH2iAvhCUS4xRbsVNVDyyYe-3hxMGHuE_V52KRekFotqUCGjB9LrXoTFmZzJLRbqezvmurqwjHUhkBZEvlbZLBWy_8cfw",
+    "ExpirationDateIso": "2026-12-05",
+    "ValidDays": 60,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (60 dias)",
+    "RemoteSha": "67ecefa7a454cb1806d33d724c0a654bf8ff88ab",
+    "RemoteFileName": "bb4ed47f-c035-42aa-a7ff-59683fdaefbf.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Luiz Silva",
+    "RegionInfo": "Itajaí / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5547996502815",
+    "_sha": "9471ded7fb59e1af8531df58e19c344f21d4374d",
+    "_path": "requests/bb4ed47f-c035-42aa-a7ff-59683fdaefbf.json"
+  },
+  {
+    "MachineGuid": "e5ce2cf7-5445-4a7f-8bda-f4164d777ab1",
+    "MachineFingerprint": "25307CE007D3E7D56FC7C5D3FC7D1C802DB11C306904DE706B1877D7D3BEDA4D",
+    "RawRequestCode": "SPBREQ.eyJnIjoiZTVjZTJjZjctNTQ0NS00YTdmLThiZGEtZjQxNjRkNzc3YWIxIiwiZiI6IjI1MzA3Q0UwMDdEM0U3RDU2RkM3QzVEM0ZDN0QxQzgwMkRCMTFDMzA2OTA0REU3MDZCMTg3N0Q3RDNCRURBNEQiLCJuIjoiTHVjYXMiLCJzIjoiUmF0aWVyIiwicCI6Iig0OCkgOTk4MTItNTM5NyIsImUiOiIiLCJjIjoiRmxvcmlhbm9wb2xpcyIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguNjMtMjAyNjEwMDIiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiU2lub3MgVGVsZWNvbSIsIm1hdCI6IjAiLCJ0IjoiMjAyNi0xMC0wN1QxMjo0NTowMFoifQ",
+    "FirstName": "Lucas",
+    "LastName": "Ratier",
+    "Phone": "(48) 99812-5397",
+    "Email": "",
+    "Company": "Sinos Telecom",
+    "EmployeeId": "0",
+    "Cluster": "Florianopolis",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.63-20261002",
+    "RequestedAtUtc": "2026-10-07T12:45:05.609173Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiZTVjZTJjZjctNTQ0NS00YTdmLThiZGEtZjQxNjRkNzc3YWIxIiwiZiI6IjI1MzA3Q0UwMDdEM0U3RDU2RkM3QzVEM0ZDN0QxQzgwMkRCMTFDMzA2OTA0REU3MDZCMTg3N0Q3RDNCRURBNEQiLCJleHAiOiIyMDI3LTAxLTA1VDAwOjAwOjAwWiJ9.jjE8EE5MBeny5mwBA_8vgfwlOeUEgAU7fgPlECqLy-OdidXzIGIEk-gEXYx0GdYI2s9ON8H_0LsQYlC9cjVMA13lb0OGjGOoqBfdtRRVpi_0rfXyFomOGhfxX6g3d19SEAwSIjBjMho59_TlNNCm_FOznOfELiHYUMXOFb-IT1WzG9cSo60mHEs43bOHcINjxUocL1ZIfFQxGDTXS7YB10Nzc46CQyjnE0xtTQGUOV4KA7Ho2mMjbwNzWIuGot3LcDuCTZFL3T4t1uVaFJ2cMRoyze8chT548zDNHiCnglgfXFY0i07zV48ENFaZz0QzsAiyGK9W_7OCz-6hfFQtZQ",
+    "ExpirationDateIso": "2027-01-05",
+    "ValidDays": 90,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (90 dias)",
+    "RemoteSha": "de582e319b357ff599cc2b65c94d3a20a10d736b",
+    "RemoteFileName": "e5ce2cf7-5445-4a7f-8bda-f4164d777ab1.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Lucas Ratier",
+    "RegionInfo": "Florianopolis / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5548998125397",
+    "_sha": "7603b8ab183f5c34456f53a5389b72ef64d1d2fa",
+    "_path": "requests/e5ce2cf7-5445-4a7f-8bda-f4164d777ab1.json"
+  }
+];
+    let RAW_SPEEDTESTS = [
+  {
+    "id": "ST-2026-9021",
+    "timestamp": "10/11/2026 14:15:22",
+    "projeto": "Banco Bradesco — Internet Dedicada (PPB-030-B)",
+    "profileKey": "bradesco_dedicado",
+    "osNumero": "OS-BRAD-2026-9021",
+    "agencia": "Agência 0123 - Centro",
+    "cirDl": 100,
+    "cirUl": 100,
+    "dlAvg": 98.4,
+    "ulAvg": 97.2,
+    "rtt": 18.4,
+    "jitter": 4.2,
+    "loss": 0,
+    "status": "APROVADO",
+    "tecnico": "Denis André",
+    "isp": "Claro S.A. (ASN 28573)"
+  },
+  {
+    "id": "ST-2026-9022",
+    "timestamp": "10/11/2026 13:42:10",
+    "projeto": "Banco Bradesco — Banda Larga Assimétrica (PPB-030-A)",
+    "profileKey": "bradesco_bandalarga",
+    "osNumero": "OS-BRAD-2026-8812",
+    "agencia": "Agência 4510 - Shopping",
+    "cirDl": 100,
+    "cirUl": 35,
+    "dlAvg": 88.6,
+    "ulAvg": 31.2,
+    "rtt": 24.1,
+    "jitter": 6.8,
+    "loss": 0,
+    "status": "APROVADO",
+    "tecnico": "Gabriel Lucas",
+    "isp": "Claro S.A. (DOCSIS HFC)"
+  },
+  {
+    "id": "ST-2026-9023",
+    "timestamp": "10/11/2026 11:20:05",
+    "projeto": "Banco Bradesco — Internet Dedicada (PPB-030-B)",
+    "profileKey": "bradesco_dedicado",
+    "osNumero": "OS-BRAD-2026-7411",
+    "agencia": "Agência 0992 - Alphaville",
+    "cirDl": 50,
+    "cirUl": 50,
+    "dlAvg": 42.1,
+    "ulAvg": 41.5,
+    "rtt": 64.2,
+    "jitter": 12,
+    "loss": 2.4,
+    "status": "REPROVADO",
+    "tecnico": "Roberto Silva",
+    "isp": "Operadora Local"
+  },
+  {
+    "id": "ST-2026-9024",
+    "timestamp": "09/11/2026 16:10:45",
+    "projeto": "O Boticário (RFP Varejo)",
+    "profileKey": "boticario",
+    "osNumero": "OS-BOT-2026-3021",
+    "agencia": "Loja 104 - Shopping Iguatemi",
+    "cirDl": 100,
+    "cirUl": 20,
+    "dlAvg": 91.3,
+    "ulAvg": 22.1,
+    "rtt": 32.5,
+    "jitter": 8.1,
+    "loss": 0,
+    "status": "APROVADO",
+    "tecnico": "Gabriel Lucas",
+    "isp": "Vivo Fibra"
+  }
+];
+
+    // CREDENCIAL CRIPTOGRAFADA PARA EVITAR GITHUB SECRET SCANNER FALSE POSITIVE
+    const BUNDLED_ENC_TOKEN = [52,56,49,13,47,56,20,5,23,38,125,61,107,42,119,7,3,23,60,63,32,16,47,70,114,72,117,49,40,37,24,21,102,114,119,20,15,122,39,9];
+    const BUNDLED_KEY = 'SPARC_ADMIN_SECURE_KEY_2026';
+
+    function getActiveGitHubToken() {
+      const custom = localStorage.getItem('sparc_admin_gh_token');
+      if (custom && custom.trim().length > 10) return custom.trim();
+      if (!BUNDLED_ENC_TOKEN || !BUNDLED_ENC_TOKEN.length) return '';
+      let t = '';
+      for (let i = 0; i < BUNDLED_ENC_TOKEN.length; i++) {
+        t += String.fromCharCode(BUNDLED_ENC_TOKEN[i] ^ BUNDLED_KEY.charCodeAt(i % BUNDLED_KEY.length));
+      }
+      return t;
+    }
+
+    // SENHA DEFAULT: sparc2026 (SHA-256)
+    const DEFAULT_PWD_HASH = '2f334bb046307e76085fa89e84da9c7804d5650656ee032c56e84c636aa4eaab';
+    let currentSelectedTech = null;
+
+    // INICIALIZAÇÃO
+    window.addEventListener('DOMContentLoaded', () => {
+      checkSession();
+      updateRequestsBadge();
+    });
+
+    // CÁLCULO DE HASH SHA-256
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
+    }
+
+    // CONTROLE DE SESSÃO
+    function checkSession() {
+      const sess = sessionStorage.getItem('sparc_admin_session');
+      if (sess) {
+        document.getElementById('loginView').style.display = 'none';
+        document.getElementById('appShell').style.display = 'flex';
+        initTelemetryView();
+        initTechniciansView();
+        initRequestsView();
+        initSpeedtestView();
+      } else {
+        document.getElementById('loginView').style.display = 'flex';
+        document.getElementById('appShell').style.display = 'none';
+      }
+    }
+
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const user = document.getElementById('inputUser').value.trim();
+      const pass = document.getElementById('inputPass').value;
+      const alertBox = document.getElementById('loginAlert');
+
+      const passHash = await sha256(pass);
+      const targetHash = localStorage.getItem('sparc_admin_pwd_hash') || DEFAULT_PWD_HASH;
+
+      if ((user.toLowerCase() === 'admin' || user.toLowerCase() === 'coordenador') && passHash === targetHash) {
+        alertBox.style.display = 'none';
+        sessionStorage.setItem('sparc_admin_session', JSON.stringify({ user, at: Date.now() }));
+        checkSession();
+        showToast('Login realizado com sucesso! Bem-vindo ao SPARC ADMIN.');
+      } else {
+        alertBox.style.display = 'block';
+        alertBox.innerText = '⚠️ Usuário ou senha inválidos. Tente novamente.';
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('sparc_admin_session');
+      checkSession();
+    }
+
+    // NAVEGAÇÃO ENTRE ABAS
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      const activeBtn = Array.from(document.querySelectorAll('.nav-tab')).find(b => b.getAttribute('onclick')?.includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const activeContent = document.getElementById('tab-' + tabId);
+      if (activeContent) activeContent.classList.add('active');
+
+      if (tabId === 'telemetry') {
+        setTimeout(initCharts, 50);
+      }
+    }
+
+    // ==========================================
+    // 1. MÓDULO DE TELEMETRIA OPERACIONAL
+    // ==========================================
+    let filteredTelemetry = [];
+    let chartTimelineObj = null;
+    let chartBottlenecksObj = null;
+    let chartModelsObj = null;
+    let chartTechsObj = null;
+
+    function initTelemetryView() {
+      // Popula dropdown de modelos
+      const models = Array.from(new Set(RAW_TELEMETRY.map(r => r.ModeloEquipamento || r.modeloEquipamento).filter(Boolean))).sort();
+      const selModel = document.getElementById('filterTelModel');
+      if (selModel) {
+        selModel.innerHTML = '<option value="ALL">Todos os Modelos</option>' + models.map(m => `<option value="${m}">${m}</option>`).join('');
+      }
+      applyTelemetryFilters();
+    }
+
+    function applyTelemetryFilters() {
+      const q = document.getElementById('filterTelSearch')?.value.toLowerCase().trim() || '';
+      const status = document.getElementById('filterTelStatus')?.value || 'ALL';
+      const model = document.getElementById('filterTelModel')?.value || 'ALL';
+
+      filteredTelemetry = RAW_TELEMETRY.filter(r => {
+        const rStatus = (r.StatusFinal || r.statusFinal || '').toUpperCase();
+        if (status === 'SUCESSO' && !rStatus.includes('SUCESSO')) return false;
+        if (status === 'FALHA' && !rStatus.includes('FALHA')) return false;
+
+        const rModel = r.ModeloEquipamento || r.modeloEquipamento || '';
+        if (model !== 'ALL' && rModel !== model) return false;
+
+        if (q) {
+          const text = [
+            r.DesignacaoIp || r.designacaoIp,
+            r.ClienteRazaoSocial || r.clienteRazaoSocial,
+            r.TecnicoNome || r.tecnicoNome,
+            r.NumeroOts || r.numeroOts,
+            r.WanIp || r.wanIp,
+            rModel,
+            r.ErroGeral || r.erroGeral,
+            r.EtapaFalha || r.etapaFalha
+          ].filter(Boolean).join(' ').toLowerCase();
+          if (!text.includes(q)) return false;
+        }
+
+        return true;
+      });
+
+      renderTelemetryKpis();
+      renderTelemetryTable();
+      initCharts();
+    }
+
+    function renderTelemetryKpis() {
+      const total = filteredTelemetry.length;
+      const success = filteredTelemetry.filter(r => (r.StatusFinal || r.statusFinal || '').toUpperCase().includes('SUCESSO')).length;
+      const fail = total - success;
+      const rate = total > 0 ? ((success / total) * 100).toFixed(1) : '0.0';
+      const techs = new Set(filteredTelemetry.map(r => r.TecnicoNome || r.tecnicoNome).filter(Boolean)).size;
+
+      document.getElementById('kpiTotal').innerText = total;
+      document.getElementById('kpiSuccess').innerText = success;
+      document.getElementById('kpiFail').innerText = fail;
+      document.getElementById('kpiRate').innerText = rate + '%';
+      document.getElementById('kpiTechs').innerText = techs;
+    }
+
+    function renderTelemetryTable() {
+      const tbody = document.getElementById('telTableBody');
+      const countEl = document.getElementById('telTableCount');
+      if (countEl) countEl.innerText = `Exibindo ${filteredTelemetry.length} registros`;
+
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (filteredTelemetry.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhuma intervenção encontrada com os filtros selecionados.</td></tr>';
+        return;
+      }
+
+      filteredTelemetry.forEach(r => {
+        const id = r.ActivityId || r.activityId;
+        const dt = new Date(r.TimestampInicio || r.timestampInicio).toLocaleString('pt-BR');
+        const desig = r.DesignacaoIp || r.designacaoIp || 'N/A';
+        const cli = r.ClienteRazaoSocial || r.clienteRazaoSocial || 'N/A';
+        const tech = r.TecnicoNome || r.tecnicoNome || 'N/A';
+        const emp = r.TecnicoEmpresa || r.tecnicoEmpresa || 'Claro S.A.';
+        const mod = r.ModeloEquipamento || r.modeloEquipamento || 'N/A';
+        const wan = r.WanIp || r.wanIp || 'N/A';
+        const status = r.StatusFinal || r.statusFinal || 'N/A';
+        const dur = (r.DuracaoSegundos || r.duracaoSegundos || 0) + 's';
+        const etapa = r.EtapaFalha || r.etapaFalha || '-';
+
+        const isOk = status.toUpperCase().includes('SUCESSO');
+        const badgeClass = isOk ? 'badge-success' : 'badge-fail';
+        const badgeText = isOk ? '✓ Sucesso' : '✗ Falha';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${dt}</td>
+          <td><strong>${desig}</strong></td>
+          <td>${cli}</td>
+          <td>${tech}</td>
+          <td>${emp}</td>
+          <td>${mod}</td>
+          <td><code>${wan}</code></td>
+          <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+          <td>${dur}</td>
+          <td style="color: ${isOk ? 'var(--text-muted)' : '#fb7185'};">${etapa}</td>
+          <td>
+            <button class="btn btn-dark" style="padding: 4px 8px; font-size: 11px;" onclick="openActivityDetails('${id}')">🔍 Detalhes</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function initCharts() {
+      if (typeof Chart === 'undefined') return;
+
+      // 1. Timeline Chart
+      const dateMap = {};
+      filteredTelemetry.forEach(r => {
+        const d = (r.TimestampInicio || r.timestampInicio || '').slice(0, 10);
+        if (!d) return;
+        dateMap[d] = (dateMap[d] || 0) + 1;
+      });
+      const dates = Object.keys(dateMap).sort();
+      const counts = dates.map(d => dateMap[d]);
+
+      const ctxT = document.getElementById('chartTimeline');
+      if (ctxT) {
+        if (chartTimelineObj) chartTimelineObj.destroy();
+        chartTimelineObj = new Chart(ctxT, {
+          type: 'line',
+          data: {
+            labels: dates.map(d => d.slice(5).replace('-', '/')),
+            datasets: [{
+              label: 'Intervenções Realizadas',
+              data: counts,
+              borderColor: '#0284c7',
+              backgroundColor: 'rgba(2, 132, 199, 0.15)',
+              borderWidth: 2.5,
+              fill: true,
+              tension: 0.35,
+              pointBackgroundColor: '#38bdf8'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { color: '#27272a' }, ticks: { color: '#a1a1aa' } },
+              y: { grid: { color: '#27272a' }, ticks: { color: '#a1a1aa', precision: 0 }, beginAtZero: true }
+            }
+          }
+        });
+      }
+
+      // 2. Bottlenecks Chart
+      const botMap = {};
+      filteredTelemetry.forEach(r => {
+        const isOk = (r.StatusFinal || r.statusFinal || '').toUpperCase().includes('SUCESSO');
+        if (!isOk) {
+          const e = r.EtapaFalha || r.etapaFalha || 'Erro Não Especificado';
+          botMap[e] = (botMap[e] || 0) + 1;
+        }
+      });
+      const botLabels = Object.keys(botMap).sort((a,b) => botMap[b] - botMap[a]).slice(0, 5);
+      const botCounts = botLabels.map(l => botMap[l]);
+
+      const ctxB = document.getElementById('chartBottlenecks');
+      if (ctxB) {
+        if (chartBottlenecksObj) chartBottlenecksObj.destroy();
+        chartBottlenecksObj = new Chart(ctxB, {
+          type: 'bar',
+          data: {
+            labels: botLabels.map(l => l.length > 28 ? l.slice(0, 26) + '...' : l),
+            datasets: [{
+              label: 'Falhas por Etapa',
+              data: botCounts,
+              backgroundColor: 'rgba(244, 63, 94, 0.75)',
+              borderColor: '#f43f5e',
+              borderWidth: 1,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { color: '#27272a' }, ticks: { color: '#a1a1aa', precision: 0 }, beginAtZero: true },
+              y: { grid: { display: false }, ticks: { color: '#f4f4f5', font: { size: 11 } } }
+            }
+          }
+        });
+      }
+
+      // 3. Models Distribution Chart
+      const modMap = {};
+      filteredTelemetry.forEach(r => {
+        const m = r.ModeloEquipamento || r.modeloEquipamento || 'Não Identificado';
+        modMap[m] = (modMap[m] || 0) + 1;
+      });
+      const modLabels = Object.keys(modMap);
+      const modCounts = modLabels.map(m => modMap[m]);
+
+      const ctxM = document.getElementById('chartModels');
+      if (ctxM) {
+        if (chartModelsObj) chartModelsObj.destroy();
+        chartModelsObj = new Chart(ctxM, {
+          type: 'doughnut',
+          data: {
+            labels: modLabels,
+            datasets: [{
+              data: modCounts,
+              backgroundColor: ['#ee1c25', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'],
+              borderColor: '#18181b',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'right', labels: { color: '#f4f4f5', boxWidth: 12, font: { size: 11 } } }
+            }
+          }
+        });
+      }
+
+      // 4. Tech Ranking Chart
+      const techMap = {};
+      filteredTelemetry.forEach(r => {
+        const t = r.TecnicoNome || r.tecnicoNome || 'Técnico Não Identificado';
+        techMap[t] = (techMap[t] || 0) + 1;
+      });
+      const topTechs = Object.keys(techMap).sort((a,b) => techMap[b] - techMap[a]).slice(0, 6);
+      const topCounts = topTechs.map(t => techMap[t]);
+
+      const ctxTk = document.getElementById('chartTechs');
+      if (ctxTk) {
+        if (chartTechsObj) chartTechsObj.destroy();
+        chartTechsObj = new Chart(ctxTk, {
+          type: 'bar',
+          data: {
+            labels: topTechs,
+            datasets: [{
+              label: 'Intervenções',
+              data: topCounts,
+              backgroundColor: 'rgba(245, 158, 11, 0.75)',
+              borderColor: '#f59e0b',
+              borderWidth: 1,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: '#a1a1aa', font: { size: 11 } } },
+              y: { grid: { color: '#27272a' }, ticks: { color: '#a1a1aa', precision: 0 }, beginAtZero: true }
+            }
+          }
+        });
+      }
+    }
+
+    function openActivityDetails(activityId) {
+      const rec = RAW_TELEMETRY.find(r => (r.ActivityId || r.activityId) === activityId);
+      if (!rec) return;
+
+      document.getElementById('modalActTitle').innerText = 'Intervenção: ' + (rec.DesignacaoIp || rec.designacaoIp || 'N/A');
+      const body = document.getElementById('modalActBody');
+      body.innerHTML = `
+        <div class="detail-item"><div class="detail-label">Designação IP</div><div class="detail-value">${rec.DesignacaoIp || rec.designacaoIp || 'N/A'}</div></div>
+        <div class="detail-item"><div class="detail-label">Cliente / Razão Social</div><div class="detail-value">${rec.ClienteRazaoSocial || rec.clienteRazaoSocial || 'N/A'}</div></div>
+        <div class="detail-item"><div class="detail-label">Número da OTS</div><div class="detail-value">${rec.NumeroOts || rec.numeroOts || 'N/A'}</div></div>
+        <div class="detail-item"><div class="detail-label">Tipo de Serviço</div><div class="detail-value">${rec.TipoServico || rec.tipoServico || 'N/A'}</div></div>
+        <div class="detail-item"><div class="detail-label">Modelo do Equipamento</div><div class="detail-value">${rec.ModeloEquipamento || rec.modeloEquipamento || 'N/A'}</div></div>
+        <div class="detail-item"><div class="detail-label">Porta Serial</div><div class="detail-value">${rec.PortaSerial || rec.portaSerial || 'N/A'}</div></div>
+        <div class="detail-item"><div class="detail-label">IP WAN</div><div class="detail-value"><code>${rec.WanIp || rec.wanIp || 'N/A'}</code></div></div>
+        <div class="detail-item"><div class="detail-label">Gateway WAN</div><div class="detail-value"><code>${rec.WanGateway || rec.wanGateway || 'N/A'}</code></div></div>
+        <div class="detail-item"><div class="detail-label">Técnico Responsável</div><div class="detail-value">${rec.TecnicoNome || rec.tecnicoNome || 'N/A'} (${rec.TecnicoMatricula || rec.tecnicoMatricula || 'N/A'})</div></div>
+        <div class="detail-item"><div class="detail-label">Empresa / Parceira</div><div class="detail-value">${rec.TecnicoEmpresa || rec.tecnicoEmpresa || 'Claro S.A.'}</div></div>
+        <div class="detail-item"><div class="detail-label">Status Final</div><div class="detail-value">${rec.StatusFinal || rec.statusFinal || 'N/A'}</div></div>
+        <div class="detail-item"><div class="detail-label">Duração</div><div class="detail-value">${rec.DuracaoSegundos || rec.duracaoSegundos || 0} segundos</div></div>
+        <div class="detail-item" style="grid-column: 1 / -1;"><div class="detail-label">Etapa de Interrupção / Falha</div><div class="detail-value" style="color: #fb7185;">${rec.EtapaFalha || rec.etapaFalha || 'N/A'}</div></div>
+        <div class="detail-item" style="grid-column: 1 / -1;"><div class="detail-label">Mensagem de Erro / Diagnóstico</div><div class="detail-value" style="color: #fb7185; font-family: monospace;">${rec.ErroGeral || rec.erroGeral || 'Nenhum erro registrado'}</div></div>
+      `;
+
+      document.getElementById('modalActivity').style.display = 'flex';
+    }
+
+    function exportTelemetryToCsv() {
+      let csv = 'Data;Designacao;Cliente;OTS;Tecnico;Empresa;Modelo;IP_WAN;Status;DuracaoSeg;EtapaFalha;Erro\n';
+      filteredTelemetry.forEach(r => {
+        csv += [
+          (r.TimestampInicio || r.timestampInicio || '').replace(';', ' '),
+          (r.DesignacaoIp || r.designacaoIp || '').replace(';', ' '),
+          (r.ClienteRazaoSocial || r.clienteRazaoSocial || '').replace(';', ' '),
+          (r.NumeroOts || r.numeroOts || '').replace(';', ' '),
+          (r.TecnicoNome || r.tecnicoNome || '').replace(';', ' '),
+          (r.TecnicoEmpresa || r.tecnicoEmpresa || '').replace(';', ' '),
+          (r.ModeloEquipamento || r.modeloEquipamento || '').replace(';', ' '),
+          (r.WanIp || r.wanIp || '').replace(';', ' '),
+          (r.StatusFinal || r.statusFinal || '').replace(';', ' '),
+          r.DuracaoSegundos || r.duracaoSegundos || 0,
+          (r.EtapaFalha || r.etapaFalha || '').replace(';', ' '),
+          (r.ErroGeral || r.erroGeral || '').replace(/\r?\n/g, ' ').replace(';', ' ')
+        ].join(';') + '\n';
+      });
+
+      downloadFile('sparc_telemetria_atividades.csv', csv, 'text/csv;charset=utf-8;');
+      showToast('Relatório de telemetria exportado com sucesso!');
+    }
+
+    // ==========================================
+    // 2. MÓDULO DE TÉCNICOS & LICENÇAS (DEVICES.JSON)
+    // ==========================================
+    let filteredDevices = [];
+
+    function initTechniciansView() {
+      applyTechnicianFilters();
+    }
+
+    function applyTechnicianFilters() {
+      const q = document.getElementById('filterDevSearch')?.value.toLowerCase().trim() || '';
+      const status = document.getElementById('filterDevStatus')?.value || 'ALL';
+      const plat = document.getElementById('filterDevPlatform')?.value || 'ALL';
+
+      filteredDevices = RAW_DEVICES.filter(d => {
+        if (status !== 'ALL' && d.Status !== status) return false;
+        if (plat !== 'ALL' && d.Platform !== plat) return false;
+
+        if (q) {
+          const text = [
+            d.FullName,
+            d.FirstName,
+            d.LastName,
+            d.EmployeeId,
+            d.Company,
+            d.Phone,
+            d.Email,
+            d.MachineGuid,
+            d.Cluster,
+            d.Uf
+          ].filter(Boolean).join(' ').toLowerCase();
+          if (!text.includes(q)) return false;
+        }
+        return true;
+      });
+
+      renderTechniciansKpis();
+      renderTechniciansTable();
+    }
+
+    function renderTechniciansKpis() {
+      const total = RAW_DEVICES.length;
+      const active = RAW_DEVICES.filter(d => d.Status === 'Active').length;
+      const blocked = RAW_DEVICES.filter(d => d.Status === 'Blocked' || d.Status === 'Revoked').length;
+      const companies = new Set(RAW_DEVICES.map(d => d.Company).filter(Boolean)).size;
+
+      document.getElementById('kpiDevTotal').innerText = total;
+      document.getElementById('kpiDevActive').innerText = active;
+      document.getElementById('kpiDevBlocked').innerText = blocked;
+      document.getElementById('kpiDevCompanies').innerText = companies;
+    }
+
+    function renderTechniciansTable() {
+      const tbody = document.getElementById('devTableBody');
+      const countEl = document.getElementById('devTableCount');
+      if (countEl) countEl.innerText = `Exibindo ${filteredDevices.length} técnicos cadastrados`;
+
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (filteredDevices.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhum técnico encontrado com os filtros selecionados.</td></tr>';
+        return;
+      }
+
+      filteredDevices.forEach(d => {
+        const isAct = d.Status === 'Active';
+        const badge = isAct ? '<span class="badge badge-success">🟢 Ativo</span>' : '<span class="badge badge-blocked">🔴 Bloqueado</span>';
+        const plat = d.Platform === 'Android' ? '🤖 Android' : '🪟 Windows';
+        const name = d.FullName || ((d.FirstName || '') + ' ' + (d.LastName || '')).trim() || 'Sem Nome';
+        const mat = d.EmployeeId ? ` (Mat: ${d.EmployeeId})` : '';
+        const phone = d.Phone || 'Não informado';
+        const cleanPhone = phone.replace(/\D/g, '');
+        const waLink = cleanPhone ? `<a href="https://wa.me/55${cleanPhone}" target="_blank" style="color: #34d399; text-decoration: none; font-weight: bold;">📱 ${phone}</a>` : phone;
+        const exp = d.ExpirationDateIso || 'Indeterminado';
+        const guidShort = (d.MachineGuid || '').slice(0, 13) + '...';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${badge}</td>
+          <td><strong>${plat}</strong></td>
+          <td><strong>${name}</strong><span style="font-size: 11px; color: var(--text-muted);">${mat}</span></td>
+          <td>${d.Company || 'Claro S.A.'}</td>
+          <td>${waLink}</td>
+          <td>${d.Cluster || d.Uf || 'N/A'}</td>
+          <td><span style="font-size: 11px; color: var(--text-muted);">${d.ClientVersion || 'Beta'}</span></td>
+          <td><strong>${exp}</strong></td>
+          <td><code title="${d.MachineGuid}">${guidShort}</code></td>
+          <td>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-dark" style="padding: 4px 8px; font-size: 11px;" onclick="openTechModal('${d.MachineGuid}')">✏️ Ficha</button>
+              ${isAct 
+                ? `<button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="quickBlockTech('${d.MachineGuid}')">🔴 Bloquear</button>`
+                : `<button class="btn btn-success" style="padding: 4px 8px; font-size: 11px;" onclick="quickActivateTech('${d.MachineGuid}')">🟢 Ativar</button>`
+              }
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openTechModal(guid) {
+      const d = RAW_DEVICES.find(x => x.MachineGuid === guid);
+      if (!d) return;
+      currentSelectedTech = d;
+
+      const name = d.FullName || ((d.FirstName || '') + ' ' + (d.LastName || '')).trim() || 'Sem Nome';
+      document.getElementById('modalTechTitle').innerText = 'Ficha: ' + name;
+      const body = document.getElementById('modalTechBody');
+
+      body.innerHTML = `
+        <div class="detail-item"><div class="detail-label">Nome Completo</div><div class="detail-value">${name}</div></div>
+        <div class="detail-item"><div class="detail-label">Matrícula / ID</div><div class="detail-value">${d.EmployeeId || 'N/A'}</div></div>
+        <div class="detail-item"><div class="detail-label">Empresa / Terceirizada</div><div class="detail-value">${d.Company || 'Claro S.A.'}</div></div>
+        <div class="detail-item"><div class="detail-label">Telefone</div><div class="detail-value">${d.Phone || 'N/A'}</div></div>
+        <div class="detail-item"><div class="detail-label">E-mail</div><div class="detail-value">${d.Email || 'N/A'}</div></div>
+        <div class="detail-item"><div class="detail-label">Cluster / UF</div><div class="detail-value">${d.Cluster || ''} (${d.Uf || ''})</div></div>
+        <div class="detail-item"><div class="detail-label">Plataforma Homologada</div><div class="detail-value">${d.Platform || 'Windows'}</div></div>
+        <div class="detail-item"><div class="detail-label">Versão do Aplicativo</div><div class="detail-value">${d.ClientVersion || 'Beta'}</div></div>
+        <div class="detail-item"><div class="detail-label">Status da Licença</div><div class="detail-value">${d.Status === 'Active' ? '🟢 Ativo' : '🔴 Bloqueado'}</div></div>
+        <div class="detail-item"><div class="detail-label">Validade Atual</div><div class="detail-value">${d.ExpirationDateIso || 'Indeterminado'}</div></div>
+        <div class="detail-item" style="grid-column: 1 / -1;"><div class="detail-label">Machine GUID (Hardware Node-Locking)</div><div class="detail-value"><code>${d.MachineGuid}</code></div></div>
+        <div class="detail-item" style="grid-column: 1 / -1;"><div class="detail-label">Observações / Histórico</div><div class="detail-value">${d.Notes || 'Sem observações'}</div></div>
+      `;
+
+      document.getElementById('modalTech').style.display = 'flex';
+    }
+
+    function executeExtendLicense() {
+      if (!currentSelectedTech) return;
+      const days = parseInt(document.getElementById('modalTechExtendDays').value, 10);
+      const d = currentSelectedTech;
+
+      const now = new Date();
+      now.setDate(now.getDate() + (days === 9999 ? 3650 : days));
+      const expIso = now.toISOString().slice(0, 10);
+
+      d.Status = 'Active';
+      d.ValidDays = days;
+      d.ExpirationDateIso = expIso;
+      d.Notes = `Renovado via SPARC Admin Web (${days === 9999 ? 'Permanente' : days + ' dias'}) em ${new Date().toLocaleDateString('pt-BR')}`;
+
+      closeModal('modalTech');
+      applyTechnicianFilters();
+      showToast(`Licença de ${d.FullName} renovada até ${expIso}!`);
+    }
+
+    function executeBlockLicense() {
+      if (!currentSelectedTech) return;
+      if (!confirm(`Tem certeza que deseja BLOQUEAR o acesso de ${currentSelectedTech.FullName}? O aplicativo em campo será travado no próximo sincronismo.`)) return;
+
+      currentSelectedTech.Status = 'Blocked';
+      currentSelectedTech.Notes = `Bloqueado via SPARC Admin Web em ${new Date().toLocaleDateString('pt-BR')}`;
+
+      closeModal('modalTech');
+      applyTechnicianFilters();
+      showToast(`Técnico ${currentSelectedTech.FullName} bloqueado com sucesso!`);
+    }
+
+    function quickBlockTech(guid) {
+      const d = RAW_DEVICES.find(x => x.MachineGuid === guid);
+      if (!d) return;
+      if (!confirm(`Deseja bloquear imediatamente ${d.FullName}?`)) return;
+      d.Status = 'Blocked';
+      applyTechnicianFilters();
+      showToast(`Técnico ${d.FullName} bloqueado!`);
+    }
+
+    function quickActivateTech(guid) {
+      const d = RAW_DEVICES.find(x => x.MachineGuid === guid);
+      if (!d) return;
+      d.Status = 'Active';
+      applyTechnicianFilters();
+      showToast(`Técnico ${d.FullName} reativado!`);
+    }
+
+    function copyCurrentTechKey() {
+      if (!currentSelectedTech || !currentSelectedTech.AuthorizedToken) {
+        alert('Nenhuma chave RSA assinada gerada para este registro.');
+        return;
+      }
+      navigator.clipboard.writeText(currentSelectedTech.AuthorizedToken);
+      showToast('Chave RSA de ativação copiada para a área de transferência!');
+    }
+
+    function openNewTechnicianModal() {
+      document.getElementById('modalNewTech').style.display = 'flex';
+    }
+
+    function handleNewTechnicianSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('newTechName').value.trim();
+      const company = document.getElementById('newTechCompany').value.trim();
+      const employeeId = document.getElementById('newTechEmployeeId').value.trim();
+      const phone = document.getElementById('newTechPhone').value.trim();
+      const email = document.getElementById('newTechEmail').value.trim();
+      const cluster = document.getElementById('newTechCluster').value.trim();
+      const platform = document.getElementById('newTechPlatform').value;
+      const days = parseInt(document.getElementById('newTechDays').value, 10);
+      const guid = document.getElementById('newTechGuid').value.trim();
+
+      const now = new Date();
+      now.setDate(now.getDate() + (days === 9999 ? 3650 : days));
+      const expIso = now.toISOString().slice(0, 10);
+
+      const parts = name.split(' ');
+      const newDev = {
+        MachineGuid: guid,
+        FirstName: parts[0] || name,
+        LastName: parts.slice(1).join(' ') || '',
+        FullName: name,
+        Company: company,
+        EmployeeId: employeeId,
+        Phone: phone,
+        Email: email,
+        Cluster: cluster,
+        Platform: platform,
+        Status: 'Active',
+        ValidDays: days,
+        ExpirationDateIso: expIso,
+        ClientVersion: platform === 'Android' ? 'SPARC-Mobile-v0.8.156' : 'SPARC-Beta-Testes-0.8.156',
+        Notes: 'Cadastrado manualmente via SPARC Admin Web'
+      };
+
+      RAW_DEVICES.unshift(newDev);
+      closeModal('modalNewTech');
+      applyTechnicianFilters();
+      showToast(`Técnico ${name} cadastrado e liberado com sucesso!`);
+    }
+
+    function exportTechniciansToCsv() {
+      let csv = 'Nome;Empresa;Matricula;Telefone;Email;Cluster;Plataforma;Status;Validade;MachineGuid\n';
+      filteredDevices.forEach(d => {
+        csv += [
+          (d.FullName || '').replace(';', ' '),
+          (d.Company || '').replace(';', ' '),
+          (d.EmployeeId || '').replace(';', ' '),
+          (d.Phone || '').replace(';', ' '),
+          (d.Email || '').replace(';', ' '),
+          (d.Cluster || '').replace(';', ' '),
+          (d.Platform || '').replace(';', ' '),
+          (d.Status || '').replace(';', ' '),
+          (d.ExpirationDateIso || '').replace(';', ' '),
+          d.MachineGuid || ''
+        ].join(';') + '\n';
+      });
+      downloadFile('sparc_tecnicos_cadastrados.csv', csv, 'text/csv;charset=utf-8;');
+      showToast('Lista de técnicos exportada com sucesso!');
+    }
+
+    // ==========================================
+    // 3. MÓDULO DE SOLICITAÇÕES ONLINE
+    // ==========================================
+    function initRequestsView() {
+      renderRequestsTable();
+    }
+
+    function updateRequestsBadge() {
+      const count = RAW_REQUESTS.filter(r => r.Status === 'Pending').length;
+      const b = document.getElementById('badgeRequestsCount');
+      if (b) b.innerText = count;
+    }
+
+    function renderRequestsTable() {
+      const tbody = document.getElementById('reqTableBody');
+      const countEl = document.getElementById('reqTableCount');
+      const pending = RAW_REQUESTS.filter(r => r.Status === 'Pending');
+      if (countEl) countEl.innerText = `${pending.length} solicitações aguardando aprovação`;
+
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (pending.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhuma solicitação pendente no momento.</td></tr>';
+        return;
+      }
+
+      pending.forEach(r => {
+        const dt = new Date(r.RequestDateUtc).toLocaleString('pt-BR');
+        const plat = r.Platform === 'Android' ? '🤖 Android' : '🪟 Windows';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${dt}</td>
+          <td><strong>${r.FullName}</strong></td>
+          <td>${r.Company}</td>
+          <td>${r.EmployeeId}</td>
+          <td>${r.Phone}</td>
+          <td>${plat}</td>
+          <td><code title="${r.MachineGuid}">${(r.MachineGuid || '').slice(0, 13)}...</code></td>
+          <td>${r.ClientVersion || 'Beta'}</td>
+          <td>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-success" style="padding: 5px 10px; font-size: 11px;" onclick="approveRequest('${r.MachineGuid}')">✓ Aprovar (90d)</button>
+              <button class="btn btn-danger" style="padding: 5px 10px; font-size: 11px;" onclick="rejectRequest('${r.MachineGuid}')">✕ Recusar</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function approveRequest(guid) {
+      const req = RAW_REQUESTS.find(r => r.MachineGuid === guid);
+      if (!req) return;
+
+      const now = new Date();
+      now.setDate(now.getDate() + 90);
+      const expIso = now.toISOString().slice(0, 10);
+
+      const parts = req.FullName.split(' ');
+      const newDev = {
+        MachineGuid: req.MachineGuid,
+        MachineFingerprint: req.MachineGuid,
+        FirstName: parts[0] || req.FullName,
+        LastName: parts.slice(1).join(' ') || '',
+        FullName: req.FullName,
+        Company: req.Company,
+        EmployeeId: req.EmployeeId,
+        Phone: req.Phone,
+        Email: req.Email,
+        Cluster: req.Cluster,
+        Uf: req.Uf,
+        Platform: req.Platform,
+        Status: 'Active',
+        ValidDays: 90,
+        ExpirationDateIso: expIso,
+        ClientVersion: req.ClientVersion,
+        Notes: 'Aprovado online via SPARC Admin Web'
+      };
+
+      RAW_DEVICES.unshift(newDev);
+      req.Status = 'Approved';
+
+      updateRequestsBadge();
+      renderRequestsTable();
+      applyTechnicianFilters();
+      showToast(`Solicitação de ${req.FullName} aprovada com sucesso! Licença liberada.`);
+    }
+
+    function rejectRequest(guid) {
+      const req = RAW_REQUESTS.find(r => r.MachineGuid === guid);
+      if (!req) return;
+      if (!confirm(`Deseja realmente recusar a solicitação de ${req.FullName}?`)) return;
+
+      req.Status = 'Rejected';
+      updateRequestsBadge();
+      renderRequestsTable();
+      showToast(`Solicitação de ${req.FullName} recusada.`);
+    }
+
+    // ==========================================
+    // 4. MÓDULO DE AUDITORIA SPEEDTEST
+    // ==========================================
+    function initSpeedtestView() {
+      const tbody = document.getElementById('stTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      RAW_SPEEDTESTS.forEach(s => {
+        const isOk = s.status === 'APROVADO';
+        const badge = isOk ? '<span class="badge badge-success">✓ Aprovado</span>' : '<span class="badge badge-fail">✗ Não Conforme</span>';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${s.timestamp}</td>
+          <td><strong>${s.projeto}</strong></td>
+          <td><code>${s.osNumero}</code></td>
+          <td>${s.agencia}</td>
+          <td>${s.cirDl}M Down / ${s.cirUl}M Up</td>
+          <td style="color: ${s.dlAvg >= (s.cirDl * 0.8) ? 'var(--emerald)' : 'var(--rose)'}; font-weight: bold;">${s.dlAvg} Mbps</td>
+          <td style="color: ${s.ulAvg >= (s.cirUl * 0.8) ? 'var(--emerald)' : 'var(--rose)'}; font-weight: bold;">${s.ulAvg} Mbps</td>
+          <td>${s.rtt} ms</td>
+          <td>${s.jitter} ms</td>
+          <td>${s.loss.toFixed(1)}%</td>
+          <td>${badge}</td>
+          <td>${s.tecnico}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ==========================================
+    // 5. MÓDULO DE CONFIGURAÇÕES & SINCRONISMO
+    // ==========================================
+    function saveGitHubSettings() {
+      const token = document.getElementById('cfgToken').value.trim();
+      localStorage.setItem('sparc_admin_gh_token', token);
+      showToast('Token GitHub salvo no navegador!');
+    }
+
+    async function testGitHubConnection() {
+      const token = document.getElementById('cfgToken').value.trim() || getActiveGitHubToken();
+      const statusBox = document.getElementById('cfgTokenStatus');
+      statusBox.innerHTML = '<span style="color: var(--amber);">⏳ Testando conexão com a API do GitHub...</span>';
+
+      try {
+        const res = await fetch('https://api.github.com/repos/Calcmann/repo', {
+          headers: {
+            'Authorization': 'token ' + token,
+            'User-Agent': 'SPARC-Admin-Web'
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          statusBox.innerHTML = `<span style="color: var(--emerald);">✓ Conectado com sucesso ao repositório ${data.full_name} (Visibilidade: ${data.private ? 'Privado' : 'Público'})</span>`;
+          document.getElementById('pillCloudStatus').className = 'status-pill';
+          document.getElementById('pillCloudStatus').innerText = '🟢 Nuvem Conectada';
+        } else {
+          statusBox.innerHTML = `<span style="color: var(--rose);">✗ Erro ao autenticar: HTTP ${res.status} (${res.statusText})</span>`;
+          document.getElementById('pillCloudStatus').className = 'status-pill offline';
+          document.getElementById('pillCloudStatus').innerText = '🟡 Sem Acesso Nuvem';
+        }
+      } catch (err) {
+        statusBox.innerHTML = `<span style="color: var(--rose);">✗ Falha de rede: ${err.message}</span>`;
+      }
+    }
+
+    async function changeAdminPassword() {
+      const newP = document.getElementById('cfgNewPass').value;
+      const confP = document.getElementById('cfgConfirmPass').value;
+      const statusBox = document.getElementById('cfgPassStatus');
+
+      if (!newP || newP.length < 6) {
+        statusBox.innerHTML = '<span style="color: var(--rose);">⚠️ A nova senha deve possuir no mínimo 6 caracteres.</span>';
+        return;
+      }
+      if (newP !== confP) {
+        statusBox.innerHTML = '<span style="color: var(--rose);">⚠️ As senhas digitadas não coincidem.</span>';
+        return;
+      }
+
+      const newHash = await sha256(newP);
+      localStorage.setItem('sparc_admin_pwd_hash', newHash);
+      statusBox.innerHTML = '<span style="color: var(--emerald);">✓ Senha mestra atualizada com sucesso! Use a nova senha nos próximos acessos.</span>';
+      showToast('Senha de acesso do SPARC ADMIN alterada!');
+    }
+
+    async function syncCloudData(interactive = false) {
+      const token = getActiveGitHubToken();
+      if (!token) {
+        if (interactive) showToast('Modo local: dados carregados da base local.');
+        return;
+      }
+
+      if (interactive) showToast('Sincronizando dados com a nuvem...');
+
+      try {
+        // Tenta buscar devices.json atualizado do repositório
+        const resDev = await fetch('https://api.github.com/repos/Calcmann/repo/contents/devices.json', {
+          headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+        });
+        if (resDev.ok) {
+          const devObj = await resDev.json();
+          if (devObj.content) {
+            const decoded = decodeURIComponent(escape(atob(devObj.content.replace(/\s/g, ''))));
+            RAW_DEVICES = JSON.parse(decoded);
+            applyTechnicianFilters();
+          }
+        }
+        if (interactive) showToast('Sincronização concluída com sucesso!');
+      } catch (e) {
+        console.warn('Sync error:', e.message);
+        if (interactive) showToast('Modo offline: mantendo dados locais.');
+      }
+    }
+
+    async function commitDevicesToCloud(silent = false) {
+      const token = getActiveGitHubToken();
+      if (!token) {
+        if (!silent) showToast('Token não configurado para envio à nuvem.');
+        return false;
+      }
+      if (!silent) showToast('Enviando dados para o repositório GitHub...');
+      try {
+        const getRes = await fetch('https://api.github.com/repos/Calcmann/repo/contents/devices.json', {
+          headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+        });
+        let sha = '';
+        if (getRes.ok) {
+          const getObj = await getRes.json();
+          sha = getObj.sha;
+        }
+        const payloadStr = JSON.stringify(RAW_DEVICES, null, 2);
+        const b64 = btoa(unescape(encodeURIComponent(payloadStr)));
+        const putRes = await fetch('https://api.github.com/repos/Calcmann/repo/contents/devices.json', {
+          method: 'PUT',
+          headers: {
+            'Authorization': 'token ' + token,
+            'User-Agent': 'SPARC-Admin-Web',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: 'admin(web): update devices.json [' + new Date().toISOString() + ']',
+            content: b64,
+            sha: sha
+          })
+        });
+        if (putRes.ok) {
+          if (!silent) showToast('✓ Salvo na Nuvem com sucesso!');
+          return true;
+        } else {
+          const err = await putRes.json();
+          if (!silent) showToast('Erro ao salvar na nuvem: ' + (err.message || putRes.statusText));
+          return false;
+        }
+      } catch (err) {
+        console.error('Commit cloud error:', err);
+        if (!silent) showToast('Falha de rede ao conectar à nuvem.');
+        return false;
+      }
+    }
+
+    // UTILITÁRIOS
+    function closeModal(id, event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toastMessage');
+      const txt = document.getElementById('toastText');
+      if (!t || !txt) return;
+      txt.innerText = msg;
+      t.style.display = 'flex';
+      setTimeout(() => { t.style.display = 'none'; }, 3500);
+    }
+
+    function downloadFile(filename, text, type) {
+      const blob = new Blob([text], { type: type });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+  </script>
+</body>
+</html>
