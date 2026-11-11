@@ -277,7 +277,7 @@
 
     .project-grid {
       display: grid;
-      grid-template-columns: 1fr 1.2fr;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 14px 16px;
     }
     @media (max-width: 720px) {
@@ -668,6 +668,12 @@
         <input type="text" id="txtAgencia" placeholder="Ex: Agência 0123 - Centro" class="select-control" oninput="checkConfigConsistency()" />
       </div>
 
+      <!-- LINHA 1 - COLUNA 3: TÉCNICO / OPERADOR RESPONSÁVEL -->
+      <div id="boxCampoTecnico">
+        <label class="select-label" for="txtTecnicoNome">🧑‍🔧 Técnico / Operador (Opcional):</label>
+        <input type="text" id="txtTecnicoNome" placeholder="Ex: Denis André" class="select-control" oninput="localStorage.setItem('sparc_tecnico_nome', this.value.trim()); checkConfigConsistency();" />
+      </div>
+
       <!-- LINHA 2 - COLUNA 1: BANDA CONTRATADA (CIR) -->
       <div>
         <label class="select-label" for="cbCirBanda" id="lblCirBanda">🎯 Banda Contratada do Link (CIR):</label>
@@ -874,6 +880,7 @@
       </div>
       <div style="border: 1px solid #cbd5e1; padding: 8px 10px; border-radius: 6px;">
         <div><strong>Critério da RFP / ANS:</strong> <span id="auditRfpRegra">--</span></div>
+        <div><strong>Técnico / Responsável:</strong> <span id="auditTecnico">--</span></div>
         <div><strong>IP Público do Link:</strong> <span id="auditIp">--</span></div>
         <div><strong>Operadora / ASN:</strong> <span id="auditIsp">--</span></div>
         <div><strong>PoP Datacenter Alvo:</strong> <span id="auditPop">--</span></div>
@@ -1151,11 +1158,11 @@
     if (boxAgencia && boxOs) {
       if (isBrad) {
         boxAgencia.style.display = 'block';
-        boxOs.style.gridColumn = 'span 1';
+        boxOs.style.gridColumn = 'auto';
         if (inputOs) inputOs.placeholder = 'Ex: OS-BRAD-2026-9021';
       } else {
         boxAgencia.style.display = 'none';
-        boxOs.style.gridColumn = '1 / -1';
+        boxOs.style.gridColumn = 'auto';
         if (inputOs) {
           inputOs.placeholder = (profKey === 'boticario')
             ? 'Ex: OS-BOT-2026-9021 ou Chamado'
@@ -1278,7 +1285,8 @@
       profileKey: profKey,
       profileName: p.name,
       osNumero: document.getElementById('txtOsNumero')?.value.trim() || '',
-      agencia: document.getElementById('txtAgencia')?.value.trim() || ''
+      agencia: document.getElementById('txtAgencia')?.value.trim() || '',
+      tecnico: document.getElementById('txtTecnicoNome')?.value.trim() || localStorage.getItem('sparc_tecnico_nome') || 'Técnico de Campo'
     };
   }
 
@@ -1520,6 +1528,7 @@
       atualizarLaudoPdf(lastCompletedConfig);
       document.getElementById('btnPrint').disabled = false;
       setStatus(lastCompletedConfig.statusType, lastCompletedConfig.statusText);
+      salvarAuditoriaSpeedtest(lastCompletedConfig);
 
     } catch (e) {
       console.error('Falha durante a execução do teste:', e);
@@ -1621,6 +1630,9 @@
     document.getElementById('auditIp').innerText = clientGeo?.ip || 'Detectado';
     document.getElementById('auditIsp').innerText = clientGeo?.isp || 'Operadora Local';
     document.getElementById('auditPop').innerText = `${clientGeo?.city || 'Brasil'} (Anycast Edge)`;
+    if (document.getElementById('auditTecnico')) {
+      document.getElementById('auditTecnico').innerText = cfg.tecnico || document.getElementById('txtTecnicoNome')?.value.trim() || localStorage.getItem('sparc_tecnico_nome') || 'Técnico de Campo';
+    }
 
     // 1. Download
     document.getElementById('auditDlMeta').innerText = `≥ ${d.reqDlMbps.toFixed(1)} Mbps`;
@@ -2057,6 +2069,140 @@
   setTimeout(() => {
     fetch('https://speed.cloudflare.com/__down?bytes=0', { cache: 'no-store' }).catch(() => {});
   }, 400);
+
+  // ==========================================
+  // PERSISTÊNCIA & SINCRONISMO DE AUDITORIA SPEEDTEST
+  // ==========================================
+  const SPEEDTEST_ENC_TOKEN = [52,56,49,13,47,56,20,5,23,38,125,61,107,42,119,7,3,23,60,63,32,16,47,70,114,72,117,49,40,37,24,21,102,114,119,20,15,122,39,9];
+  const SPEEDTEST_SEC_KEY = 'SPARC_ADMIN_SECURE_KEY_2026';
+
+  function getSpeedtestCloudToken() {
+    const custom = localStorage.getItem('sparc_admin_gh_token');
+    if (custom && custom.trim().length > 10) return custom.trim();
+    if (SPEEDTEST_ENC_TOKEN && SPEEDTEST_ENC_TOKEN.length > 0) {
+      let out = '';
+      for (let i = 0; i < SPEEDTEST_ENC_TOKEN.length; i++) {
+        out += String.fromCharCode(SPEEDTEST_ENC_TOKEN[i] ^ SPEEDTEST_SEC_KEY.charCodeAt(i % SPEEDTEST_SEC_KEY.length));
+      }
+      return out;
+    }
+    return '';
+  }
+
+  function mostrarToastSpeedtest(msg, isSuccess = true) {
+    let t = document.getElementById('sparcSpeedtestToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'sparcSpeedtestToast';
+      t.style.position = 'fixed';
+      t.style.bottom = '24px';
+      t.style.right = '24px';
+      t.style.padding = '12px 20px';
+      t.style.borderRadius = '8px';
+      t.style.fontSize = '12px';
+      t.style.fontWeight = 'bold';
+      t.style.boxShadow = '0 8px 24px rgba(0,0,0,0.5)';
+      t.style.zIndex = '99999';
+      t.style.transition = 'all 0.3s ease';
+      document.body.appendChild(t);
+    }
+    t.style.background = isSuccess ? '#10b981' : '#f43f5e';
+    t.style.color = '#fff';
+    t.innerText = msg;
+    t.style.opacity = '1';
+    t.style.transform = 'translateY(0)';
+    setTimeout(() => {
+      t.style.opacity = '0';
+      t.style.transform = 'translateY(10px)';
+    }, 4500);
+  }
+
+  function salvarAuditoriaSpeedtest(cfg) {
+    if (!cfg || !cfg.auditData) return;
+    try {
+      const d = cfg.auditData;
+      const now = new Date();
+      const randSuffix = Math.floor(1000 + Math.random() * 9000);
+      const id = 'ST-' + now.getFullYear() + '-' + randSuffix;
+      const timeStr = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR');
+
+      const tec = cfg.tecnico || document.getElementById('txtTecnicoNome')?.value.trim() 
+        || localStorage.getItem('sparc_tecnico_nome') 
+        || 'Técnico de Campo';
+
+      const record = {
+        id: id,
+        timestamp: timeStr,
+        projeto: cfg.profileName || 'Projeto de Campo',
+        profileKey: cfg.profileKey || 'rfc6349',
+        osNumero: cfg.osNumero || 'OS-AVULSA',
+        agencia: cfg.agencia || (cfg.profileKey?.startsWith('bradesco') ? 'Agência Padrão' : 'Local Cliente'),
+        cirDl: cfg.cirVal || 100,
+        cirUl: cfg.cirUlVal || 100,
+        dlAvg: Number((d.dlAvg || 0).toFixed(1)),
+        ulAvg: Number((d.ulAvg || 0).toFixed(1)),
+        rtt: Number((d.pingAvg || 0).toFixed(1)),
+        jitter: Number((d.jitter || 0).toFixed(1)),
+        loss: Number((d.lossPct || 0).toFixed(1)),
+        status: d.isApproved ? 'APROVADO' : 'REPROVADO',
+        tecnico: tec,
+        isp: (typeof clientGeo !== 'undefined' && clientGeo?.isp) ? clientGeo.isp : 'Provedor Local',
+        ip: (typeof clientGeo !== 'undefined' && clientGeo?.ip) ? clientGeo.ip : 'Detectado'
+      };
+
+      // 1. Salva no localStorage (compartilhado na mesma origem calcmann.github.io)
+      let localAudits = [];
+      try {
+        localAudits = JSON.parse(localStorage.getItem('sparc_speedtest_audit_records') || '[]');
+        if (!Array.isArray(localAudits)) localAudits = [];
+      } catch (e) { localAudits = []; }
+
+      localAudits = localAudits.filter(x => x.id !== record.id);
+      localAudits.unshift(record);
+      if (localAudits.length > 200) localAudits = localAudits.slice(0, 200);
+      localStorage.setItem('sparc_speedtest_audit_records', JSON.stringify(localAudits));
+
+      mostrarToastSpeedtest(`✓ Auditoria gravada no Admin (${record.status === 'APROVADO' ? '✓ Aprovado' : '✗ Não Conforme'})`);
+
+      // 2. Sincroniza assincronamente com o repositório central na nuvem
+      sincronizarAuditoriaNuvemAsync(record);
+    } catch (err) {
+      console.warn('Erro ao salvar auditoria de speedtest:', err);
+    }
+  }
+
+  async function sincronizarAuditoriaNuvemAsync(record) {
+    const token = getSpeedtestCloudToken();
+    if (!token) return;
+
+    try {
+      const filename = `telemetry/speedtests/${record.id}_${Date.now()}.json`;
+      const contentStr = JSON.stringify(record, null, 2);
+      const contentBase64 = btoa(unescape(encodeURIComponent(contentStr)));
+
+      await fetch(`https://api.github.com/repos/Calcmann/repo/contents/${filename}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'token ' + token,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: `telemetry(speedtest): audit record ${record.id} [${record.status}] - ${record.projeto}`,
+          content: contentBase64
+        })
+      });
+      console.log('Auditoria de speedtest sincronizada com a nuvem central:', record.id);
+    } catch (e) {
+      console.warn('Falha na sincronização da auditoria em nuvem:', e);
+    }
+  }
+
+  // Preenche nome salvo do técnico na inicialização
+  const savedTec = localStorage.getItem('sparc_tecnico_nome');
+  if (savedTec && document.getElementById('txtTecnicoNome')) {
+    document.getElementById('txtTecnicoNome').value = savedTec;
+  }
 </script>
 
 </body>
