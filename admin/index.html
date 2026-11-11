@@ -971,8 +971,15 @@
       <section id="tab-speedtest" class="tab-content">
         <div class="table-card">
           <div class="table-header">
-            <div class="table-title">📑 Auditoria de Links &amp; Aceite de Projetos (Bradesco &amp; Varejo)</div>
-            <a href="../speedtest/campo.html" target="_blank" class="btn btn-primary">🚀 Abrir Ferramenta de Campo</a>
+            <div>
+              <div class="table-title">📑 Auditoria de Links &amp; Aceite de Projetos (Bradesco &amp; Varejo)</div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;" id="stTableCount">0 auditorias registradas</div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <button type="button" onclick="fetchRemoteSpeedtestsAsync(true)" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">🔄 Sincronizar Nuvem</button>
+              <button type="button" onclick="limparAuditoriaLocal()" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px; color: var(--rose); border-color: rgba(244,63,94,0.3);">🗑️ Limpar Histórico</button>
+              <a href="../speedtest/campo.html" target="_blank" class="btn btn-primary" style="font-size: 12px; padding: 6px 14px;">🚀 Abrir Ferramenta de Campo</a>
+            </div>
           </div>
           <div class="table-container">
             <table>
@@ -2077,80 +2084,7 @@
     "_path": "requests/e5ce2cf7-5445-4a7f-8bda-f4164d777ab1.json"
   }
 ];
-    let RAW_SPEEDTESTS = [
-  {
-    "id": "ST-2026-9021",
-    "timestamp": "10/11/2026 14:15:22",
-    "projeto": "Banco Bradesco — Internet Dedicada (PPB-030-B)",
-    "profileKey": "bradesco_dedicado",
-    "osNumero": "OS-BRAD-2026-9021",
-    "agencia": "Agência 0123 - Centro",
-    "cirDl": 100,
-    "cirUl": 100,
-    "dlAvg": 98.4,
-    "ulAvg": 97.2,
-    "rtt": 18.4,
-    "jitter": 4.2,
-    "loss": 0,
-    "status": "APROVADO",
-    "tecnico": "Denis André",
-    "isp": "Claro S.A. (ASN 28573)"
-  },
-  {
-    "id": "ST-2026-9022",
-    "timestamp": "10/11/2026 13:42:10",
-    "projeto": "Banco Bradesco — Banda Larga Assimétrica (PPB-030-A)",
-    "profileKey": "bradesco_bandalarga",
-    "osNumero": "OS-BRAD-2026-8812",
-    "agencia": "Agência 4510 - Shopping",
-    "cirDl": 100,
-    "cirUl": 35,
-    "dlAvg": 88.6,
-    "ulAvg": 31.2,
-    "rtt": 24.1,
-    "jitter": 6.8,
-    "loss": 0,
-    "status": "APROVADO",
-    "tecnico": "Gabriel Lucas",
-    "isp": "Claro S.A. (DOCSIS HFC)"
-  },
-  {
-    "id": "ST-2026-9023",
-    "timestamp": "10/11/2026 11:20:05",
-    "projeto": "Banco Bradesco — Internet Dedicada (PPB-030-B)",
-    "profileKey": "bradesco_dedicado",
-    "osNumero": "OS-BRAD-2026-7411",
-    "agencia": "Agência 0992 - Alphaville",
-    "cirDl": 50,
-    "cirUl": 50,
-    "dlAvg": 42.1,
-    "ulAvg": 41.5,
-    "rtt": 64.2,
-    "jitter": 12,
-    "loss": 2.4,
-    "status": "REPROVADO",
-    "tecnico": "Roberto Silva",
-    "isp": "Operadora Local"
-  },
-  {
-    "id": "ST-2026-9024",
-    "timestamp": "09/11/2026 16:10:45",
-    "projeto": "O Boticário (RFP Varejo)",
-    "profileKey": "boticario",
-    "osNumero": "OS-BOT-2026-3021",
-    "agencia": "Loja 104 - Shopping Iguatemi",
-    "cirDl": 100,
-    "cirUl": 20,
-    "dlAvg": 91.3,
-    "ulAvg": 22.1,
-    "rtt": 32.5,
-    "jitter": 8.1,
-    "loss": 0,
-    "status": "APROVADO",
-    "tecnico": "Gabriel Lucas",
-    "isp": "Vivo Fibra"
-  }
-];
+    let RAW_SPEEDTESTS = [];
 
     // CREDENCIAL CRIPTOGRAFADA PARA EVITAR GITHUB SECRET SCANNER FALSE POSITIVE
     const BUNDLED_ENC_TOKEN = [52,56,49,13,47,56,20,5,23,38,125,61,107,42,119,7,3,23,60,63,32,16,47,70,114,72,117,49,40,37,24,21,102,114,119,20,15,122,39,9];
@@ -2968,31 +2902,132 @@
     // ==========================================
     // 4. MÓDULO DE AUDITORIA SPEEDTEST
     // ==========================================
-    function initSpeedtestView() {
+    function getMergedSpeedtestAudits() {
+      let audits = [];
+      try {
+        const local = JSON.parse(localStorage.getItem('sparc_speedtest_audit_records') || '[]');
+        if (Array.isArray(local)) audits = local;
+      } catch (e) {
+        audits = [];
+      }
+
+      if (Array.isArray(RAW_SPEEDTESTS) && RAW_SPEEDTESTS.length > 0) {
+        RAW_SPEEDTESTS.forEach(rem => {
+          if (!audits.some(x => x.id === rem.id || (x.timestamp === rem.timestamp && x.osNumero === rem.osNumero))) {
+            audits.push(rem);
+          }
+        });
+      }
+
+      return audits;
+    }
+
+    function renderSpeedtestTable(audits) {
       const tbody = document.getElementById('stTableBody');
+      const countEl = document.getElementById('stTableCount');
       if (!tbody) return;
       tbody.innerHTML = '';
 
-      RAW_SPEEDTESTS.forEach(s => {
+      if (countEl) {
+        countEl.innerText = `${audits.length} auditoria${audits.length === 1 ? '' : 's'} registrada${audits.length === 1 ? '' : 's'}`;
+      }
+
+      if (!audits || audits.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="12" style="text-align: center; color: var(--text-muted); padding: 36px 16px; font-size: 13px;">Nenhuma auditoria registrada até o momento.<br><span style="font-size: 11.5px; color: var(--text-muted);">Qualquer teste executado na Ferramenta de Campo (link ao lado) é automaticamente catalogado e auditado aqui.</span></td></tr>';
+        return;
+      }
+
+      audits.forEach(s => {
         const isOk = s.status === 'APROVADO';
         const badge = isOk ? '<span class="badge badge-success">✓ Aprovado</span>' : '<span class="badge badge-fail">✗ Não Conforme</span>';
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${s.timestamp}</td>
-          <td><strong>${s.projeto}</strong></td>
-          <td><code>${s.osNumero}</code></td>
-          <td>${s.agencia}</td>
-          <td>${s.cirDl}M Down / ${s.cirUl}M Up</td>
-          <td style="color: ${s.dlAvg >= (s.cirDl * 0.8) ? 'var(--emerald)' : 'var(--rose)'}; font-weight: bold;">${s.dlAvg} Mbps</td>
-          <td style="color: ${s.ulAvg >= (s.cirUl * 0.8) ? 'var(--emerald)' : 'var(--rose)'}; font-weight: bold;">${s.ulAvg} Mbps</td>
-          <td>${s.rtt} ms</td>
-          <td>${s.jitter} ms</td>
-          <td>${s.loss.toFixed(1)}%</td>
+          <td><strong>${s.projeto || 'Projeto'}</strong></td>
+          <td><code>${s.osNumero || 'N/A'}</code></td>
+          <td>${s.agencia || 'N/A'}</td>
+          <td>${s.cirDl || '--'}M Down / ${s.cirUl || '--'}M Up</td>
+          <td style="color: ${(s.dlAvg || 0) >= ((s.cirDl || 1) * 0.8) ? 'var(--emerald)' : 'var(--rose)'}; font-weight: bold;">${s.dlAvg || 0} Mbps</td>
+          <td style="color: ${(s.ulAvg || 0) >= ((s.cirUl || 1) * 0.8) ? 'var(--emerald)' : 'var(--rose)'}; font-weight: bold;">${s.ulAvg || 0} Mbps</td>
+          <td>${s.rtt || 0} ms</td>
+          <td>${s.jitter || 0} ms</td>
+          <td>${(s.loss != null ? Number(s.loss).toFixed(1) : '0.0')}%</td>
           <td>${badge}</td>
-          <td>${s.tecnico}</td>
+          <td>${s.tecnico || 'Técnico de Campo'}</td>
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    function initSpeedtestView() {
+      const audits = getMergedSpeedtestAudits();
+      renderSpeedtestTable(audits);
+      fetchRemoteSpeedtestsAsync(false);
+    }
+
+    async function fetchRemoteSpeedtestsAsync(userInitiated = false) {
+      const token = getActiveGitHubToken();
+      if (!token) {
+        if (userInitiated) showToast('Token GitHub não configurado');
+        return;
+      }
+
+      try {
+        const res = await fetch('https://api.github.com/repos/Calcmann/repo/contents/telemetry/speedtests', {
+          headers: {
+            'Authorization': 'token ' + token,
+            'User-Agent': 'SPARC-Admin-Web'
+          }
+        });
+
+        if (res.ok) {
+          const files = await res.json();
+          if (Array.isArray(files) && files.length > 0) {
+            let fetched = [];
+            const recent = files.slice(-40).reverse();
+            for (const file of recent) {
+              if (file.name.endsWith('.json')) {
+                try {
+                  const fRes = await fetch(file.download_url);
+                  if (fRes.ok) {
+                    const rec = await fRes.json();
+                    fetched.push(rec);
+                  }
+                } catch (e) {}
+              }
+            }
+
+            if (fetched.length > 0) {
+              let local = [];
+              try { local = JSON.parse(localStorage.getItem('sparc_speedtest_audit_records') || '[]'); } catch (e) {}
+              fetched.forEach(rem => {
+                if (!local.some(x => x.id === rem.id || (x.timestamp === rem.timestamp && x.osNumero === rem.osNumero))) {
+                  local.push(rem);
+                }
+              });
+              localStorage.setItem('sparc_speedtest_audit_records', JSON.stringify(local));
+              renderSpeedtestTable(local);
+              if (userInitiated) showToast(`✓ ${fetched.length} auditorias sincronizadas da nuvem!`);
+            } else if (userInitiated) {
+              showToast('Auditorias já estão atualizadas.');
+            }
+          } else if (userInitiated) {
+            showToast('Nenhuma auditoria remota encontrada na nuvem.');
+          }
+        } else if (userInitiated) {
+          showToast('Nenhuma pasta remota de testes criada ainda.');
+        }
+      } catch (err) {
+        console.warn('Erro ao sincronizar auditorias de speedtest:', err);
+        if (userInitiated) showToast('Falha ao conectar na nuvem');
+      }
+    }
+
+    function limparAuditoriaLocal() {
+      if (!confirm('Deseja realmente limpar o histórico de auditorias de speedtest deste navegador?')) return;
+      localStorage.removeItem('sparc_speedtest_audit_records');
+      renderSpeedtestTable([]);
+      showToast('Histórico local de auditorias limpo com sucesso.');
     }
 
     // ==========================================
