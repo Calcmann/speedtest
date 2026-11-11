@@ -656,10 +656,10 @@
   <!-- CARD PRINCIPAL: DEFINIÇÃO DO PROJETO E BANDA (EVIDENCIADOS PARA O TÉCNICO) -->
   <div class="project-card">
     <div class="project-grid">
-      <!-- LINHA 1 - COLUNA 1: NÚMERO DA OS / CHAMADO -->
+      <!-- LINHA 1 - COLUNA 1: DESIGNAÇÃO CLARO (OBRIGATÓRIO) -->
       <div id="boxCampoOs">
-        <label class="select-label" for="txtOsNumero">📋 Número da OS / Chamado (Opcional):</label>
-        <input type="text" id="txtOsNumero" placeholder="Ex: OS-BRAD-2026-9021" class="select-control" oninput="checkConfigConsistency()" />
+        <label class="select-label" for="txtOsNumero">🎯 Designação Claro: <span style="color: var(--rose); font-weight: 900;">*</span></label>
+        <input type="text" id="txtOsNumero" placeholder="Ex: LDA/IP/02580 ou SPO/IP/01234" class="select-control" oninput="checkConfigConsistency()" required />
       </div>
 
       <!-- LINHA 1 - COLUNA 2: AGÊNCIA / PRÉDIO (SOMENTE BRADESCO) -->
@@ -668,10 +668,10 @@
         <input type="text" id="txtAgencia" placeholder="Ex: Agência 0123 - Centro" class="select-control" oninput="checkConfigConsistency()" />
       </div>
 
-      <!-- LINHA 1 - COLUNA 3: TÉCNICO / OPERADOR RESPONSÁVEL -->
+      <!-- LINHA 1 - COLUNA 3: TÉCNICO / OPERADOR (OBRIGATÓRIO) -->
       <div id="boxCampoTecnico">
-        <label class="select-label" for="txtTecnicoNome">🧑‍🔧 Técnico / Operador (Opcional):</label>
-        <input type="text" id="txtTecnicoNome" placeholder="Ex: Denis André" class="select-control" oninput="localStorage.setItem('sparc_tecnico_nome', this.value.trim()); checkConfigConsistency();" />
+        <label class="select-label" for="txtTecnicoNome">🧑‍🔧 Técnico / Operador: <span style="color: var(--rose); font-weight: 900;">*</span></label>
+        <input type="text" id="txtTecnicoNome" placeholder="Ex: Gabriel Lucas ou Denis André" class="select-control" oninput="localStorage.setItem('sparc_tecnico_nome', this.value.trim()); checkConfigConsistency();" required />
       </div>
 
       <!-- LINHA 2 - COLUNA 1: BANDA CONTRATADA (CIR) -->
@@ -874,7 +874,7 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; font-size: 11px; line-height: 1.45;">
       <div style="border: 1px solid #cbd5e1; padding: 8px 10px; border-radius: 6px;">
         <div><strong>Cliente / Projeto:</strong> <span id="auditProjeto">--</span></div>
-        <div><strong>Ordem de Serviço (OS):</strong> <span id="auditOsNumero">--</span></div>
+        <div><strong>Designação Claro:</strong> <span id="auditOsNumero">--</span></div>
         <div id="rowAuditAgencia"><strong>Agência / Prédio:</strong> <span id="auditAgencia">--</span></div>
         <div><strong>Banda Contratada (CIR):</strong> <span id="auditCir">--</span></div>
       </div>
@@ -962,7 +962,7 @@
   const ulPoints = [];
   let maxGraphSpeed = 50;
 
-  const PARAM_INPUT_IDS = ['cbCirBanda', 'txtCustomCir', 'cbUlCirBanda', 'txtCustomUlCir', 'cbProjetoPerfil', 'txtOsNumero', 'txtAgencia'];
+  const PARAM_INPUT_IDS = ['cbCirBanda', 'txtCustomCir', 'cbUlCirBanda', 'txtCustomUlCir', 'cbProjetoPerfil', 'txtOsNumero', 'txtAgencia', 'txtTecnicoNome'];
 
   // PERFIS DE PROJETO OFICIAIS COM CRITÉRIOS DE RFP / ANS
   const PROJECT_PROFILES = {
@@ -1159,14 +1159,12 @@
       if (isBrad) {
         boxAgencia.style.display = 'block';
         boxOs.style.gridColumn = 'auto';
-        if (inputOs) inputOs.placeholder = 'Ex: OS-BRAD-2026-9021';
+        if (inputOs) inputOs.placeholder = 'Ex: LDA/IP/02580 ou SPO/IP/01234';
       } else {
         boxAgencia.style.display = 'none';
         boxOs.style.gridColumn = 'auto';
         if (inputOs) {
-          inputOs.placeholder = (profKey === 'boticario')
-            ? 'Ex: OS-BOT-2026-9021 ou Chamado'
-            : 'Ex: OS-2026-9021 ou Nº do Chamado';
+          inputOs.placeholder = 'Ex: LDA/IP/02580 ou SPO/IP/01234';
         }
       }
     }
@@ -1345,6 +1343,7 @@
 
     if (document.getElementById('txtOsNumero')) document.getElementById('txtOsNumero').value = lastCompletedConfig.osNumero || '';
     if (document.getElementById('txtAgencia')) document.getElementById('txtAgencia').value = lastCompletedConfig.agencia || '';
+    if (document.getElementById('txtTecnicoNome')) document.getElementById('txtTecnicoNome').value = lastCompletedConfig.tecnico || '';
 
     checkConfigConsistency();
   }
@@ -1422,6 +1421,41 @@
   // DISPARO DO TESTE
   async function startTest() {
     if (isRunning) return;
+
+    // 1. VALIDAÇÃO DOS CAMPOS OBRIGATÓRIOS: DESIGNAÇÃO CLARO & TÉCNICO
+    const inputDesignacao = document.getElementById('txtOsNumero');
+    const inputTecnico = document.getElementById('txtTecnicoNome');
+    const designacaoVal = inputDesignacao?.value.trim() || '';
+    const tecnicoVal = inputTecnico?.value.trim() || '';
+
+    if (!designacaoVal) {
+      if (inputDesignacao) {
+        inputDesignacao.focus();
+        inputDesignacao.style.borderColor = 'var(--rose)';
+        inputDesignacao.style.boxShadow = '0 0 0 3px rgba(244, 63, 94, 0.3)';
+        setTimeout(() => {
+          inputDesignacao.style.borderColor = '';
+          inputDesignacao.style.boxShadow = '';
+        }, 3500);
+      }
+      mostrarToastSpeedtest('⚠️ Atenção: Preencha a Designação Claro antes de iniciar.', false);
+      return;
+    }
+
+    if (!tecnicoVal) {
+      if (inputTecnico) {
+        inputTecnico.focus();
+        inputTecnico.style.borderColor = 'var(--rose)';
+        inputTecnico.style.boxShadow = '0 0 0 3px rgba(244, 63, 94, 0.3)';
+        setTimeout(() => {
+          inputTecnico.style.borderColor = '';
+          inputTecnico.style.boxShadow = '';
+        }, 3500);
+      }
+      mostrarToastSpeedtest('⚠️ Atenção: Preencha o nome do Técnico / Operador antes de iniciar.', false);
+      return;
+    }
+
     isRunning = true;
     abortController = new AbortController();
     const signal = abortController.signal;
