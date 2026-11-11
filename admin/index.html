@@ -1613,40 +1613,6 @@
     let RAW_TELEMETRY = [];
     let RAW_REQUESTS = [
   {
-    "MachineGuid": "e5c2901a-8b14-469f-9201-1192847a98ef",
-    "MachineDisplayId": "WIN-BRAD-FIELD-09",
-    "FullName": "Marcos Vinicius Santos",
-    "FirstName": "Marcos",
-    "LastName": "Santos",
-    "Phone": "(19) 99821-4433",
-    "Email": "marcos.santos@procisa.com.br",
-    "Company": "Procisa",
-    "EmployeeId": "16789",
-    "Cluster": "Campinas / Interior",
-    "Uf": "SP",
-    "Platform": "Windows",
-    "ClientVersion": "SPARC-Beta-Testes-0.8.156",
-    "RequestDateUtc": "2026-11-10T14:10:00Z",
-    "Status": "Pending"
-  },
-  {
-    "MachineGuid": "b4728d10-5321-4a11-8712-9901452cba11",
-    "MachineDisplayId": "AND-S22-FIELD-04",
-    "FullName": "Carlos Eduardo Lima",
-    "FirstName": "Carlos",
-    "LastName": "Lima",
-    "Phone": "(11) 98765-4321",
-    "Email": "carlos.lima@claro.com.br",
-    "Company": "Claro S.A.",
-    "EmployeeId": "992144",
-    "Cluster": "São Paulo Capital",
-    "Uf": "SP",
-    "Platform": "Android",
-    "ClientVersion": "SPARC-Mobile-v0.8.156",
-    "RequestDateUtc": "2026-11-10T10:35:00Z",
-    "Status": "Pending"
-  },
-  {
     "MachineGuid": "4a5d9b04-6b99-449c-bff2-72dc252a4300",
     "MachineFingerprint": "0FEFB84C2125EB6F9A4D52F50006017A1BBD969CD2B7A15C79CA134C026099A3",
     "RawRequestCode": "SPBREQ.eyJnIjoiNGE1ZDliMDQtNmI5OS00NDljLWJmZjItNzJkYzI1MmE0MzAwIiwiZiI6IjBGRUZCODRDMjEyNUVCNkY5QTRENTJGNTAwMDYwMTdBMUJCRDk2OUNEMkI3QTE1Qzc5Q0ExMzRDMDI2MDk5QTMiLCJuIjoiSm9zw6kgVm9sbWlyIiwicyI6IlBhdsOjbyIsInAiOiIoNDkpIDk4ODYzLTIzODYiLCJlIjoiam9zZS5wYXZhb0BjbGFyby5jb20uYnIiLCJjIjoiU0MiLCJ1IjoiU0MiLCJ2IjoiQkVUQS1URVNURVMtMC44LjEwMC0yMDI2MTAxNCIsInBsdCI6IldpbmRvd3MiLCJjbXAiOiJDbGFybyIsIm1hdCI6IjE0Mzg3MyIsInQiOiIyMDI2LTEwLTE2VDEyOjUwOjQzWiJ9",
@@ -2205,8 +2171,20 @@
     const DEFAULT_PWD_HASH = '2f334bb046307e76085fa89e84da9c7804d5650656ee032c56e84c636aa4eaab';
     let currentSelectedTech = null;
 
+    // LIMPEZA DE SOLICITAÇÕES REJEITADAS DEFINITIVAMENTE
+    function purgeRejectedRequests() {
+      let rejected = [];
+      try {
+        rejected = JSON.parse(localStorage.getItem('sparc_admin_rejected_guids') || '[]');
+      } catch (e) { rejected = []; }
+      if (rejected.length > 0) {
+        RAW_REQUESTS = RAW_REQUESTS.filter(r => !rejected.includes(r.MachineGuid));
+      }
+    }
+
     // INICIALIZAÇÃO
     window.addEventListener('DOMContentLoaded', () => {
+      purgeRejectedRequests();
       checkSession();
       updateRequestsBadge();
     });
@@ -2936,15 +2914,55 @@
       showToast(`Solicitação de ${req.FullName} aprovada com sucesso! Licença liberada.`);
     }
 
-    function rejectRequest(guid) {
+    async function rejectRequest(guid) {
       const req = RAW_REQUESTS.find(r => r.MachineGuid === guid);
       if (!req) return;
-      if (!confirm(`Deseja realmente recusar a solicitação de ${req.FullName}?`)) return;
+      if (!confirm(`Deseja realmente RECUSAR e EXCLUIR DEFINITIVAMENTE a solicitação de ${req.FullName}?`)) return;
 
-      req.Status = 'Rejected';
+      // 1. Remove da memória local imediatamente
+      RAW_REQUESTS = RAW_REQUESTS.filter(r => r.MachineGuid !== guid);
+
+      // 2. Persiste na lista de rejeitados no navegador (evita que reapareça em qualquer refresh)
+      try {
+        let rejected = JSON.parse(localStorage.getItem('sparc_admin_rejected_guids') || '[]');
+        if (!rejected.includes(guid)) rejected.push(guid);
+        localStorage.setItem('sparc_admin_rejected_guids', JSON.stringify(rejected));
+      } catch (e) {}
+
+      // 3. Atualiza UI e contador da aba
       updateRequestsBadge();
       renderRequestsTable();
-      showToast(`Solicitação de ${req.FullName} recusada.`);
+      showToast(`Solicitação de ${req.FullName} excluída definitivamente!`);
+
+      // 4. Se existir arquivo de request no GitHub (requests/{guid}.json), exclui permanentemente do repositório
+      const token = getActiveGitHubToken();
+      if (token) {
+        try {
+          const reqUrl = `https://api.github.com/repos/Calcmann/repo/contents/requests/${guid}.json`;
+          const getRes = await fetch(reqUrl, {
+            headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+          });
+          if (getRes.ok) {
+            const getObj = await getRes.json();
+            if (getObj.sha) {
+              await fetch(reqUrl, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': 'token ' + token,
+                  'User-Agent': 'SPARC-Admin-Web',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  message: `admin(web): delete rejected request ${guid} [${req.FullName}]`,
+                  sha: getObj.sha
+                })
+              });
+            }
+          }
+        } catch (delErr) {
+          console.warn('Erro ao excluir solicitação remota:', delErr);
+        }
+      }
     }
 
     // ==========================================
