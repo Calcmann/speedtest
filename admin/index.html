@@ -497,7 +497,6 @@
 
     .table-container {
       overflow-x: auto;
-      max-height: 580px;
     }
 
     table {
@@ -859,7 +858,7 @@
         <div class="table-card">
           <div class="table-header">
             <div>
-              <div class="table-title">📑 Auditoria de Links &amp; Aceite de Projetos (Bradesco, Banda Larga &amp; Varejo)</div>
+              <div class="table-title">📑 Auditoria de Links &amp; Aceite de Projetos (Bradesco &amp; Varejo)</div>
               <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;" id="stTableCount">0 auditorias registradas</div>
             </div>
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -896,20 +895,8 @@
       <section id="tab-requests" class="tab-content">
         <div class="table-card">
           <div class="table-header">
-            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-              <div class="table-title">🔔 Fila de Solicitações de Ativação Online (Técnicos em Campo)</div>
-              <button class="btn btn-dark" onclick="fetchCloudRequests(true)" style="padding: 4px 10px; font-size: 11.5px;" title="Atualizar solicitações da nuvem agora">
-                <span>🔄</span> Atualizar da Nuvem
-              </button>
-            </div>
-            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-              <div style="font-size: 11.5px; color: var(--text-muted);" id="reqTableCount">0 solicitações</div>
-              <select id="selFilterRequestsStatus" class="form-input" style="width: auto; padding: 4px 10px; font-size: 11.5px; margin: 0;" onchange="renderRequestsTable()">
-                <option value="Pending">⏳ Somente Pendentes</option>
-                <option value="ALL">📋 Todas as Solicitações</option>
-                <option value="Approved">✅ Aprovadas</option>
-              </select>
-            </div>
+            <div class="table-title">🔔 Fila de Solicitações de Ativação Online (Novos Técnicos em Campo)</div>
+            <div style="font-size: 11.5px; color: var(--text-muted);" id="reqTableCount">0 pendentes</div>
           </div>
           <div class="table-container">
             <table>
@@ -921,10 +908,9 @@
                   <th>Matrícula</th>
                   <th>Telefone</th>
                   <th>Plataforma</th>
-                  <th>Cluster / UF</th>
+                  <th>Machine GUID / Display</th>
                   <th>Versão do App</th>
-                  <th>Status</th>
-                  <th>Ações</th>
+                  <th>Aprovação Imediata</th>
                 </tr>
               </thead>
               <tbody id="reqTableBody"></tbody>
@@ -947,10 +933,10 @@
             <div class="kpi-value" id="kpiDevActive">0</div>
             <div class="kpi-sub"><span style="color: var(--emerald);">🟢</span> Acesso liberado</div>
           </div>
-          <div class="kpi-card kpi-fail">
-            <div class="kpi-title">Bloqueadas / Revogadas</div>
-            <div class="kpi-value" id="kpiDevBlocked">0</div>
-            <div class="kpi-sub"><span style="color: var(--rose);">🔴</span> Sem autorização de uso</div>
+          <div class="kpi-card" style="border-left: 3px solid var(--amber);">
+            <div class="kpi-title">Solicitações Pendentes</div>
+            <div class="kpi-value" id="kpiDevPendingReqs" style="color: var(--amber);">0</div>
+            <div class="kpi-sub"><span style="color: var(--amber);">⏳</span> Aguardando aprovação</div>
           </div>
           <div class="kpi-card kpi-tech">
             <div class="kpi-title">Parceiras / Terceirizadas</div>
@@ -970,7 +956,7 @@
             <select id="filterDevStatus" class="filter-select" onchange="applyTechnicianFilters()">
               <option value="ALL">Todos os Status</option>
               <option value="Active">🟢 Ativos</option>
-              <option value="Blocked">🔴 Bloqueados</option>
+              <option value="Expired">⏳ Licenças Vencidas</option>
             </select>
           </div>
           <div class="filter-group">
@@ -1066,31 +1052,104 @@
       </div>
     </div>
 
-    <!-- ================= MODAL: FICHA DO TÉCNICO & ATIVAÇÃO ================= -->
+    <!-- ================= MODAL: EDITAR CADASTRO DO TÉCNICO & LICENÇAS ================= -->
     <div class="modal-overlay" id="modalTech" onclick="closeModal('modalTech', event)">
-      <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 780px;">
         <button class="modal-close" onclick="closeModal('modalTech')">&times;</button>
-        <h2 style="font-size: 17px; font-weight: 800;" id="modalTechTitle">Ficha Cadastral do Técnico</h2>
-        
-        <div class="detail-grid" id="modalTechBody"></div>
-
-        <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid #3f3f46;">
-          <h3 style="font-size: 13.5px; font-weight: 800; margin-bottom: 12px; color: var(--text);">Ações de Governança &amp; Licenciamento RSA</h3>
-          
-          <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-            <select id="modalTechExtendDays" class="filter-select" style="padding: 9px 12px;">
-              <option value="30">Liberar por 30 Dias</option>
-              <option value="60">Liberar por 60 Dias</option>
-              <option value="90" selected>Liberar por 90 Dias (Recomendado)</option>
-              <option value="180">Liberar por 180 Dias</option>
-              <option value="365">Liberar por 1 Ano (365 Dias)</option>
-              <option value="9999">Licença Permanente (Sem Expiração)</option>
-            </select>
-            <button class="btn btn-success" onclick="executeExtendLicense()">🟢 Ativar / Renovar Licença</button>
-            <button class="btn btn-danger" onclick="executeBlockLicense()">🔴 Bloquear / Revogar Cópia</button>
-            <button class="btn btn-dark" onclick="copyCurrentTechKey()">📋 Copiar Chave RSA</button>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+          <div>
+            <h2 style="font-size: 17.5px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0;" id="modalTechTitle">
+              <span>✏️</span> Editar Cadastro do Técnico
+            </h2>
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Edite as informações cadastrais e licença com sincronização imediata na nuvem</div>
           </div>
+          <div id="modalTechBadgeStatus"></div>
         </div>
+
+        <form id="formEditTech" onsubmit="handleSaveTechEdits(event)">
+          <input type="hidden" id="editTechGuid">
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px;">
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Nome Completo *</label>
+              <input type="text" id="editTechFullName" class="form-input" required placeholder="Nome e Sobrenome" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Empresa / Terceirizada *</label>
+              <input type="text" id="editTechCompany" class="form-input" required placeholder="Ex: Claro S.A., Procisa, etc." style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Matrícula / ID Funcional</label>
+              <input type="text" id="editTechEmployeeId" class="form-input" placeholder="Ex: 9114406" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Telefone / WhatsApp</label>
+              <input type="text" id="editTechPhone" class="form-input" placeholder="(DD) 99999-9999" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">E-mail</label>
+              <input type="email" id="editTechEmail" class="form-input" placeholder="nome@empresa.com.br" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Cluster / Polo</label>
+              <input type="text" id="editTechCluster" class="form-input" placeholder="Ex: Campinas, FNS, Capital" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">UF / Estado</label>
+              <input type="text" id="editTechUf" class="form-input" maxlength="2" placeholder="Ex: SP, SC, PR" style="width: 100%; text-transform: uppercase;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Plataforma</label>
+              <select id="editTechPlatform" class="form-input" style="width: 100%;">
+                <option value="Windows">🪟 Windows (.NET 8 WPF)</option>
+                <option value="Android">🤖 Android (.NET MAUI)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Data de Expiração da Licença</label>
+              <input type="date" id="editTechExpirationDate" class="form-input" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Versão do SPARC em Campo</label>
+              <input type="text" id="editTechClientVersion" class="form-input" placeholder="SPARC-Beta-Testes..." style="width: 100%;">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Observações / Histórico</label>
+            <textarea id="editTechNotes" class="form-input" rows="2" placeholder="Observações e notas sobre este técnico..." style="width: 100%; resize: vertical;"></textarea>
+          </div>
+
+          <div style="background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 18px;">
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">Machine GUID (Identificador Físico Node-Locking):</div>
+            <div><code id="editTechGuidDisplay" style="font-size: 11.5px; color: #38bdf8; word-break: break-all;"></code></div>
+          </div>
+
+          <div style="display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap; align-items: center; border-top: 1px solid var(--border); padding-top: 14px;">
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+              <span style="font-size: 11.5px; color: var(--text-muted); margin-right: 4px;">Prorrogar:</span>
+              <button type="button" class="btn btn-dark" style="padding: 5px 9px; font-size: 11.5px;" onclick="addDaysToEditExpiry(30)">+30d</button>
+              <button type="button" class="btn btn-dark" style="padding: 5px 9px; font-size: 11.5px;" onclick="addDaysToEditExpiry(60)">+60d</button>
+              <button type="button" class="btn btn-dark" style="padding: 5px 9px; font-size: 11.5px;" onclick="addDaysToEditExpiry(90)">+90d</button>
+              <button type="button" class="btn btn-dark" style="padding: 5px 9px; font-size: 11.5px;" onclick="copyCurrentTechKey()">📋 Copiar Chave</button>
+              <button type="button" class="btn btn-danger" style="padding: 5px 10px; font-size: 11.5px; margin-left: 6px;" onclick="executeDeleteCurrentTech()">🗑️ Excluir Técnico</button>
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" class="btn btn-dark" onclick="closeModal('modalTech')">Cancelar</button>
+              <button type="submit" class="btn btn-success" style="padding: 7px 16px; font-weight: 700; font-size: 12.5px;">💾 Salvar Alterações</button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -2187,7 +2246,11 @@
         rejected = JSON.parse(localStorage.getItem('sparc_admin_rejected_guids') || '[]');
       } catch (e) { rejected = []; }
       if (rejected.length > 0) {
-        RAW_REQUESTS = RAW_REQUESTS.filter(r => !rejected.includes(r.MachineGuid));
+        const lowerRejected = rejected.map(x => (x || '').toLowerCase().replace(/.json$/, ''));
+        RAW_REQUESTS = RAW_REQUESTS.filter(r => {
+          const g = (r.MachineGuid || '').toLowerCase().replace(/.json$/, '');
+          return !lowerRejected.includes(g);
+        });
       }
     }
 
@@ -2214,8 +2277,6 @@
         initTechniciansView();
         initRequestsView();
         initSpeedtestView();
-        // Sincroniza dados da nuvem em segundo plano automaticamente
-        setTimeout(() => syncCloudData(false), 200);
       } else {
         document.getElementById('loginView').style.display = 'flex';
         document.getElementById('appShell').style.display = 'none';
@@ -2260,9 +2321,6 @@
 
       if (tabId === 'telemetry') {
         setTimeout(initCharts, 50);
-      } else if (tabId === 'requests') {
-        renderRequestsTable();
-        fetchCloudRequests(false);
       }
     }
 
@@ -2630,13 +2688,14 @@
 
     function renderTechniciansKpis() {
       const total = RAW_DEVICES.length;
-      const active = RAW_DEVICES.filter(d => d.Status === 'Active').length;
-      const blocked = RAW_DEVICES.filter(d => d.Status === 'Blocked' || d.Status === 'Revoked').length;
+      const active = RAW_DEVICES.filter(d => (d.Status || 'Active') === 'Active').length;
+      const pendingReqs = RAW_REQUESTS.filter(r => (r.Status || 'Pending') === 'Pending').length;
       const companies = new Set(RAW_DEVICES.map(d => d.Company).filter(Boolean)).size;
 
       document.getElementById('kpiDevTotal').innerText = total;
       document.getElementById('kpiDevActive').innerText = active;
-      document.getElementById('kpiDevBlocked').innerText = blocked;
+      const kpiPending = document.getElementById('kpiDevPendingReqs');
+      if (kpiPending) kpiPending.innerText = pendingReqs;
       document.getElementById('kpiDevCompanies').innerText = companies;
     }
 
@@ -2654,8 +2713,8 @@
       }
 
       filteredDevices.forEach(d => {
-        const isAct = d.Status === 'Active';
-        const badge = isAct ? '<span class="badge badge-success">🟢 Ativo</span>' : '<span class="badge badge-blocked">🔴 Bloqueado</span>';
+        const isAct = (d.Status || 'Active') === 'Active';
+        const badge = isAct ? '<span class="badge badge-success">🟢 Ativo</span>' : '<span class="badge badge-fail">🔴 Inativo</span>';
         const plat = d.Platform === 'Android' ? '🤖 Android' : '🪟 Windows';
         const name = d.FullName || ((d.FirstName || '') + ' ' + (d.LastName || '')).trim() || 'Sem Nome';
         const mat = d.EmployeeId ? ` (Mat: ${d.EmployeeId})` : '';
@@ -2666,6 +2725,9 @@
         const guidShort = (d.MachineGuid || '').slice(0, 13) + '...';
 
         const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.title = 'Duplo clique para editar o cadastro deste técnico';
+        tr.ondblclick = () => openEditTechModal(d.MachineGuid);
         tr.innerHTML = `
           <td>${badge}</td>
           <td><strong>${plat}</strong></td>
@@ -2677,12 +2739,9 @@
           <td><strong>${exp}</strong></td>
           <td><code title="${d.MachineGuid}">${guidShort}</code></td>
           <td>
-            <div style="display: flex; gap: 4px;">
-              <button class="btn btn-dark" style="padding: 4px 8px; font-size: 11px;" onclick="openTechModal('${d.MachineGuid}')">✏️ Ficha</button>
-              ${isAct 
-                ? `<button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="quickBlockTech('${d.MachineGuid}')">🔴 Bloquear</button>`
-                : `<button class="btn btn-success" style="padding: 4px 8px; font-size: 11px;" onclick="quickActivateTech('${d.MachineGuid}')">🟢 Ativar</button>`
-              }
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <button class="btn btn-primary" style="padding: 4px 10px; font-size: 11px; background: #2563eb; color: #fff; font-weight: 600;" onclick="event.stopPropagation(); openEditTechModal('${d.MachineGuid}')">✏️ Editar</button>
+              <button class="btn btn-danger" style="padding: 4px 10px; font-size: 11px; background: #dc2626; color: #fff; font-weight: 600;" onclick="event.stopPropagation(); quickDeleteTech('${d.MachineGuid}')">🗑️ Excluir</button>
             </div>
           </td>
         `;
@@ -2690,79 +2749,111 @@
       });
     }
 
-    function openTechModal(guid) {
+    function openEditTechModal(guid) {
       const d = RAW_DEVICES.find(x => x.MachineGuid === guid);
       if (!d) return;
       currentSelectedTech = d;
 
       const name = d.FullName || ((d.FirstName || '') + ' ' + (d.LastName || '')).trim() || 'Sem Nome';
-      document.getElementById('modalTechTitle').innerText = 'Ficha: ' + name;
-      const body = document.getElementById('modalTechBody');
+      document.getElementById('modalTechTitle').innerHTML = `<span>✏️</span> Editar Cadastro: ${name}`;
 
-      body.innerHTML = `
-        <div class="detail-item"><div class="detail-label">Nome Completo</div><div class="detail-value">${name}</div></div>
-        <div class="detail-item"><div class="detail-label">Matrícula / ID</div><div class="detail-value">${d.EmployeeId || 'N/A'}</div></div>
-        <div class="detail-item"><div class="detail-label">Empresa / Terceirizada</div><div class="detail-value">${d.Company || 'Claro S.A.'}</div></div>
-        <div class="detail-item"><div class="detail-label">Telefone</div><div class="detail-value">${d.Phone || 'N/A'}</div></div>
-        <div class="detail-item"><div class="detail-label">E-mail</div><div class="detail-value">${d.Email || 'N/A'}</div></div>
-        <div class="detail-item"><div class="detail-label">Cluster / UF</div><div class="detail-value">${d.Cluster || ''} (${d.Uf || ''})</div></div>
-        <div class="detail-item"><div class="detail-label">Plataforma Homologada</div><div class="detail-value">${d.Platform || 'Windows'}</div></div>
-        <div class="detail-item"><div class="detail-label">Versão do Aplicativo</div><div class="detail-value">${d.ClientVersion || 'Beta'}</div></div>
-        <div class="detail-item"><div class="detail-label">Status da Licença</div><div class="detail-value">${d.Status === 'Active' ? '🟢 Ativo' : '🔴 Bloqueado'}</div></div>
-        <div class="detail-item"><div class="detail-label">Validade Atual</div><div class="detail-value">${d.ExpirationDateIso || 'Indeterminado'}</div></div>
-        <div class="detail-item" style="grid-column: 1 / -1;"><div class="detail-label">Machine GUID (Hardware Node-Locking)</div><div class="detail-value"><code>${d.MachineGuid}</code></div></div>
-        <div class="detail-item" style="grid-column: 1 / -1;"><div class="detail-label">Observações / Histórico</div><div class="detail-value">${d.Notes || 'Sem observações'}</div></div>
-      `;
+      const badgeStatusEl = document.getElementById('modalTechBadgeStatus');
+      if (badgeStatusEl) {
+        badgeStatusEl.innerHTML = (d.Status || 'Active') === 'Active'
+          ? '<span class="badge badge-success" style="font-size: 12px; padding: 4px 10px;">🟢 Ativo</span>'
+          : '<span class="badge badge-fail" style="font-size: 12px; padding: 4px 10px;">🔴 Inativo / Vencido</span>';
+      }
+
+      document.getElementById('editTechGuid').value = d.MachineGuid || '';
+      document.getElementById('editTechFullName').value = name;
+      document.getElementById('editTechCompany').value = d.Company || '';
+      document.getElementById('editTechEmployeeId').value = d.EmployeeId || '';
+      document.getElementById('editTechPhone').value = d.Phone || '';
+      document.getElementById('editTechEmail').value = d.Email || '';
+      document.getElementById('editTechCluster').value = d.Cluster || '';
+      document.getElementById('editTechUf').value = d.Uf || '';
+      document.getElementById('editTechPlatform').value = d.Platform === 'Android' ? 'Android' : 'Windows';
+      document.getElementById('editTechExpirationDate').value = d.ExpirationDateIso || '';
+      document.getElementById('editTechClientVersion').value = d.ClientVersion || '';
+      document.getElementById('editTechNotes').value = d.Notes || '';
+      document.getElementById('editTechGuidDisplay').innerText = d.MachineGuid || '';
 
       document.getElementById('modalTech').style.display = 'flex';
     }
 
-    function executeExtendLicense() {
-      if (!currentSelectedTech) return;
-      const days = parseInt(document.getElementById('modalTechExtendDays').value, 10);
-      const d = currentSelectedTech;
+    function addDaysToEditExpiry(days) {
+      const expInput = document.getElementById('editTechExpirationDate');
+      let baseDate = new Date();
+      if (expInput.value) {
+        const parsed = new Date(expInput.value + 'T00:00:00');
+        if (!isNaN(parsed.getTime()) && parsed > baseDate) {
+          baseDate = parsed;
+        }
+      }
+      baseDate.setDate(baseDate.getDate() + days);
+      expInput.value = baseDate.toISOString().slice(0, 10);
+      showToast(`Data de expiração estendida em +${days} dias: ${expInput.value}`);
+    }
 
-      const now = new Date();
-      now.setDate(now.getDate() + (days === 9999 ? 3650 : days));
-      const expIso = now.toISOString().slice(0, 10);
+    async function handleSaveTechEdits(e) {
+      e.preventDefault();
+      const guid = document.getElementById('editTechGuid').value;
+      const d = RAW_DEVICES.find(x => x.MachineGuid === guid);
+      if (!d) return;
 
+      const fullName = document.getElementById('editTechFullName').value.trim();
+      const parts = fullName.split(' ');
+      const firstName = parts[0] || fullName;
+      const lastName = parts.slice(1).join(' ') || '';
+
+      d.FullName = fullName;
+      d.FirstName = firstName;
+      d.LastName = lastName;
+      d.Company = document.getElementById('editTechCompany').value.trim();
+      d.EmployeeId = document.getElementById('editTechEmployeeId').value.trim();
+      d.Phone = document.getElementById('editTechPhone').value.trim();
+      d.Email = document.getElementById('editTechEmail').value.trim();
+      d.Cluster = document.getElementById('editTechCluster').value.trim();
+      d.Uf = document.getElementById('editTechUf').value.trim().toUpperCase();
+      d.Platform = document.getElementById('editTechPlatform').value;
+      d.ExpirationDateIso = document.getElementById('editTechExpirationDate').value;
+      d.ClientVersion = document.getElementById('editTechClientVersion').value.trim();
+      d.Notes = document.getElementById('editTechNotes').value.trim();
       d.Status = 'Active';
-      d.ValidDays = days;
-      d.ExpirationDateIso = expIso;
-      d.Notes = `Renovado via SPARC Admin Web (${days === 9999 ? 'Permanente' : days + ' dias'}) em ${new Date().toLocaleDateString('pt-BR')}`;
 
       closeModal('modalTech');
       applyTechnicianFilters();
-      showToast(`Licença de ${d.FullName} renovada até ${expIso}!`);
+      showToast(`✓ Cadastro de ${fullName} atualizado! Sincronizando com a nuvem...`);
+
+      await commitDevicesToCloud(true);
+      showToast(`✓ Alterações de ${fullName} salvas na nuvem com sucesso!`);
     }
 
-    function executeBlockLicense() {
+    async function executeDeleteCurrentTech() {
       if (!currentSelectedTech) return;
-      if (!confirm(`Tem certeza que deseja BLOQUEAR o acesso de ${currentSelectedTech.FullName}? O aplicativo em campo será travado no próximo sincronismo.`)) return;
+      const guid = currentSelectedTech.MachineGuid;
+      const name = currentSelectedTech.FullName || 'Técnico';
+      if (!confirm(`Deseja realmente EXCLUIR DEFINITIVAMENTE o cadastro de "${name}"?\n\nEsta cópia será removida permanentemente da base e sincronizada na nuvem.`)) return;
 
-      currentSelectedTech.Status = 'Blocked';
-      currentSelectedTech.Notes = `Bloqueado via SPARC Admin Web em ${new Date().toLocaleDateString('pt-BR')}`;
-
+      RAW_DEVICES = RAW_DEVICES.filter(x => x.MachineGuid !== guid);
       closeModal('modalTech');
       applyTechnicianFilters();
-      showToast(`Técnico ${currentSelectedTech.FullName} bloqueado com sucesso!`);
+      showToast(`Cadastro de ${name} excluído! Sincronizando com a nuvem...`);
+      await commitDevicesToCloud(true);
+      showToast(`✓ Cadastro de ${name} excluído da nuvem com sucesso!`);
     }
 
-    function quickBlockTech(guid) {
+    async function quickDeleteTech(guid) {
       const d = RAW_DEVICES.find(x => x.MachineGuid === guid);
       if (!d) return;
-      if (!confirm(`Deseja bloquear imediatamente ${d.FullName}?`)) return;
-      d.Status = 'Blocked';
-      applyTechnicianFilters();
-      showToast(`Técnico ${d.FullName} bloqueado!`);
-    }
+      const name = d.FullName || ((d.FirstName || '') + ' ' + (d.LastName || '')).trim() || 'Técnico';
+      if (!confirm(`Deseja realmente EXCLUIR DEFINITIVAMENTE o cadastro do técnico "${name}"?\n\nEsta cópia será removida permanentemente da base e sincronizada na nuvem.`)) return;
 
-    function quickActivateTech(guid) {
-      const d = RAW_DEVICES.find(x => x.MachineGuid === guid);
-      if (!d) return;
-      d.Status = 'Active';
+      RAW_DEVICES = RAW_DEVICES.filter(x => x.MachineGuid !== guid);
       applyTechnicianFilters();
-      showToast(`Técnico ${d.FullName} reativado!`);
+      showToast(`Cadastro de ${name} excluído! Sincronizando com a nuvem...`);
+      await commitDevicesToCloud(true);
+      showToast(`✓ Cadastro de ${name} excluído da nuvem com sucesso!`);
     }
 
     function copyCurrentTechKey() {
@@ -2844,23 +2935,88 @@
     // ==========================================
     function initRequestsView() {
       renderRequestsTable();
-      fetchCloudRequests(false);
     }
 
     function updateRequestsBadge() {
-      const pendingCount = RAW_REQUESTS.filter(r => (r.Status || 'Pending') === 'Pending').length;
+      const count = RAW_REQUESTS.filter(r => r.Status === 'Pending').length;
       const b = document.getElementById('badgeRequestsCount');
-      if (b) {
-        b.innerText = pendingCount;
-        if (pendingCount > 0) {
-          b.style.background = 'var(--amber)';
-          b.style.color = '#000';
-          b.style.fontWeight = 'bold';
-        } else {
-          b.style.background = 'var(--border)';
-          b.style.color = 'var(--text-muted)';
-        }
+      if (b) b.innerText = count;
+    }
+
+    function renderRequestsTable() {
+      const tbody = document.getElementById('reqTableBody');
+      const countEl = document.getElementById('reqTableCount');
+      const pending = RAW_REQUESTS.filter(r => r.Status === 'Pending');
+      if (countEl) countEl.innerText = `${pending.length} solicitações aguardando aprovação`;
+
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (pending.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhuma solicitação pendente no momento.</td></tr>';
+        return;
       }
+
+      pending.forEach(r => {
+        const dt = new Date(r.RequestDateUtc).toLocaleString('pt-BR');
+        const plat = r.Platform === 'Android' ? '🤖 Android' : '🪟 Windows';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${dt}</td>
+          <td><strong>${r.FullName}</strong></td>
+          <td>${r.Company}</td>
+          <td>${r.EmployeeId}</td>
+          <td>${r.Phone}</td>
+          <td>${plat}</td>
+          <td><code title="${r.MachineGuid}">${(r.MachineGuid || '').slice(0, 13)}...</code></td>
+          <td>${r.ClientVersion || 'Beta'}</td>
+          <td>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-success" style="padding: 5px 10px; font-size: 11px;" onclick="approveRequest('${r.MachineGuid}')">✓ Aprovar (90d)</button>
+              <button class="btn btn-danger" style="padding: 5px 10px; font-size: 11px;" onclick="rejectRequest('${r.MachineGuid}')">✕ Recusar</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function approveRequest(guid) {
+      const req = RAW_REQUESTS.find(r => r.MachineGuid === guid);
+      if (!req) return;
+
+      const now = new Date();
+      now.setDate(now.getDate() + 90);
+      const expIso = now.toISOString().slice(0, 10);
+
+      const parts = req.FullName.split(' ');
+      const newDev = {
+        MachineGuid: req.MachineGuid,
+        MachineFingerprint: req.MachineGuid,
+        FirstName: parts[0] || req.FullName,
+        LastName: parts.slice(1).join(' ') || '',
+        FullName: req.FullName,
+        Company: req.Company,
+        EmployeeId: req.EmployeeId,
+        Phone: req.Phone,
+        Email: req.Email,
+        Cluster: req.Cluster,
+        Uf: req.Uf,
+        Platform: req.Platform,
+        Status: 'Active',
+        ValidDays: 90,
+        ExpirationDateIso: expIso,
+        ClientVersion: req.ClientVersion,
+        Notes: 'Aprovado online via SPARC Admin Web'
+      };
+
+      RAW_DEVICES.unshift(newDev);
+      req.Status = 'Approved';
+
+      updateRequestsBadge();
+      renderRequestsTable();
+      applyTechnicianFilters();
+      showToast(`Solicitação de ${req.FullName} aprovada com sucesso! Licença liberada.`);
     }
 
     async function fetchCloudRequests(interactive = false) {
@@ -2890,9 +3046,36 @@
           rejected = JSON.parse(localStorage.getItem('sparc_admin_rejected_guids') || '[]');
         } catch (e) { rejected = []; }
 
+        // Sincroniza lista remota de excluídos se existir
+        const delFile = files.find(f => f.name === 'deleted_requests.json');
+        if (delFile) {
+          try {
+            const delRes = await fetch('https://api.github.com/repos/Calcmann/repo/contents/requests/deleted_requests.json', {
+              headers: {
+                'Authorization': 'token ' + token,
+                'Accept': 'application/vnd.github.v3.raw',
+                'User-Agent': 'SPARC-Admin-Web'
+              }
+            });
+            if (delRes.ok) {
+              const remoteDel = await delRes.json();
+              if (Array.isArray(remoteDel)) {
+                remoteDel.forEach(g => {
+                  if (g && !rejected.includes(g)) rejected.push(g);
+                });
+                localStorage.setItem('sparc_admin_rejected_guids', JSON.stringify(rejected));
+              }
+            }
+          } catch (e) {}
+        }
+
+        const lowerRejected = rejected.map(x => (x || '').toLowerCase().replace(/.json$/, ''));
+
         const jsonFiles = files.filter(f => f.name && f.name.endsWith('.json') && !f.name.includes('deleted'));
 
         const fetchPromises = jsonFiles.map(async f => {
+          const fGuid = f.name.replace(/.json$/, '').toLowerCase();
+          if (lowerRejected.includes(fGuid)) return null;
           try {
             const fileRes = await fetch('https://api.github.com/repos/Calcmann/repo/contents/requests/' + f.name, {
               headers: {
@@ -2916,8 +3099,9 @@
         const fetchedReqs = (await Promise.all(fetchPromises)).filter(Boolean);
 
         fetchedReqs.forEach(newR => {
-          if (rejected.includes(newR.MachineGuid)) return;
-          const idx = RAW_REQUESTS.findIndex(r => r.MachineGuid && r.MachineGuid.toLowerCase() === newR.MachineGuid.toLowerCase());
+          const g = (newR.MachineGuid || '').toLowerCase().replace(/.json$/, '');
+          if (lowerRejected.includes(g)) return;
+          const idx = RAW_REQUESTS.findIndex(r => r.MachineGuid && r.MachineGuid.toLowerCase().replace(/.json$/, '') === g);
           if (idx >= 0) {
             RAW_REQUESTS[idx] = Object.assign({}, RAW_REQUESTS[idx], newR);
           } else {
@@ -2945,190 +3129,29 @@
       }
     }
 
-    function renderRequestsTable() {
-      const tbody = document.getElementById('reqTableBody');
-      const countEl = document.getElementById('reqTableCount');
-      const filterStatus = document.getElementById('selFilterRequestsStatus')?.value || 'Pending';
-
-      const pending = RAW_REQUESTS.filter(r => (r.Status || 'Pending') === 'Pending');
-      const approved = RAW_REQUESTS.filter(r => (r.Status || '') === 'Approved');
-
-      if (countEl) {
-        countEl.innerText = `${pending.length} pendente(s) | ${approved.length} aprovada(s) | ${RAW_REQUESTS.length} total`;
-      }
-
-      if (!tbody) return;
-      tbody.innerHTML = '';
-
-      let list = RAW_REQUESTS;
-      if (filterStatus !== 'ALL') {
-        list = RAW_REQUESTS.filter(r => (r.Status || 'Pending') === filterStatus);
-      }
-
-      if (list.length === 0) {
-        const msg = filterStatus === 'Pending' 
-          ? 'Nenhuma solicitação pendente no momento.' 
-          : `Nenhuma solicitação encontrada no filtro (${filterStatus}).`;
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 24px; color: var(--text-muted);">${msg}</td></tr>`;
-        return;
-      }
-
-      list.forEach(r => {
-        const rawDate = r.RequestedAtUtc || r.RequestDateUtc;
-        const dt = rawDate ? new Date(rawDate).toLocaleString('pt-BR') : '-';
-        const plat = r.Platform === 'Android' ? '🤖 Android' : '🪟 Windows';
-        const fullName = r.FullName || ((r.FirstName || '') + ' ' + (r.LastName || '')).trim() || 'Técnico';
-        const phone = r.Phone || '-';
-        const isPending = (r.Status || 'Pending') === 'Pending';
-        const isApproved = (r.Status || '') === 'Approved';
-
-        let statusBadge = '';
-        if (isPending) {
-          statusBadge = '<span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;">⏳ Pendente</span>';
-        } else if (isApproved) {
-          statusBadge = `<span style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;">✅ Aprovada (${r.ValidDays || 90}d)</span>`;
-        } else {
-          statusBadge = `<span style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;">❌ ${r.Status || 'Recusada'}</span>`;
-        }
-
-        const phoneDigits = (phone || '').replace(/\D/g, '');
-        const waLink = phoneDigits.length >= 10 
-          ? `<a href="https://wa.me/55${phoneDigits}" target="_blank" class="btn btn-dark" style="padding: 4px 8px; font-size: 11px;" title="Chamar no WhatsApp">💬 WhatsApp</a>` 
-          : '';
-
-        let actionsHtml = '<div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">';
-        if (isPending) {
-          actionsHtml += `
-            <button class="btn btn-success" style="padding: 4px 8px; font-size: 11px;" onclick="approveRequest('${r.MachineGuid}')">✓ Aprovar (90d)</button>
-            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="rejectRequest('${r.MachineGuid}')">✕ Recusar</button>
-          `;
-        }
-        if (waLink) {
-          actionsHtml += waLink;
-        }
-        actionsHtml += '</div>';
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="font-size: 11.5px; white-space: nowrap;">${dt}</td>
-          <td><strong>${fullName}</strong></td>
-          <td>${r.Company || '-'}</td>
-          <td>${r.EmployeeId || '-'}</td>
-          <td>${phone}</td>
-          <td>${plat}</td>
-          <td>${r.Cluster || '-'} / ${r.Uf || '-'}</td>
-          <td>${r.ClientVersion || 'Beta'}</td>
-          <td>${statusBadge}</td>
-          <td>${actionsHtml}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function approveRequest(guid) {
-      const req = RAW_REQUESTS.find(r => r.MachineGuid === guid);
-      if (!req) return;
-
-      const now = new Date();
-      now.setDate(now.getDate() + 90);
-      const expIso = now.toISOString().slice(0, 10);
-
-      const fullName = req.FullName || ((req.FirstName || '') + ' ' + (req.LastName || '')).trim() || 'Técnico';
-      const parts = fullName.split(' ');
-      const newDev = {
-        MachineGuid: req.MachineGuid,
-        MachineFingerprint: req.MachineFingerprint || req.MachineGuid,
-        FirstName: parts[0] || fullName,
-        LastName: parts.slice(1).join(' ') || '',
-        FullName: fullName,
-        Company: req.Company || 'Claro',
-        EmployeeId: req.EmployeeId || '0',
-        Phone: req.Phone || '',
-        Email: req.Email || '',
-        Cluster: req.Cluster || '',
-        Uf: req.Uf || '',
-        Platform: req.Platform || 'Windows',
-        Status: 'Active',
-        ValidDays: 90,
-        ExpirationDateIso: expIso,
-        ClientVersion: req.ClientVersion || 'Beta',
-        Notes: 'Aprovado online via SPARC Admin Web',
-        FirstRegisteredUtc: new Date().toISOString(),
-        LastSeenUtc: new Date().toISOString()
-      };
-
-      const existingIdx = RAW_DEVICES.findIndex(d => d.MachineGuid && d.MachineGuid.toLowerCase() === guid.toLowerCase());
-      if (existingIdx >= 0) {
-        RAW_DEVICES[existingIdx] = Object.assign({}, RAW_DEVICES[existingIdx], newDev);
-      } else {
-        RAW_DEVICES.unshift(newDev);
-      }
-
-      req.Status = 'Approved';
-      req.AdminNotes = 'Aprovado online via SPARC Admin Web (90 dias)';
-      req.ExpirationDateIso = expIso;
-      req.ValidDays = 90;
-
-      updateRequestsBadge();
-      renderRequestsTable();
-      applyTechnicianFilters();
-      showToast(`Solicitação de ${fullName} aprovada com sucesso! Salvando na nuvem...`);
-
-      await commitDevicesToCloud(true);
-
-      const token = getActiveGitHubToken();
-      if (token) {
-        try {
-          const reqUrl = `https://api.github.com/repos/Calcmann/repo/contents/requests/${guid}.json`;
-          const getRes = await fetch(reqUrl, {
-            headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
-          });
-          let sha = '';
-          if (getRes.ok) {
-            const getObj = await getRes.json();
-            sha = getObj.sha;
-          }
-          const payloadStr = JSON.stringify(req, null, 2);
-          const b64 = btoa(unescape(encodeURIComponent(payloadStr)));
-          await fetch(reqUrl, {
-            method: 'PUT',
-            headers: {
-              'Authorization': 'token ' + token,
-              'User-Agent': 'SPARC-Admin-Web',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              message: `admin(web): approve request for ${fullName} [${guid}]`,
-              content: b64,
-              sha: sha || undefined
-            })
-          });
-          showToast(`✓ Aprovação de ${fullName} salva na Nuvem!`);
-        } catch (saveErr) {
-          console.warn('Erro ao atualizar arquivo da solicitação no GitHub:', saveErr);
-        }
-      }
-    }
-
     async function rejectRequest(guid) {
       const req = RAW_REQUESTS.find(r => r.MachineGuid === guid);
       if (!req) return;
-      if (!confirm(`Deseja realmente RECUSAR e EXCLUIR DEFINITIVAMENTE a solicitação de ${req.FullName}?`)) return;
+      const techName = req.FullName || ((req.FirstName || '') + ' ' + (req.LastName || '')).trim() || 'Técnico';
+      if (!confirm(`Deseja realmente RECUSAR e EXCLUIR DEFINITIVAMENTE a solicitação de "${techName}"?\n\nEsta solicitação será removida permanentemente e não voltará a aparecer.`)) return;
+
+      const gLower = guid.toLowerCase().replace(/.json$/, '');
 
       // 1. Remove da memória local imediatamente
-      RAW_REQUESTS = RAW_REQUESTS.filter(r => r.MachineGuid !== guid);
+      RAW_REQUESTS = RAW_REQUESTS.filter(r => (r.MachineGuid || '').toLowerCase().replace(/.json$/, '') !== gLower);
 
       // 2. Persiste na lista de rejeitados no navegador (evita que reapareça em qualquer refresh)
       try {
         let rejected = JSON.parse(localStorage.getItem('sparc_admin_rejected_guids') || '[]');
         if (!rejected.includes(guid)) rejected.push(guid);
+        if (!rejected.includes(gLower)) rejected.push(gLower);
         localStorage.setItem('sparc_admin_rejected_guids', JSON.stringify(rejected));
       } catch (e) {}
 
       // 3. Atualiza UI e contador da aba
       updateRequestsBadge();
       renderRequestsTable();
-      showToast(`Solicitação de ${req.FullName} excluída definitivamente!`);
+      showToast(`Solicitação de ${techName} excluída definitivamente!`);
 
       // 4. Se existir arquivo de request no GitHub (requests/{guid}.json), exclui permanentemente do repositório
       const token = getActiveGitHubToken();
@@ -3149,7 +3172,7 @@
                   'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                  message: `admin(web): delete rejected request ${guid} [${req.FullName}]`,
+                  message: `admin(web): delete rejected request ${guid} [${techName}]`,
                   sha: getObj.sha
                 })
               });
@@ -3157,6 +3180,45 @@
           }
         } catch (delErr) {
           console.warn('Erro ao excluir solicitação remota:', delErr);
+        }
+
+        // 5. Registra no arquivo remoto deleted_requests.json para propagar a exclusão para todos os dispositivos
+        try {
+          const delListUrl = 'https://api.github.com/repos/Calcmann/repo/contents/requests/deleted_requests.json';
+          const getDelRes = await fetch(delListUrl, {
+            headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+          });
+          let delSha = '';
+          let delList = [];
+          if (getDelRes.ok) {
+            const delObj = await getDelRes.json();
+            delSha = delObj.sha;
+            try {
+              delList = JSON.parse(atob(delObj.content.replace(/s/g, '')));
+            } catch (e) { delList = []; }
+          }
+          if (!Array.isArray(delList)) delList = [];
+          if (!delList.includes(guid)) delList.push(guid);
+          if (!delList.includes(gLower)) delList.push(gLower);
+          if (!delList.includes(guid + '.json')) delList.push(guid + '.json');
+          
+          const payloadStr = JSON.stringify(delList, null, 2);
+          const b64 = btoa(unescape(encodeURIComponent(payloadStr)));
+          await fetch(delListUrl, {
+            method: 'PUT',
+            headers: {
+              'Authorization': 'token ' + token,
+              'User-Agent': 'SPARC-Admin-Web',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `admin(web): record deleted request ${guid}`,
+              content: b64,
+              sha: delSha || undefined
+            })
+          });
+        } catch (e) {
+          console.warn('Erro ao atualizar deleted_requests.json remoto:', e);
         }
       }
     }
@@ -3385,11 +3447,6 @@
             }
           }
         } catch (eTel) { }
-
-        // 3. Tenta buscar requests/ atualizado do repositório
-        try {
-          await fetchCloudRequests(false);
-        } catch (eReq) { }
 
         if (interactive) showToast('Sincronização concluída com sucesso!');
       } catch (e) {
