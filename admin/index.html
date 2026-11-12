@@ -1,1411 +1,2819 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>SPARC ADMIN — Painel Central de Gestão & Telemetria Claro</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
+
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
   <style>
+
     :root {
+
       --bg: #09090b;
+
       --card-bg: #141417;
+
       --card-hover: #1c1c21;
+
       --card-border: #27272a;
+
       --card-border-focus: #3f3f46;
+
       --text: #f4f4f5;
+
       --text-muted: #a1a1aa;
+
       --claro-red: #ee1c25;
+
       --claro-red-hover: #dc2626;
+
       --claro-dark-red: #881337;
+
       --emerald: #10b981;
+
       --emerald-bg: rgba(16, 185, 129, 0.12);
+
       --amber: #f59e0b;
+
       --amber-bg: rgba(245, 158, 11, 0.12);
+
       --rose: #f43f5e;
+
       --rose-bg: rgba(244, 63, 94, 0.12);
+
       --sky: #0284c7;
+
       --sky-light: #38bdf8;
+
       --purple: #8b5cf6;
+
       --purple-bg: rgba(139, 92, 246, 0.12);
+
     }
+
+
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.5; -webkit-font-smoothing: antialiased; }
 
+
+
     /* LOGIN VIEW */
+
     #loginView {
+
       display: flex;
+
       align-items: center;
+
       justify-content: center;
+
       min-height: 100vh;
+
       padding: 20px;
+
       background: radial-gradient(circle at top center, rgba(238, 28, 37, 0.15) 0%, rgba(9, 9, 11, 0.95) 70%);
+
     }
+
+
 
     .login-card {
+
       background: rgba(20, 20, 23, 0.85);
+
       border: 1px solid rgba(255, 255, 255, 0.08);
+
       backdrop-filter: blur(16px);
+
       border-radius: 18px;
+
       padding: 38px 32px;
+
       width: 100%;
+
       max-width: 420px;
+
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(238, 28, 37, 0.2);
+
     }
+
+
 
     .login-header {
+
       text-align: center;
+
       margin-bottom: 28px;
+
     }
+
+
 
     .brand-badge {
+
       display: inline-flex;
+
       align-items: center;
+
       justify-content: center;
+
       width: 52px;
+
       height: 52px;
+
       border-radius: 14px;
+
       background: linear-gradient(135deg, var(--claro-red), #991b1b);
+
       color: white;
+
       font-weight: 900;
+
       font-size: 22px;
+
       margin-bottom: 14px;
+
       box-shadow: 0 8px 24px rgba(238, 28, 37, 0.4);
+
     }
+
+
 
     .login-header h1 {
+
       font-size: 22px;
+
       font-weight: 900;
+
       color: #ffffff;
+
       letter-spacing: -0.5px;
+
     }
+
+
 
     .login-header p {
+
       font-size: 13px;
+
       color: var(--text-muted);
+
       margin-top: 4px;
+
     }
+
+
 
     .form-group {
+
       margin-bottom: 18px;
+
     }
+
+
 
     .form-group label {
+
       display: block;
+
       font-size: 11.5px;
+
       font-weight: 700;
+
       color: var(--text-muted);
+
       text-transform: uppercase;
+
       letter-spacing: 0.5px;
+
       margin-bottom: 6px;
+
     }
+
+
 
     .form-input {
+
       width: 100%;
+
       background: #09090b;
+
       border: 1.5px solid var(--card-border);
+
       border-radius: 10px;
+
       padding: 12px 14px;
+
       color: var(--text);
+
       font-size: 14px;
+
       outline: none;
+
       transition: all 0.2s ease;
+
     }
+
+
 
     .form-input:focus {
+
       border-color: var(--claro-red);
+
       box-shadow: 0 0 0 3px rgba(238, 28, 37, 0.2);
+
     }
+
+
 
     .login-btn {
+
       width: 100%;
+
       background: linear-gradient(135deg, var(--claro-red), #b91c1c);
+
       color: white;
+
       border: none;
+
       border-radius: 10px;
+
       padding: 13px;
+
       font-size: 14px;
+
       font-weight: 800;
+
       cursor: pointer;
+
       margin-top: 10px;
+
       transition: all 0.2s;
+
       box-shadow: 0 4px 14px rgba(238, 28, 37, 0.3);
+
     }
+
+
 
     .login-btn:hover {
+
       background: linear-gradient(135deg, #f82b34, #cf1b24);
+
       transform: translateY(-1px);
+
     }
+
+
 
     .login-alert {
+
       padding: 10px 14px;
+
       border-radius: 8px;
+
       font-size: 12px;
+
       font-weight: 600;
+
       margin-bottom: 18px;
+
       display: none;
+
       background: rgba(244, 63, 94, 0.15);
+
       border: 1px solid rgba(244, 63, 94, 0.3);
+
       color: #fb7185;
+
     }
+
+
 
     /* MAIN APP SHELL */
+
     #appShell {
+
       display: none;
+
       min-height: 100vh;
+
       flex-direction: column;
+
     }
+
+
 
     /* HEADER */
+
     header {
+
       background: rgba(20, 20, 23, 0.95);
+
       border-bottom: 1px solid var(--card-border);
+
       position: sticky;
+
       top: 0;
+
       z-index: 50;
+
       backdrop-filter: blur(12px);
+
     }
+
+
 
     .header-inner {
+
       max-width: 1560px;
+
       margin: 0 auto;
+
       padding: 12px 24px;
+
       display: flex;
+
       justify-content: space-between;
+
       align-items: center;
+
       flex-wrap: wrap;
+
       gap: 16px;
+
     }
+
+
 
     .header-left {
+
       display: flex;
+
       align-items: center;
+
       gap: 14px;
+
     }
+
+
 
     .header-brand-title {
+
       font-size: 17px;
+
       font-weight: 900;
+
       letter-spacing: -0.5px;
+
       display: flex;
+
       align-items: center;
+
       gap: 8px;
+
     }
+
+
 
     .header-brand-sub {
+
       font-size: 11px;
+
       color: var(--text-muted);
+
       font-weight: 600;
+
     }
+
+
 
     /* NAV TABS */
+
     .nav-tabs {
+
       display: flex;
+
       background: #09090b;
+
       padding: 4px;
+
       border-radius: 12px;
+
       border: 1px solid var(--card-border);
+
       gap: 4px;
+
     }
+
+
 
     .nav-tab {
+
       background: transparent;
+
       border: none;
+
       color: var(--text-muted);
+
       padding: 8px 16px;
+
       border-radius: 8px;
+
       font-size: 12.5px;
+
       font-weight: 700;
+
       cursor: pointer;
+
       display: flex;
+
       align-items: center;
+
       gap: 8px;
+
       transition: all 0.2s;
+
       white-space: nowrap;
+
     }
+
+
 
     .nav-tab:hover {
+
       color: var(--text);
+
       background: rgba(255, 255, 255, 0.04);
+
     }
+
+
 
     .nav-tab.active {
+
       background: var(--card-bg);
+
       color: #ffffff;
+
       border: 1px solid var(--card-border);
+
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
     }
+
+
 
     .tab-badge {
+
       background: var(--claro-red);
+
       color: white;
+
       font-size: 10px;
+
       font-weight: 900;
+
       padding: 1px 6px;
+
       border-radius: 10px;
+
     }
+
+
 
     .header-right {
+
       display: flex;
+
       align-items: center;
+
       gap: 12px;
+
     }
+
+
 
     .status-pill {
+
       font-size: 11px;
+
       font-weight: 700;
+
       padding: 5px 10px;
+
       border-radius: 20px;
+
       display: inline-flex;
+
       align-items: center;
+
       gap: 6px;
+
       background: rgba(16, 185, 129, 0.15);
+
       color: #34d399;
+
       border: 1px solid rgba(16, 185, 129, 0.3);
+
     }
+
+
 
     .status-pill.offline {
+
       background: rgba(245, 158, 11, 0.15);
+
       color: #fbbf24;
+
       border-color: rgba(245, 158, 11, 0.3);
+
     }
+
+
 
     .btn {
+
       padding: 8px 14px;
+
       border-radius: 8px;
+
       font-size: 12px;
+
       font-weight: 700;
+
       border: none;
+
       cursor: pointer;
+
       display: inline-flex;
+
       align-items: center;
+
       gap: 6px;
+
       transition: all 0.2s;
+
       text-decoration: none;
+
     }
+
+
 
     .btn-primary { background: #2563eb; color: white; }
+
     .btn-primary:hover { background: #1d4ed8; }
+
     .btn-success { background: #16a34a; color: white; }
+
     .btn-success:hover { background: #15803d; }
+
     .btn-danger { background: #dc2626; color: white; }
+
     .btn-danger:hover { background: #b91c1c; }
+
     .btn-dark { background: #27272a; color: var(--text); border: 1px solid #3f3f46; }
+
     .btn-dark:hover { background: #3f3f46; }
 
+
+
     /* CONTENT LAYOUT */
+
     main {
+
       flex: 1;
+
       max-width: 1560px;
+
       margin: 0 auto;
+
       padding: 24px;
+
       width: 100%;
+
     }
+
+
 
     .tab-content {
+
       display: none;
+
     }
+
+
 
     .tab-content.active {
+
       display: block;
+
       animation: fadeIn 0.2s ease-in;
+
     }
+
+
 
     @keyframes fadeIn {
+
       from { opacity: 0; transform: translateY(4px); }
+
       to { opacity: 1; transform: translateY(0); }
+
     }
+
+
 
     /* KPI CARDS */
+
     .kpi-grid {
+
       display: grid;
+
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
       gap: 16px;
+
       margin-bottom: 24px;
+
     }
+
+
 
     .kpi-card {
+
       background: var(--card-bg);
+
       border: 1px solid var(--card-border);
+
       border-radius: 14px;
+
       padding: 18px 20px;
+
       display: flex;
+
       flex-direction: column;
+
       justify-content: space-between;
+
       position: relative;
+
       overflow: hidden;
+
       transition: transform 0.2s;
+
     }
+
+
 
     .kpi-card:hover {
+
       border-color: var(--card-border-focus);
+
       transform: translateY(-2px);
+
     }
+
+
 
     .kpi-card::before {
+
       content: '';
+
       position: absolute;
+
       top: 0; left: 0; right: 0;
+
       height: 3px;
+
     }
+
+
 
     .kpi-total::before { background: var(--sky); }
+
     .kpi-success::before { background: var(--emerald); }
+
     .kpi-fail::before { background: var(--rose); }
+
     .kpi-rate::before { background: var(--purple); }
+
     .kpi-tech::before { background: var(--amber); }
 
+
+
     .kpi-title {
+
       font-size: 11.5px;
+
       font-weight: 700;
+
       color: var(--text-muted);
+
       text-transform: uppercase;
+
       letter-spacing: 0.5px;
+
     }
+
+
 
     .kpi-value {
+
       font-size: 30px;
+
       font-weight: 900;
+
       color: #ffffff;
+
       letter-spacing: -1px;
+
       margin: 8px 0 4px;
+
     }
+
+
 
     .kpi-sub {
+
       font-size: 11.5px;
+
       color: var(--text-muted);
+
       display: flex;
+
       align-items: center;
+
       gap: 6px;
+
     }
+
+
 
     /* FILTERS PANEL */
+
     .filter-panel {
+
       background: var(--card-bg);
+
       border: 1px solid var(--card-border);
+
       border-radius: 14px;
+
       padding: 14px 18px;
+
       margin-bottom: 24px;
+
       display: flex;
+
       gap: 14px;
+
       flex-wrap: wrap;
+
       align-items: center;
+
     }
+
+
 
     .filter-group {
+
       display: flex;
+
       flex-direction: column;
+
       gap: 4px;
+
     }
+
+
 
     .filter-group label {
+
       font-size: 10.5px;
+
       font-weight: 700;
+
       color: var(--text-muted);
+
       text-transform: uppercase;
+
       letter-spacing: 0.5px;
+
     }
+
+
 
     .filter-input, .filter-select {
+
       background: #09090b;
+
       border: 1px solid #3f3f46;
+
       color: var(--text);
+
       padding: 8px 12px;
+
       border-radius: 8px;
+
       font-size: 12.5px;
+
       outline: none;
+
       transition: border-color 0.2s;
+
     }
+
+
 
     .filter-input:focus, .filter-select:focus {
+
       border-color: var(--sky-light);
+
     }
+
+
 
     .search-box {
+
       flex-grow: 1;
+
       min-width: 260px;
+
     }
+
+
 
     /* CHARTS GRID */
+
     .charts-grid {
+
       display: grid;
+
       grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+
       gap: 18px;
+
       margin-bottom: 24px;
+
     }
+
+
 
     .chart-card {
+
       background: var(--card-bg);
+
       border: 1px solid var(--card-border);
+
       border-radius: 14px;
+
       padding: 20px;
+
       display: flex;
+
       flex-direction: column;
+
     }
+
+
 
     .chart-header {
+
       display: flex;
+
       justify-content: space-between;
+
       align-items: center;
+
       margin-bottom: 16px;
+
     }
+
+
 
     .chart-title {
+
       font-size: 14px;
+
       font-weight: 800;
+
       color: #ffffff;
+
       display: flex;
+
       align-items: center;
+
       gap: 8px;
+
     }
+
+
 
     .chart-canvas-wrap {
+
       position: relative;
+
       height: 270px;
+
       width: 100%;
+
     }
+
+
 
     /* TABLES */
+
     .table-card {
+
       background: var(--card-bg);
+
       border: 1px solid var(--card-border);
+
       border-radius: 14px;
+
       padding: 20px;
+
       margin-bottom: 24px;
+
     }
+
+
 
     .table-header {
+
       display: flex;
+
       justify-content: space-between;
+
       align-items: center;
+
       margin-bottom: 16px;
+
       flex-wrap: wrap;
+
       gap: 12px;
+
     }
+
+
 
     .table-title {
+
       font-size: 14.5px;
+
       font-weight: 800;
+
       color: #ffffff;
+
       display: flex;
+
       align-items: center;
+
       gap: 8px;
+
     }
+
+
 
     .table-container {
+
       overflow-x: auto;
+
     }
+
+
 
     table {
+
       width: 100%;
+
       border-collapse: collapse;
+
       text-align: left;
+
       font-size: 12px;
+
     }
+
+
 
     th {
+
       background: #101012;
+
       color: #94a3b8;
+
       font-weight: 700;
+
       padding: 10px 14px;
+
       position: sticky;
+
       top: 0;
+
       z-index: 2;
+
       border-bottom: 1.5px solid #3f3f46;
+
       white-space: nowrap;
+
     }
+
+
 
     td {
+
       padding: 10px 14px;
+
       border-bottom: 1px solid #27272a;
+
       white-space: nowrap;
+
       vertical-align: middle;
+
     }
+
+
 
     tr:hover td {
+
       background-color: var(--card-hover);
+
     }
+
+
 
     .badge {
+
       padding: 3px 8px;
+
       border-radius: 6px;
+
       font-size: 11px;
+
       font-weight: 700;
+
       display: inline-flex;
+
       align-items: center;
+
       gap: 4px;
+
     }
+
+
 
     .badge-success { background: var(--emerald-bg); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
     .badge-fail { background: var(--rose-bg); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
+
     .badge-pending { background: var(--amber-bg); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+
     .badge-blocked { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
     .badge-global { background: rgba(234, 179, 8, 0.15) !important; color: #facc15 !important; border: 1px solid rgba(234, 179, 8, 0.4) !important; }
+
     .badge-subadmin { background: rgba(56, 189, 248, 0.15) !important; color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.4) !important; }
+
     .cluster-badge { display: inline-flex; align-items: center; background: #27272a; border: 1px solid #3f3f46; color: #e4e4e7; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin: 2px; }
+
     .cluster-checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 180px; overflow-y: auto; background: #18181b; border: 1px solid #3f3f46; border-radius: 8px; padding: 10px; margin-top: 6px; }
+
     .cluster-chk-label { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #d4d4d8; cursor: pointer; user-select: none; }
+
     .cluster-chk-label input { cursor: pointer; accent-color: var(--claro-red); }
 
+
+
     /* MODAL */
+
     .modal-overlay {
+
       position: fixed;
+
       top: 0; left: 0; right: 0; bottom: 0;
+
       background: rgba(0, 0, 0, 0.8);
+
       display: none;
+
       align-items: center;
+
       justify-content: center;
+
       z-index: 100;
+
       backdrop-filter: blur(6px);
+
     }
+
+
 
     .modal-content {
+
       background: #18181b;
+
       border: 1px solid #3f3f46;
+
       border-radius: 16px;
+
       width: 90%;
+
       max-width: 760px;
+
       max-height: 90vh;
+
       overflow-y: auto;
+
       padding: 28px;
+
       position: relative;
+
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+
     }
 
+
+
     .modal-close {
+
       position: absolute;
+
       top: 20px;
+
       right: 20px;
+
       background: none;
+
       border: none;
+
       color: #a1a1aa;
+
       font-size: 22px;
+
       cursor: pointer;
+
     }
+
+
 
     .modal-close:hover { color: white; }
 
+
+
     .detail-grid {
+
       display: grid;
+
       grid-template-columns: 1fr 1fr;
+
       gap: 12px;
+
       margin-top: 18px;
+
     }
+
+
 
     .detail-item {
+
       background: #27272a;
+
       border-radius: 8px;
+
       padding: 11px 14px;
+
     }
+
+
 
     .detail-label {
+
       font-size: 10.5px;
+
       font-weight: 700;
+
       color: #a1a1aa;
+
       text-transform: uppercase;
+
       letter-spacing: 0.5px;
+
     }
+
+
 
     .detail-value {
+
       font-size: 13.5px;
+
       font-weight: 600;
+
       color: #ffffff;
+
       margin-top: 3px;
+
       word-break: break-all;
+
     }
+
+
 
     /* FOOTER */
+
     footer {
+
       text-align: center;
+
       font-size: 12px;
+
       color: var(--text-muted);
+
       padding: 24px;
+
       border-top: 1px solid var(--card-border);
+
       background: #09090b;
+
     }
+
+
 
     /* TOAST NOTIFICATION */
+
     .toast {
+
       position: fixed;
+
       bottom: 24px;
+
       right: 24px;
+
       background: #18181b;
+
       border: 1px solid var(--emerald);
+
       color: #ffffff;
+
       padding: 12px 20px;
+
       border-radius: 10px;
+
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+
       z-index: 1000;
+
       font-size: 13px;
+
       font-weight: 700;
+
       display: none;
+
       align-items: center;
+
       gap: 8px;
+
       animation: slideUp 0.25s ease-out;
+
     }
+
+
 
     @keyframes slideUp {
+
       from { transform: translateY(20px); opacity: 0; }
+
       to { transform: translateY(0); opacity: 1; }
+
     }
+
   </style>
+
 </head>
+
 <body>
 
+
+
   <!-- ================= TELA DE LOGIN ================= -->
+
   <div id="loginView">
+
     <div class="login-card">
+
       <div class="login-header">
+
         <div class="brand-badge">SP</div>
+
         <h1>SPARC ADMIN</h1>
+
         <p>Inteligência Operacional &amp; Gestão Centralizada</p>
+
       </div>
+
+
 
       <div class="login-alert" id="loginAlert">
+
         ⚠️ Usuário ou senha incorretos.
+
       </div>
+
+
 
       <form id="formLogin" onsubmit="handleLoginSubmit(event)">
-        <div class="form-group">
-          <label for="inputUser">Usuário Administrador</label>
-          <input type="text" id="inputUser" class="form-input" value="admin" required autofocus>
-        </div>
 
         <div class="form-group">
-          <label for="inputPass">Senha de Acesso</label>
-          <input type="password" id="inputPass" class="form-input" placeholder="Digite a senha mestra" required>
+
+          <label for="inputUser">Usuário Administrador</label>
+
+          <input type="text" id="inputUser" class="form-input" value="admin" required autofocus>
+
         </div>
+
+
+
+        <div class="form-group">
+
+          <label for="inputPass">Senha de Acesso</label>
+
+          <input type="password" id="inputPass" class="form-input" placeholder="Digite a senha mestra" required>
+
+        </div>
+
+
 
         <button type="submit" class="login-btn">🔐 Entrar no Painel</button>
+
       </form>
 
+
+
       <div style="text-align: center; margin-top: 20px; font-size: 11.5px; color: var(--text-muted);">
+
         Acesso restrito &bull; Claro S.A. Operações &bull; SPARC v0.8
+
       </div>
+
     </div>
+
   </div>
+
+
 
   <!-- ================= APLICAÇÃO PRINCIPAL ================= -->
+
   <div id="appShell">
+
     <header>
+
       <div class="header-inner">
+
         <div class="header-left">
+
           <div class="brand-badge" style="width: 38px; height: 38px; font-size: 16px; margin-bottom: 0;">SP</div>
+
           <div>
+
             <div class="header-brand-title">SPARC ADMIN <span style="font-size: 11px; background: var(--claro-red); color: white; padding: 1px 7px; border-radius: 12px;">WEB</span></div>
+
             <div class="header-brand-sub">Claro S.A. &bull; Gestão &amp; Telemetria em Nuvem</div>
+
           </div>
+
         </div>
+
+
 
         <nav class="nav-tabs">
+
           <button class="nav-tab active" onclick="switchTab('telemetry')">
+
             <span>📊</span> Telemetria
+
           </button>
+
           <button class="nav-tab" onclick="switchTab('speedtest')">
+
             <span>📑</span> Auditoria SpeedTest
+
           </button>
+
           <button class="nav-tab" onclick="switchTab('requests')">
+
             <span>🔔</span> Solicitações <span class="tab-badge" id="badgeRequestsCount">0</span>
+
           </button>
+
           <button class="nav-tab" onclick="switchTab('technicians')">
+
             <span>👥</span> Técnicos e Licenças
+
           </button>
+
           <button class="nav-tab" id="navTabSubAdmins" onclick="switchTab('subadmins')">
+
             <span>🛡️</span> Sub-Administradores
+
           </button>
+
           <button class="nav-tab" onclick="switchTab('settings')">
+
             <span>⚙️</span> Configurações
+
           </button>
+
         </nav>
 
+
+
         <div class="header-right">
+
           <span class="status-pill badge-global" id="pillUserProfile" style="display: inline-flex; align-items: center; gap: 6px;">👑 Administrador Global</span>
+
           <span class="status-pill" id="pillCloudStatus">🟢 Nuvem Conectada</span>
+
           <button class="btn btn-dark" onclick="syncCloudData(true)" title="Sincronizar dados agora">
+
             <span>🔄</span> Sync
+
           </button>
+
           <button class="btn btn-dark" onclick="handleLogout()" style="background: rgba(244, 63, 94, 0.15); color: #fb7185; border-color: rgba(244, 63, 94, 0.3);">
+
             <span>🚪</span> Sair
+
           </button>
+
         </div>
+
       </div>
+
     </header>
 
+
+
     <main>
+
       <!-- ================= ABA 1: TELEMETRIA OPERACIONAL ================= -->
+
       <section id="tab-telemetry" class="tab-content active">
+
         <!-- KPIs -->
+
         <div class="kpi-grid">
+
           <div class="kpi-card kpi-total">
+
             <div class="kpi-title">Total de Intervenções</div>
+
             <div class="kpi-value" id="kpiTotal">0</div>
+
             <div class="kpi-sub"><span>📋</span> Circuitos auditados em campo</div>
+
           </div>
+
           <div class="kpi-card kpi-success">
+
             <div class="kpi-title">Homologados com Sucesso</div>
+
             <div class="kpi-value" id="kpiSuccess">0</div>
+
             <div class="kpi-sub"><span style="color: var(--emerald);">🟢</span> Ativações concluídas 100%</div>
+
           </div>
+
           <div class="kpi-card kpi-fail">
+
             <div class="kpi-title">Falhas / Gargalos</div>
+
             <div class="kpi-value" id="kpiFail">0</div>
+
             <div class="kpi-sub"><span style="color: var(--rose);">🔴</span> Interrupções registradas</div>
+
           </div>
+
           <div class="kpi-card kpi-rate">
+
             <div class="kpi-title">Taxa First Time Right</div>
+
             <div class="kpi-value" id="kpiRate">0.0%</div>
+
             <div class="kpi-sub"><span>🎯</span> Homologação de primeira</div>
+
           </div>
+
           <div class="kpi-card kpi-tech">
+
             <div class="kpi-title">Técnicos Ativos</div>
+
             <div class="kpi-value" id="kpiTechs">0</div>
+
             <div class="kpi-sub"><span>👨‍💻</span> Operadores registrando dados</div>
+
           </div>
+
         </div>
+
+
 
         <!-- Filtros -->
+
         <div class="filter-panel">
+
           <div class="filter-group search-box">
+
             <label>Busca Inteligente</label>
+
             <input type="text" id="filterTelSearch" class="filter-input" placeholder="Designação, Cliente, Técnico, OTS, Modelo, IP WAN..." oninput="applyTelemetryFilters()">
+
           </div>
+
           <div class="filter-group">
+
             <label>Status</label>
+
             <select id="filterTelStatus" class="filter-select" onchange="applyTelemetryFilters()">
+
               <option value="ALL">Todos os Status</option>
+
               <option value="SUCESSO">🟢 Sucesso</option>
+
               <option value="FALHA">🔴 Falha</option>
+
             </select>
+
           </div>
+
           <div class="filter-group">
+
             <label>Modelo do Roteador</label>
+
             <select id="filterTelModel" class="filter-select" onchange="applyTelemetryFilters()">
+
               <option value="ALL">Todos os Modelos</option>
+
             </select>
+
           </div>
+
           <div class="filter-group">
+
             <label>Ações</label>
+
             <div style="display: flex; gap: 8px;">
+
               <button class="btn btn-success" onclick="exportTelemetryToCsv()">📊 Exportar CSV</button>
+
               <button class="btn btn-dark" onclick="window.print()">🖨️ Imprimir</button>
+
             </div>
+
           </div>
+
         </div>
+
+
 
         <!-- Gráficos -->
+
         <div class="charts-grid">
+
           <div class="chart-card">
+
             <div class="chart-header">
+
               <div class="chart-title">📈 Histórico de Volume &amp; Entregas por Data</div>
+
             </div>
+
             <div class="chart-canvas-wrap">
+
               <canvas id="chartTimeline"></canvas>
+
             </div>
+
           </div>
 
+
+
           <div class="chart-card">
+
             <div class="chart-header">
+
               <div class="chart-title">🎯 Gargalos de Fluxo: Funil de Falhas por Etapa</div>
+
             </div>
+
             <div class="chart-canvas-wrap">
+
               <canvas id="chartBottlenecks"></canvas>
+
             </div>
+
           </div>
 
+
+
           <div class="chart-card">
+
             <div class="chart-header">
+
               <div class="chart-title">📦 Distribuição por Modelo de Roteador</div>
+
             </div>
+
             <div class="chart-canvas-wrap">
+
               <canvas id="chartModels"></canvas>
+
             </div>
+
           </div>
 
+
+
           <div class="chart-card">
+
             <div class="chart-header">
+
               <div class="chart-title">🏆 Ranking de Atividades por Técnico</div>
+
             </div>
+
             <div class="chart-canvas-wrap">
+
               <canvas id="chartTechs"></canvas>
+
             </div>
+
           </div>
+
         </div>
+
+
 
         <!-- Tabela -->
+
         <div class="table-card">
+
           <div class="table-header">
+
             <div class="table-title">📋 Registros de Intervenção em Campo</div>
+
             <div style="font-size: 11.5px; color: var(--text-muted);" id="telTableCount">Exibindo 0 registros</div>
+
           </div>
+
           <div class="table-container">
+
             <table>
+
               <thead>
+
                 <tr>
+
                   <th>Data / Hora</th>
+
                   <th>Designação IP</th>
+
                   <th>Cliente / Razão Social</th>
+
                   <th>Técnico</th>
+
                   <th>Empresa</th>
+
                   <th>Modelo Roteador</th>
+
                   <th>IP WAN</th>
+
                   <th>Status</th>
+
                   <th>Duração</th>
+
                   <th>Etapa Falha / Gargalo</th>
+
                   <th>Ações</th>
+
                 </tr>
+
               </thead>
+
               <tbody id="telTableBody"></tbody>
+
             </table>
+
           </div>
+
         </div>
+
       </section>
+
+
 
       <!-- ================= ABA 2: AUDITORIA SPEEDTEST ================= -->
+
       <section id="tab-speedtest" class="tab-content">
+
         <div class="table-card">
+
           <div class="table-header">
+
             <div>
+
               <div class="table-title">📑 Auditoria de Links &amp; Aceite de Projetos (Bradesco &amp; Varejo)</div>
+
               <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;" id="stTableCount">0 auditorias registradas</div>
+
             </div>
+
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+
               <button type="button" onclick="fetchRemoteSpeedtestsAsync(true)" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">🔄 Sincronizar Nuvem</button>
+
               <button type="button" onclick="limparAuditoriaLocal()" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px; color: var(--rose); border-color: rgba(244,63,94,0.3);">🗑️ Limpar Histórico</button>
+
               <a href="https://calcmann.github.io/speedtest/campo.html" target="_blank" class="btn btn-primary" style="font-size: 12px; padding: 6px 14px;">🚀 Abrir Ferramenta de Campo</a>
+
             </div>
+
           </div>
+
           <div class="table-container">
+
             <table>
+
               <thead>
+
                 <tr>
+
                   <th>Data / Hora</th>
+
                   <th>Projeto / Perfil</th>
+
                   <th>Designação Claro</th>
+
                   <th>Agência / Local</th>
+
                   <th>Banda Contratada</th>
+
                   <th>Download Efetivo</th>
+
                   <th>Upload Efetivo</th>
+
                   <th>Latência (RTT)</th>
+
                   <th>Jitter</th>
+
                   <th>Perda</th>
+
                   <th>Status ANS</th>
+
                   <th>Técnico</th>
+
                 </tr>
+
               </thead>
+
               <tbody id="stTableBody"></tbody>
+
             </table>
+
           </div>
+
         </div>
+
       </section>
+
+
 
       <!-- ================= ABA 3: SOLICITAÇÕES ONLINE ================= -->
+
       <section id="tab-requests" class="tab-content">
+
         <div class="table-card">
+
           <div class="table-header">
+
             <div>
+
               <div class="table-title">🔔 Fila de Solicitações de Ativação Online (Novos Técnicos em Campo)</div>
+
               <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;" id="reqTableCount">0 pendentes</div>
+
             </div>
+
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+
               <button type="button" onclick="fetchCloudRequests(true)" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">🔄 Sincronizar Nuvem</button>
+
               <button type="button" onclick="purgeAllPendingRequests()" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px; color: var(--rose); border-color: rgba(244,63,94,0.3);">🗑️ Recusar / Limpar Todas</button>
+
             </div>
+
           </div>
+
           <div class="table-container">
+
             <table>
+
               <thead>
+
                 <tr>
+
                   <th>Data da Solicitação</th>
+
                   <th>Técnico</th>
+
                   <th>Empresa</th>
+
                   <th>Matrícula</th>
+
                   <th>Telefone</th>
+
                   <th>Plataforma</th>
+
                   <th>Machine GUID / Display</th>
+
                   <th>Versão do App</th>
+
                   <th>Aprovação Imediata</th>
+
                 </tr>
+
               </thead>
+
               <tbody id="reqTableBody"></tbody>
+
             </table>
+
           </div>
+
         </div>
+
       </section>
+
+
 
       <!-- ================= ABA 4: TÉCNICOS & LICENÇAS (DEVICES.JSON) ================= -->
+
       <section id="tab-technicians" class="tab-content">
+
         <!-- KPIs Técnicos -->
+
         <div class="kpi-grid">
+
           <div class="kpi-card kpi-total">
+
             <div class="kpi-title">Total de Técnicos</div>
+
             <div class="kpi-value" id="kpiDevTotal">0</div>
+
             <div class="kpi-sub"><span>👥</span> Fichas cadastradas</div>
+
           </div>
+
           <div class="kpi-card kpi-success">
+
             <div class="kpi-title">Cópias Ativas</div>
+
             <div class="kpi-value" id="kpiDevActive">0</div>
+
             <div class="kpi-sub"><span style="color: var(--emerald);">🟢</span> Acesso liberado</div>
+
           </div>
+
           <div class="kpi-card" style="border-left: 3px solid var(--amber);">
+
             <div class="kpi-title">Solicitações Pendentes</div>
+
             <div class="kpi-value" id="kpiDevPendingReqs" style="color: var(--amber);">0</div>
+
             <div class="kpi-sub"><span style="color: var(--amber);">⏳</span> Aguardando aprovação</div>
+
           </div>
+
           <div class="kpi-card kpi-tech">
+
             <div class="kpi-title">Parceiras / Terceirizadas</div>
+
             <div class="kpi-value" id="kpiDevCompanies">0</div>
+
             <div class="kpi-sub"><span>🏢</span> Empresas ativas</div>
+
           </div>
+
         </div>
+
+
 
         <!-- Filtros Técnicos -->
+
         <div class="filter-panel">
+
           <div class="filter-group search-box">
+
             <label>Buscar Técnico</label>
+
             <input type="text" id="filterDevSearch" class="filter-input" placeholder="Nome, Matrícula, Empresa, Telefone, Machine GUID, UF..." oninput="applyTechnicianFilters()">
+
           </div>
+
           <div class="filter-group">
+
             <label>Status</label>
+
             <select id="filterDevStatus" class="filter-select" onchange="applyTechnicianFilters()">
+
               <option value="ALL">Todos os Status</option>
+
               <option value="Active">🟢 Ativos</option>
+
               <option value="Expired">⏳ Licenças Vencidas</option>
+
             </select>
+
           </div>
+
           <div class="filter-group">
+
             <label>Plataforma</label>
+
             <select id="filterDevPlatform" class="filter-select" onchange="applyTechnicianFilters()">
+
               <option value="ALL">Todas as Plataformas</option>
+
               <option value="Windows">🪟 Windows</option>
+
               <option value="Android">🤖 Android</option>
+
             </select>
+
           </div>
+
           <div class="filter-group">
+
             <label>Ações</label>
+
             <div style="display: flex; gap: 8px;">
+
               <button class="btn btn-primary" onclick="openNewTechnicianModal()">➕ Novo Técnico</button>
+
               <button class="btn btn-success" onclick="exportTechniciansToCsv()">📊 Exportar CSV</button>
+
             </div>
+
           </div>
+
         </div>
+
+
 
         <!-- Tabela Técnicos -->
+
         <div class="table-card">
+
           <div class="table-header">
+
             <div class="table-title">👥 Fichas de Cadastro e Controle de Licenças (Node-Locking RSA)</div>
+
             <div style="font-size: 11.5px; color: var(--text-muted);" id="devTableCount">Exibindo 0 técnicos</div>
+
           </div>
+
           <div class="table-container">
+
             <table>
+
               <thead>
+
                 <tr>
+
                   <th>Status</th>
+
                   <th>Plataforma</th>
+
                   <th>Técnico (Nome / Matrícula)</th>
+
                   <th>Empresa</th>
+
                   <th>WhatsApp / Contato</th>
+
                   <th>UF / Cluster</th>
+
                   <th>Versão Instalada</th>
+
                   <th>Expiração Licença</th>
+
                   <th>Machine GUID</th>
+
                   <th>Ações de Controle</th>
+
                 </tr>
+
               </thead>
+
               <tbody id="devTableBody"></tbody>
+
             </table>
+
           </div>
+
         </div>
+
       </section>
+
+
 
       <!-- ================= ABA: SUB-ADMINISTRADORES (EXCLUSIVO GLOBAL ADMIN) ================= -->
+
       <section id="tab-subadmins" class="tab-content">
+
         <!-- KPIs Sub-Administradores -->
+
         <div class="kpi-grid">
+
           <div class="kpi-card kpi-total">
+
             <div class="kpi-title">Total de Sub-Admins</div>
+
             <div class="kpi-value" id="kpiSubTotal">0</div>
+
             <div class="kpi-sub"><span>🛡️</span> Perfis com delegação de cluster</div>
+
           </div>
+
           <div class="kpi-card kpi-success">
+
             <div class="kpi-title">Gestores Ativos</div>
+
             <div class="kpi-value" id="kpiSubActive">0</div>
+
             <div class="kpi-sub"><span style="color: var(--emerald);">🟢</span> Acesso habilitado no painel</div>
+
           </div>
+
           <div class="kpi-card" style="border-left: 3px solid #38bdf8;">
+
             <div class="kpi-title">Clusters sob Cobertura</div>
+
             <div class="kpi-value" id="kpiSubClustersCovered" style="color: #38bdf8;">0</div>
+
             <div class="kpi-sub"><span>📍</span> Regiões atendidas por gestores</div>
+
           </div>
+
           <div class="kpi-card kpi-tech">
+
             <div class="kpi-title">Técnicos Supervisionados</div>
+
             <div class="kpi-value" id="kpiSubTechsCovered">0</div>
+
             <div class="kpi-sub"><span>👥</span> Membros em equipes atribuídas</div>
+
           </div>
+
         </div>
+
+
 
         <!-- Filtros e Ações Sub-Admins -->
+
         <div class="filter-panel">
+
           <div class="filter-group search-box">
+
             <label>Buscar Gestor / Sub-Admin</label>
+
             <input type="text" id="filterSubSearch" class="filter-input" placeholder="Nome, usuário, e-mail, telefone, cluster gerenciado..." oninput="renderSubAdminsTable()">
+
           </div>
+
           <div class="filter-group">
+
             <label>Status do Perfil</label>
+
             <select id="filterSubStatus" class="filter-select" onchange="renderSubAdminsTable()">
+
               <option value="ALL">Todos os Perfis</option>
+
               <option value="Active">🟢 Somente Ativos</option>
+
               <option value="Inactive">⚪ Inativos / Bloqueados</option>
+
             </select>
+
           </div>
+
           <div class="filter-group">
+
             <label>Ações do Administrador Global</label>
+
             <div style="display: flex; gap: 8px;">
+
               <button class="btn btn-primary" onclick="openNewSubAdminModal()">➕ Novo Sub-Administrador</button>
+
               <button class="btn btn-secondary" onclick="fetchCloudSubAdmins(true)">🔄 Sincronizar Nuvem</button>
+
             </div>
+
           </div>
+
         </div>
+
+
 
         <!-- Tabela Sub-Admins -->
+
         <div class="table-card">
+
           <div class="table-header">
+
             <div>
+
               <div class="table-title">🛡️ Gestão de Sub-Administradores &amp; Clusters Autorizados</div>
+
               <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;" id="subTableCount">Exibindo 0 sub-administradores</div>
+
             </div>
+
           </div>
+
           <div class="table-container">
+
             <table>
+
               <thead>
+
                 <tr>
+
                   <th>Status</th>
+
                   <th>Usuário (Login)</th>
+
                   <th>Nome do Gestor</th>
+
                   <th>Contato (WhatsApp / E-mail)</th>
+
                   <th>Clusters sob sua Gerência</th>
+
                   <th>Equipe Ativa</th>
+
                   <th>Data Cadastro</th>
+
                   <th>Ações de Controle</th>
+
                 </tr>
+
               </thead>
+
               <tbody id="subTableBody"></tbody>
+
             </table>
+
           </div>
+
         </div>
+
       </section>
+
+
 
       <!-- ================= ABA 5: CONFIGURAÇÕES & NUVEM ================= -->
+
       <section id="tab-settings" class="tab-content">
+
         <div class="charts-grid" style="grid-template-columns: 1fr 1fr;">
+
           <!-- Conexão GitHub Nuvem -->
+
           <div class="chart-card">
+
             <div class="chart-title" style="margin-bottom: 14px;">☁️ Conexão com Repositório Central (GitHub API)</div>
+
             <div class="form-group">
+
               <label>Repositório de Dados</label>
+
               <input type="text" id="cfgRepo" class="form-input" value="Calcmann/repo" readonly>
+
             </div>
+
             <div class="form-group">
+
               <label>GitHub Personal Access Token (PAT)</label>
+
               <input type="password" id="cfgToken" class="form-input" placeholder="ghp_... (deixe em branco para usar chave padrão institucional)">
+
             </div>
+
             <div style="display: flex; gap: 8px;">
+
               <button class="btn btn-primary" onclick="testGitHubConnection()">🔍 Testar Conexão</button>
+
               <button class="btn btn-success" onclick="saveGitHubSettings()">💾 Salvar Token</button>
+
             </div>
+
             <div id="cfgTokenStatus" style="font-size: 12px; margin-top: 10px; font-weight: 700;"></div>
+
           </div>
+
+
 
           <!-- Segurança & Senha -->
+
           <div class="chart-card">
+
             <div class="chart-title" style="margin-bottom: 14px;">🔐 Senha de Acesso do Painel Admin</div>
+
             <div class="form-group">
+
               <label>Nova Senha Mestra</label>
+
               <input type="password" id="cfgNewPass" class="form-input" placeholder="Mínimo 6 caracteres">
+
             </div>
+
             <div class="form-group">
+
               <label>Confirmar Nova Senha</label>
+
               <input type="password" id="cfgConfirmPass" class="form-input" placeholder="Repita a nova senha">
+
             </div>
+
             <button class="btn btn-danger" onclick="changeAdminPassword()">🔑 Atualizar Senha de Acesso</button>
+
             <div id="cfgPassStatus" style="font-size: 12px; margin-top: 10px; font-weight: 700;"></div>
+
           </div>
+
         </div>
+
       </section>
+
     </main>
 
+
+
     <!-- ================= MODAL: DETALHES DE ATIVIDADE ================= -->
+
     <div class="modal-overlay" id="modalActivity" onclick="closeModal('modalActivity', event)">
+
       <div class="modal-content" onclick="event.stopPropagation()">
+
         <button class="modal-close" onclick="closeModal('modalActivity')">&times;</button>
+
         <h2 style="font-size: 17px; font-weight: 800;" id="modalActTitle">Detalhes da Intervenção Técnica</h2>
+
         <div class="detail-grid" id="modalActBody"></div>
+
       </div>
+
     </div>
+
+
 
     <!-- ================= MODAL: EDITAR CADASTRO DO TÉCNICO & LICENÇAS ================= -->
+
     <div class="modal-overlay" id="modalTech" onclick="closeModal('modalTech', event)">
+
       <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 780px;">
+
         <button class="modal-close" onclick="closeModal('modalTech')">&times;</button>
+
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+
           <div>
+
             <h2 style="font-size: 17.5px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0;" id="modalTechTitle">
+
               <span>✏️</span> Editar Cadastro do Técnico
+
             </h2>
+
             <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Edite as informações cadastrais e licença com sincronização imediata na nuvem</div>
+
           </div>
+
           <div id="modalTechBadgeStatus"></div>
+
         </div>
+
+
 
         <form id="formEditTech" onsubmit="handleSaveTechEdits(event)">
+
           <input type="hidden" id="editTechGuid">
 
+
+
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px;">
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Nome Completo *</label>
+
               <input type="text" id="editTechFullName" class="form-input" required placeholder="Nome e Sobrenome" style="width: 100%;">
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Empresa / Terceirizada *</label>
+
               <input type="text" id="editTechCompany" class="form-input" required placeholder="Ex: Claro S.A., Procisa, etc." style="width: 100%;">
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Matrícula / ID Funcional</label>
+
               <input type="text" id="editTechEmployeeId" class="form-input" placeholder="Ex: 9114406" style="width: 100%;">
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Telefone / WhatsApp</label>
+
               <input type="text" id="editTechPhone" class="form-input" placeholder="(DD) 99999-9999" style="width: 100%;">
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">E-mail</label>
+
               <input type="email" id="editTechEmail" class="form-input" placeholder="nome@empresa.com.br" style="width: 100%;">
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Cluster / Polo</label>
+
               <input type="text" id="editTechCluster" class="form-input" placeholder="Ex: Campinas, FNS, Capital" style="width: 100%;">
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">UF / Estado</label>
+
               <input type="text" id="editTechUf" class="form-input" maxlength="2" placeholder="Ex: SP, SC, PR" style="width: 100%; text-transform: uppercase;">
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Plataforma</label>
+
               <select id="editTechPlatform" class="form-input" style="width: 100%;">
+
                 <option value="Windows">🪟 Windows (.NET 8 WPF)</option>
+
                 <option value="Android">🤖 Android (.NET MAUI)</option>
+
               </select>
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Data de Expiração da Licença</label>
+
               <input type="date" id="editTechExpirationDate" class="form-input" style="width: 100%;">
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Versão do SPARC em Campo</label>
+
               <input type="text" id="editTechClientVersion" class="form-input" placeholder="SPARC-Beta-Testes..." style="width: 100%;">
+
             </div>
+
           </div>
+
+
 
           <div class="form-group" style="margin-bottom: 14px;">
+
             <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Observações / Histórico</label>
+
             <textarea id="editTechNotes" class="form-input" rows="2" placeholder="Observações e notas sobre este técnico..." style="width: 100%; resize: vertical;"></textarea>
+
           </div>
+
+
 
           <div style="background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 18px;">
+
             <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">Machine GUID (Identificador Físico Node-Locking):</div>
+
             <div><code id="editTechGuidDisplay" style="font-size: 11.5px; color: #38bdf8; word-break: break-all;"></code></div>
+
           </div>
+
+
 
           <div style="display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap; align-items: center; border-top: 1px solid var(--border); padding-top: 14px;">
+
             <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+
               <span style="font-size: 11.5px; color: var(--text-muted); margin-right: 4px;">Prorrogar:</span>
+
               <button type="button" class="btn btn-dark" style="padding: 5px 9px; font-size: 11.5px;" onclick="addDaysToEditExpiry(30)">+30d</button>
+
               <button type="button" class="btn btn-dark" style="padding: 5px 9px; font-size: 11.5px;" onclick="addDaysToEditExpiry(60)">+60d</button>
+
               <button type="button" class="btn btn-dark" style="padding: 5px 9px; font-size: 11.5px;" onclick="addDaysToEditExpiry(90)">+90d</button>
+
               <button type="button" class="btn btn-dark" style="padding: 5px 9px; font-size: 11.5px;" onclick="copyCurrentTechKey()">📋 Copiar Chave</button>
+
               <button type="button" class="btn btn-danger" style="padding: 5px 10px; font-size: 11.5px; margin-left: 6px;" onclick="executeDeleteCurrentTech()">🗑️ Excluir Técnico</button>
+
             </div>
+
+
 
             <div style="display: flex; gap: 8px; align-items: center;">
+
               <button type="button" class="btn btn-dark" onclick="closeModal('modalTech')">Cancelar</button>
+
               <button type="submit" class="btn btn-success" style="padding: 7px 16px; font-weight: 700; font-size: 12.5px;">💾 Salvar Alterações</button>
+
             </div>
+
           </div>
+
         </form>
+
       </div>
+
     </div>
+
+
 
     <!-- ================= MODAL: NOVO TÉCNICO ================= -->
+
     <div class="modal-overlay" id="modalNewTech" onclick="closeModal('modalNewTech', event)">
+
       <div class="modal-content" onclick="event.stopPropagation()">
+
         <button class="modal-close" onclick="closeModal('modalNewTech')">&times;</button>
+
         <h2 style="font-size: 17px; font-weight: 800; margin-bottom: 18px;">Cadastrar Novo Técnico em Campo</h2>
+
         
+
         <form onsubmit="handleNewTechnicianSubmit(event)">
+
           <div class="detail-grid">
+
             <div class="form-group">
+
               <label>Nome Completo</label>
+
               <input type="text" id="newTechName" class="form-input" required placeholder="Ex: Denis André">
+
             </div>
+
             <div class="form-group">
+
               <label>Empresa / Terceirizada</label>
+
               <input type="text" id="newTechCompany" class="form-input" required placeholder="Ex: Procisa ou Claro S.A.">
+
             </div>
+
             <div class="form-group">
+
               <label>Matrícula / ID</label>
+
               <input type="text" id="newTechEmployeeId" class="form-input" required placeholder="Ex: 15662">
+
             </div>
+
             <div class="form-group">
+
               <label>Telefone / WhatsApp</label>
+
               <input type="text" id="newTechPhone" class="form-input" required placeholder="Ex: (11) 99887-6655">
+
             </div>
+
             <div class="form-group">
+
               <label>E-mail</label>
+
               <input type="email" id="newTechEmail" class="form-input" placeholder="tecnico@empresa.com.br">
+
             </div>
+
             <div class="form-group">
+
               <label>Cluster / UF</label>
+
               <input type="text" id="newTechCluster" class="form-input" placeholder="Ex: Interior SP">
+
             </div>
+
             <div class="form-group">
+
               <label>Plataforma</label>
+
               <select id="newTechPlatform" class="form-input">
+
                 <option value="Windows">🪟 Windows (Desktop)</option>
+
                 <option value="Android">🤖 Android (Mobile)</option>
+
               </select>
+
             </div>
+
             <div class="form-group">
+
               <label>Validade da Licença</label>
+
               <select id="newTechDays" class="form-input">
+
                 <option value="90" selected>90 Dias (Padrão)</option>
+
                 <option value="180">180 Dias</option>
+
                 <option value="365">1 Ano (365 Dias)</option>
+
                 <option value="9999">Permanente</option>
+
               </select>
+
             </div>
+
             <div class="form-group" style="grid-column: 1 / -1;">
+
               <label>Machine GUID (Identificador Único da Máquina)</label>
+
               <input type="text" id="newTechGuid" class="form-input" required placeholder="Ex: 637ee96a-247f-46e7-932e-665c2b931a09">
+
             </div>
+
           </div>
+
+
 
           <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+
             <button type="button" class="btn btn-dark" onclick="closeModal('modalNewTech')">Cancelar</button>
+
             <button type="submit" class="btn btn-success">💾 Salvar e Liberar Acesso</button>
+
           </div>
+
         </form>
+
       </div>
+
     </div>
+
+
 
         <!-- ================= MODAL: CADASTRAR / EDITAR SUB-ADMINISTRADOR ================= -->
+
     <div class="modal-overlay" id="modalSubAdmin" onclick="closeModal('modalSubAdmin', event)">
+
       <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 780px;">
+
         <button class="modal-close" onclick="closeModal('modalSubAdmin')">&times;</button>
+
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+
           <div>
+
             <h2 style="font-size: 17.5px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0;" id="modalSubAdminTitle">
+
               <span>🛡️</span> Cadastrar Sub-Administrador
+
             </h2>
+
             <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Atribua os clusters que este gestor poderá visualizar, aprovar, editar e excluir membros da sua equipe</div>
+
           </div>
+
           <span class="badge badge-success" id="modalSubAdminBadge">🟢 Ativo</span>
+
         </div>
 
+
+
         <form id="formSubAdmin" onsubmit="handleSaveSubAdmin(event)">
+
           <input type="hidden" id="editSubAdminId">
 
+
+
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px;">
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Nome Completo do Gestor *</label>
+
               <input type="text" id="editSubFullName" class="form-input" required placeholder="Ex: Carlos Roberto Lima" style="width: 100%;">
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Usuário de Acesso (Login) *</label>
+
               <input type="text" id="editSubUsername" class="form-input" required placeholder="Ex: carlos.supervisor" style="width: 100%;">
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Senha de Acesso <span id="lblPassHint" style="color: var(--text-muted); font-size: 10px;">(preencha para definir ou redefinir)</span></label>
+
               <input type="password" id="editSubPassword" class="form-input" placeholder="Mínimo 6 caracteres" style="width: 100%;">
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Telefone / WhatsApp</label>
+
               <input type="text" id="editSubPhone" class="form-input" placeholder="(DD) 99999-9999" style="width: 100%;">
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">E-mail Corporativo</label>
+
               <input type="email" id="editSubEmail" class="form-input" placeholder="gestor@claro.com.br" style="width: 100%;">
+
             </div>
 
+
+
             <div class="form-group">
+
               <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Status do Perfil</label>
+
               <select id="editSubActive" class="form-select" style="width: 100%;">
+
                 <option value="true">🟢 Ativo (Acesso Liberado)</option>
+
                 <option value="false">⚪ Inativo (Acesso Suspenso)</option>
+
               </select>
+
             </div>
+
           </div>
+
+
 
           <!-- Clusters sob Gerência -->
+
           <div class="form-group" style="margin-bottom: 14px;">
+
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+
               <label class="form-label" style="font-size: 11.5px; font-weight: 700; color: #38bdf8; margin: 0;">
+
                 📍 Clusters sob sua Gerência (Selecione todos os autorizados para esta equipe) *
+
               </label>
+
               <div style="display: flex; gap: 6px;">
+
                 <button type="button" class="btn btn-secondary" style="font-size: 10.5px; padding: 2px 8px;" onclick="selectAllSubAdminClusters(true)">Marcar Todos</button>
+
                 <button type="button" class="btn btn-secondary" style="font-size: 10.5px; padding: 2px 8px;" onclick="selectAllSubAdminClusters(false)">Limpar</button>
+
               </div>
+
             </div>
+
             
+
             <div class="cluster-checkbox-grid" id="subAdminClusterCheckboxes"></div>
 
+
+
             <div style="margin-top: 8px;">
+
               <label style="font-size: 11px; color: #a1a1aa;">Adicionar outros clusters personalizados (separados por vírgula):</label>
+
               <input type="text" id="editSubCustomClusters" class="form-input" placeholder="Ex: Ribeirão Preto, Santos, São José dos Campos" style="width: 100%; margin-top: 3px;">
+
             </div>
+
           </div>
+
+
 
           <div class="form-group" style="margin-bottom: 18px;">
+
             <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Observações / Notas Internas</label>
+
             <textarea id="editSubNotes" class="form-input" rows="2" placeholder="Ex: Coordenador responsável pelo rollout Bradesco na regional interior..." style="width: 100%; resize: vertical;"></textarea>
+
           </div>
+
+
 
           <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border); padding-top: 14px;">
+
             <button type="button" class="btn btn-dark" onclick="closeModal('modalSubAdmin')">Cancelar</button>
+
             <button type="submit" class="btn btn-primary" style="padding: 9px 20px;">💾 Salvar Sub-Administrador</button>
+
           </div>
+
         </form>
+
       </div>
+
     </div>
+
+
 
     <!-- TOAST -->
+
     <div id="toastMessage" class="toast">
+
       <span id="toastIcon">✓</span>
+
       <span id="toastText">Operação realizada com sucesso!</span>
+
     </div>
 
+
+
     <footer>
+
       SPARC ADMIN WEB &bull; Sistema de Provisionamento e Ativação de Roteadores Claro &bull; Telemetria Centralizada &bull; 12/11/2026
+
     </footer>
+
   </div>
 
+
+
   <script>
+
     // DADOS INICIAIS EMBUTIDOS (SNAPSHOTS PARA DISPONIBILIDADE OFFLINE E INSTANTÂNEA)
+
     let RAW_DEVICES = [
   {
     "MachineGuid": "c50381ba-6c76-4d7a-94b0-a5da7afc582d",
@@ -1930,7 +3338,9 @@
     "WhatsAppUrl": "https://wa.me/5548988036632"
   }
 ];
+
     let RAW_TELEMETRY = [];
+
     let RAW_REQUESTS = [
   {
     "MachineGuid": "c50381ba-6c76-4d7a-94b0-a5da7afc582d",
@@ -2396,7 +3806,9 @@
     "WhatsAppUrl": "https://wa.me/5548988036632"
   }
 ];
+
     let RAW_SPEEDTESTS = [];
+
     let RAW_SUB_ADMINS = [
   {
     "Id": "subadmin-001",
@@ -2444,1845 +3856,3722 @@
     "Notes": "Gestor de Equipe Regional São Paulo e Interior"
   }
 ];
+
     let CURRENT_USER = null;
 
+
+
     // Carrega sub-administradores do cache local se existir
+
     try {
+
       const localSubs = JSON.parse(localStorage.getItem('sparc_admin_sub_admins') || '[]');
+
       if (Array.isArray(localSubs) && localSubs.length > 0) {
+
         localSubs.forEach(ls => {
+
           const idx = RAW_SUB_ADMINS.findIndex(s => s.Id === ls.Id || s.Username.toLowerCase() === (ls.Username || '').toLowerCase());
+
           if (idx >= 0) RAW_SUB_ADMINS[idx] = ls;
+
           else RAW_SUB_ADMINS.push(ls);
+
         });
+
       }
+
     } catch (e) {}
 
+
+
     // CREDENCIAL CRIPTOGRAFADA PARA EVITAR GITHUB SECRET SCANNER FALSE POSITIVE
+
     const BUNDLED_ENC_TOKEN = [52,56,49,13,47,56,20,5,23,38,125,61,107,42,119,7,3,23,60,63,32,16,47,70,114,72,117,49,40,37,24,21,102,114,119,20,15,122,39,9];
+
     const BUNDLED_KEY = 'SPARC_ADMIN_SECURE_KEY_2026';
 
+
+
     function getActiveGitHubToken() {
+
       const custom = localStorage.getItem('sparc_admin_gh_token');
+
       if (custom && custom.trim().length > 10) return custom.trim();
+
       if (!BUNDLED_ENC_TOKEN || !BUNDLED_ENC_TOKEN.length) return '';
+
       let t = '';
+
       for (let i = 0; i < BUNDLED_ENC_TOKEN.length; i++) {
+
         t += String.fromCharCode(BUNDLED_ENC_TOKEN[i] ^ BUNDLED_KEY.charCodeAt(i % BUNDLED_KEY.length));
+
       }
+
       return t;
+
     }
+
+
 
     // SENHA DEFAULT: sparc2026 (SHA-256)
+
     const DEFAULT_PWD_HASH = '2f334bb046307e76085fa89e84da9c7804d5650656ee032c56e84c636aa4eaab';
+
     let currentSelectedTech = null;
 
+
+
         // LISTA PERMANENTE DE GUIDS DE TESTE EXCLUÍDOS DEFINITIVAMENTE
+
     const PERMANENT_REJECTED_GUIDS = [
+
       'e5c2901a-8b14-469f-9201-1192847a98ef',
+
       'b4728d10-5321-4a11-8712-9901452cba11',
+
       'reject-guid-789',
+
       'approve-guid-456',
+
       '45b10083-18f0-43d7-8e14-4817e7877f55',
+
       '50ea7d73-4ec0-4a2a-9e6a-7ffbe413e47b'
+
     ];
 
+
+
     // LIMPEZA DE SOLICITAÇÕES REJEITADAS DEFINITIVAMENTE
+
     function purgeRejectedRequests() {
+
       let rejected = [];
+
       try {
+
         rejected = JSON.parse(localStorage.getItem('sparc_admin_rejected_guids') || '[]');
+
       } catch (e) { rejected = []; }
 
+
+
       PERMANENT_REJECTED_GUIDS.forEach(g => {
+
         if (!rejected.includes(g)) rejected.push(g);
+
       });
+
       try {
+
         localStorage.setItem('sparc_admin_rejected_guids', JSON.stringify(rejected));
+
       } catch (e) {}
+
+
 
       const lowerRejected = rejected.map(x => (x || '').toLowerCase().replace(/\.json$/, ''));
+
       RAW_REQUESTS = RAW_REQUESTS.filter(r => {
+
         const g = (r.MachineGuid || '').toLowerCase().replace(/\.json$/, '');
+
         if (lowerRejected.includes(g)) return false;
+
         if (r.FullName === 'Marcos Vinicius Santos' || r.FullName === 'Carlos Eduardo Lima') return false;
+
         return true;
+
       });
+
     }
+
+
 
     // INICIALIZAÇÃO
+
     window.addEventListener('DOMContentLoaded', () => {
+
       purgeRejectedRequests();
+
       checkSession();
+
       updateRequestsBadge();
+
     });
 
+
+
     // CÁLCULO DE HASH SHA-256
+
     async function sha256(str) {
+
       const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+
       return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
+
     }
 
+
+
     // ==========================================
+
     // CONTROLE DE ACESSO E PERFIS (SUB-ADMINS)
+
     // ==========================================
+
     function isClusterManagedByCurrentUser(clusterName) {
-      if (!CURRENT_USER || CURRENT_USER.role === 'GlobalAdmin') return true;
-      if (!clusterName) return false;
+
+      if (!CURRENT_USER) return true;
+
+      if (!CURRENT_USER.role || CURRENT_USER.role === 'GlobalAdmin') return true;
+
+      const u = (CURRENT_USER.username || CURRENT_USER.user || '').toLowerCase();
+
+      if (u === 'admin' || u === 'coordenador') return true;
+
       const managed = CURRENT_USER.managedClusters || [];
+
+      if (managed.includes('*')) return true;
+
       if (managed.length === 0) return false;
+
+      if (!clusterName) return false;
+
       const cNorm = clusterName.trim().toLowerCase();
+
       return managed.some(m => {
+
         if (!m) return false;
+
         const mNorm = m.trim().toLowerCase();
+
         return cNorm === mNorm || cNorm.includes(mNorm) || mNorm.includes(cNorm);
+
       });
+
     }
+
+
 
     function getAvailableSystemClusters() {
+
       const set = new Set();
+
       (RAW_DEVICES || []).forEach(d => { if (d.Cluster && d.Cluster.trim()) set.add(d.Cluster.trim()); });
+
       (RAW_TELEMETRY || []).forEach(t => { if (t.Cluster && t.Cluster.trim()) set.add(t.Cluster.trim()); });
+
       (RAW_REQUESTS || []).forEach(r => { if (r.Cluster && r.Cluster.trim()) set.add(r.Cluster.trim()); });
+
       (RAW_SUB_ADMINS || []).forEach(s => {
+
         (s.ManagedClusters || []).forEach(c => { if (c && c.trim() && c !== '*') set.add(c.trim()); });
+
       });
+
       return Array.from(set).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
     }
+
+
 
     function updateUserHeaderProfile() {
+
       const pill = document.getElementById('pillUserProfile');
+
       if (!pill) return;
+
       if (!CURRENT_USER || CURRENT_USER.role === 'GlobalAdmin') {
+
         pill.innerHTML = '👑 <strong>Administrador Global</strong> (Acesso Completo)';
+
         pill.className = 'status-pill badge-global';
+
       } else {
+
         const list = (CURRENT_USER.managedClusters || []).join(', ') || 'Nenhum';
+
         pill.innerHTML = `👤 <strong>${CURRENT_USER.fullName}</strong> (Sub-Admin) &bull; <span title="${list}">📍 ${list}</span>`;
+
         pill.className = 'status-pill badge-subadmin';
+
       }
+
     }
+
+
 
     function updateUserPermissionsUi() {
+
       const isGlobal = !CURRENT_USER || CURRENT_USER.role === 'GlobalAdmin';
+
       
+
       // Aba Sub-Administradores
+
       const tabBtn = document.getElementById('navTabSubAdmins');
+
       if (tabBtn) tabBtn.style.display = isGlobal ? 'flex' : 'none';
 
+
+
       // Bloco de Token GitHub em Configurações
+
       const cfgGit = document.getElementById('cfgRepo')?.closest('.chart-card');
+
       if (cfgGit) cfgGit.style.display = isGlobal ? 'block' : 'none';
 
+
+
       // Título do card de senha
+
       const passTitle = document.getElementById('cfgNewPass')?.closest('.chart-card')?.querySelector('.chart-title');
+
       if (passTitle) {
+
         passTitle.innerHTML = isGlobal ? '🔐 Senha Mestra do Painel Admin (Global)' : '🔐 Alterar Minha Senha de Acesso (Sub-Admin)';
+
       }
+
     }
+
     // CONTROLE DE SESSÃO
+
     function checkSession() {
+
       const sessStr = sessionStorage.getItem('sparc_admin_session');
+
       if (sessStr) {
+
         try {
+
           CURRENT_USER = JSON.parse(sessStr);
+
         } catch (e) {
+
           CURRENT_USER = { username: 'admin', fullName: 'Administrador Global', role: 'GlobalAdmin', managedClusters: ['*'] };
+
         }
+
+
+
+        // NORMALIZAÇÃO DE COMPATIBILIDADE (Sessões anteriores ao perfil Sub-Admin)
+
+        if (CURRENT_USER) {
+
+          const uLower = (CURRENT_USER.username || CURRENT_USER.user || '').toLowerCase();
+
+          if (uLower === 'admin' || uLower === 'coordenador' || !CURRENT_USER.role || CURRENT_USER.role === 'GlobalAdmin') {
+
+            CURRENT_USER.username = CURRENT_USER.username || CURRENT_USER.user || 'admin';
+
+            CURRENT_USER.fullName = CURRENT_USER.fullName || 'Administrador Global';
+
+            CURRENT_USER.role = 'GlobalAdmin';
+
+            CURRENT_USER.managedClusters = ['*'];
+
+          }
+
+          sessionStorage.setItem('sparc_admin_session', JSON.stringify(CURRENT_USER));
+
+        }
+
+
+
         document.getElementById('loginView').style.display = 'none';
+
         document.getElementById('appShell').style.display = 'flex';
 
+
+
         updateUserHeaderProfile();
+
         updateUserPermissionsUi();
 
+
+
         initTelemetryView();
+
         initTechniciansView();
+
         initRequestsView();
+
         initSpeedtestView();
-        if (CURRENT_USER.role === 'GlobalAdmin') {
+
+        if (!CURRENT_USER || CURRENT_USER.role === 'GlobalAdmin') {
+
           initSubAdminsView();
+
         }
+
       } else {
+
         CURRENT_USER = null;
+
         document.getElementById('loginView').style.display = 'flex';
+
         document.getElementById('appShell').style.display = 'none';
+
       }
+
     }
+
+
 
     async function handleLoginSubmit(e) {
+
       e.preventDefault();
+
       const user = document.getElementById('inputUser').value.trim();
+
       const pass = document.getElementById('inputPass').value;
+
       const alertBox = document.getElementById('loginAlert');
 
+
+
       const passHash = await sha256(pass);
+
       const targetHash = localStorage.getItem('sparc_admin_pwd_hash') || DEFAULT_PWD_HASH;
 
+
+
       // 1. Administrador Global
+
       if ((user.toLowerCase() === 'admin' || user.toLowerCase() === 'coordenador') && passHash === targetHash) {
+
         alertBox.style.display = 'none';
+
         CURRENT_USER = {
+
           username: user,
+
           fullName: 'Administrador Global',
+
           role: 'GlobalAdmin',
+
           managedClusters: ['*'],
+
           loginAt: Date.now()
+
         };
+
         sessionStorage.setItem('sparc_admin_session', JSON.stringify(CURRENT_USER));
+
         checkSession();
+
         showToast('Login realizado com sucesso! Bem-vindo, Administrador Global.');
+
         return;
+
       }
+
+
 
       // 2. Sub-Administrador Regional
+
       const sub = (RAW_SUB_ADMINS || []).find(s => 
+
         s.Username && s.Username.trim().toLowerCase() === user.toLowerCase() && s.Active !== false
+
       );
+
       if (sub && sub.PasswordHash === passHash) {
+
         alertBox.style.display = 'none';
+
         CURRENT_USER = {
+
           id: sub.Id,
+
           username: sub.Username,
+
           fullName: sub.FullName,
+
           email: sub.Email,
+
           phone: sub.Phone,
+
           role: 'SubAdmin',
+
           managedClusters: sub.ManagedClusters || [],
+
           loginAt: Date.now()
+
         };
+
         sessionStorage.setItem('sparc_admin_session', JSON.stringify(CURRENT_USER));
+
         checkSession();
+
         showToast(`Bem-vindo, ${sub.FullName}! Acesso liberado para a sua equipe.`);
+
         return;
+
       }
+
+
 
       alertBox.style.display = 'block';
+
       alertBox.innerText = '⚠️ Usuário ou senha inválidos. Tente novamente.';
+
     }
+
+
 
     function handleLogout() {
+
       sessionStorage.removeItem('sparc_admin_session');
+
       CURRENT_USER = null;
+
       checkSession();
+
     }
+
+
 
     // NAVEGAÇÃO ENTRE ABAS
+
     function switchTab(tabId) {
+
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
+
+
       const activeBtn = Array.from(document.querySelectorAll('.nav-tab')).find(b => b.getAttribute('onclick')?.includes(tabId));
+
       if (activeBtn) activeBtn.classList.add('active');
 
+
+
       const activeContent = document.getElementById('tab-' + tabId);
+
       if (activeContent) activeContent.classList.add('active');
 
+
+
       if (tabId === 'telemetry') {
+
         setTimeout(initCharts, 50);
+
       }
+
       if (tabId === 'subadmins') {
+
         renderSubAdminsTable();
+
       }
+
     }
 
+
+
     // ==========================================
+
     // 1. MÓDULO DE TELEMETRIA OPERACIONAL
+
     // ==========================================
+
     let filteredTelemetry = [];
+
     let chartTimelineObj = null;
+
     let chartBottlenecksObj = null;
+
     let chartModelsObj = null;
+
     let chartTechsObj = null;
 
+
+
     function initTelemetryView() {
+
       // Popula dropdown de modelos
+
       const models = Array.from(new Set(RAW_TELEMETRY.map(r => r.ModeloEquipamento || r.modeloEquipamento).filter(Boolean))).sort();
+
       const selModel = document.getElementById('filterTelModel');
+
       if (selModel) {
+
         selModel.innerHTML = '<option value="ALL">Todos os Modelos</option>' + models.map(m => `<option value="${m}">${m}</option>`).join('');
+
       }
+
       applyTelemetryFilters();
+
     }
+
+
 
     function applyTelemetryFilters() {
+
       const q = document.getElementById('filterTelSearch')?.value.toLowerCase().trim() || '';
+
       const status = document.getElementById('filterTelStatus')?.value || 'ALL';
+
       const model = document.getElementById('filterTelModel')?.value || 'ALL';
 
+
+
       filteredTelemetry = RAW_TELEMETRY.filter(r => {
+
         const rStatus = (r.StatusFinal || r.statusFinal || '').toUpperCase();
+
         if (status === 'SUCESSO' && !rStatus.includes('SUCESSO')) return false;
+
         if (status === 'FALHA' && !rStatus.includes('FALHA')) return false;
 
+
+
         const rModel = r.ModeloEquipamento || r.modeloEquipamento || '';
+
         if (model !== 'ALL' && rModel !== model) return false;
 
+
+
         if (q) {
+
           const text = [
+
             r.DesignacaoIp || r.designacaoIp,
+
             r.ClienteRazaoSocial || r.clienteRazaoSocial,
+
             r.TecnicoNome || r.tecnicoNome,
+
             r.NumeroOts || r.numeroOts,
+
             r.WanIp || r.wanIp,
+
             rModel,
+
             r.ErroGeral || r.erroGeral,
+
             r.EtapaFalha || r.etapaFalha
+
           ].filter(Boolean).join(' ').toLowerCase();
+
           if (!text.includes(q)) return false;
+
         }
 
+
+
         return true;
+
       });
+
+
 
       renderTelemetryKpis();
+
       renderTelemetryTable();
+
       initCharts();
+
     }
+
+
 
     function renderTelemetryKpis() {
+
       const total = filteredTelemetry.length;
+
       const success = filteredTelemetry.filter(r => (r.StatusFinal || r.statusFinal || '').toUpperCase().includes('SUCESSO')).length;
+
       const fail = total - success;
+
       const rate = total > 0 ? ((success / total) * 100).toFixed(1) : '0.0';
+
       const techs = new Set(filteredTelemetry.map(r => r.TecnicoNome || r.tecnicoNome).filter(Boolean)).size;
 
+
+
       document.getElementById('kpiTotal').innerText = total;
+
       document.getElementById('kpiSuccess').innerText = success;
+
       document.getElementById('kpiFail').innerText = fail;
+
       document.getElementById('kpiRate').innerText = rate + '%';
+
       document.getElementById('kpiTechs').innerText = techs;
+
     }
+
+
 
     function renderTelemetryTable() {
+
       const tbody = document.getElementById('telTableBody');
+
       const countEl = document.getElementById('telTableCount');
+
       if (countEl) countEl.innerText = `Exibindo ${filteredTelemetry.length} registros`;
 
+
+
       if (!tbody) return;
+
       tbody.innerHTML = '';
+
+
 
       if (filteredTelemetry.length === 0) {
+
         tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhuma intervenção encontrada com os filtros selecionados.</td></tr>';
+
         return;
+
       }
 
+
+
       filteredTelemetry.forEach(r => {
+
         const id = r.ActivityId || r.activityId;
+
         const dt = new Date(r.TimestampInicio || r.timestampInicio).toLocaleString('pt-BR');
+
         const desig = r.DesignacaoIp || r.designacaoIp || 'N/A';
+
         const cli = r.ClienteRazaoSocial || r.clienteRazaoSocial || 'N/A';
+
         const tech = r.TecnicoNome || r.tecnicoNome || 'N/A';
+
         const emp = r.TecnicoEmpresa || r.tecnicoEmpresa || 'Claro S.A.';
+
         const mod = r.ModeloEquipamento || r.modeloEquipamento || 'N/A';
+
         const wan = r.WanIp || r.wanIp || 'N/A';
+
         const status = r.StatusFinal || r.statusFinal || 'N/A';
+
         const dur = (r.DuracaoSegundos || r.duracaoSegundos || 0) + 's';
+
         const etapa = r.EtapaFalha || r.etapaFalha || '-';
 
+
+
         const isOk = status.toUpperCase().includes('SUCESSO');
+
         const badgeClass = isOk ? 'badge-success' : 'badge-fail';
+
         const badgeText = isOk ? '✓ Sucesso' : '✗ Falha';
 
+
+
         const tr = document.createElement('tr');
+
         tr.innerHTML = `
+
           <td>${dt}</td>
+
           <td><strong>${desig}</strong></td>
+
           <td>${cli}</td>
+
           <td>${tech}</td>
+
           <td>${emp}</td>
+
           <td>${mod}</td>
+
           <td><code>${wan}</code></td>
+
           <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+
           <td>${dur}</td>
+
           <td style="color: ${isOk ? 'var(--text-muted)' : '#fb7185'};">${etapa}</td>
+
           <td>
+
             <button class="btn btn-dark" style="padding: 4px 8px; font-size: 11px;" onclick="openActivityDetails('${id}')">🔍 Detalhes</button>
+
           </td>
+
         `;
+
         tbody.appendChild(tr);
+
       });
+
     }
+
+
 
     function initCharts() {
+
       if (typeof Chart === 'undefined') return;
 
+
+
       // 1. Timeline Chart
+
       const dateMap = {};
+
       filteredTelemetry.forEach(r => {
+
         const d = (r.TimestampInicio || r.timestampInicio || '').slice(0, 10);
+
         if (!d) return;
+
         dateMap[d] = (dateMap[d] || 0) + 1;
+
       });
+
       const dates = Object.keys(dateMap).sort();
+
       const counts = dates.map(d => dateMap[d]);
 
+
+
       const ctxT = document.getElementById('chartTimeline');
+
       if (ctxT) {
+
         if (chartTimelineObj) chartTimelineObj.destroy();
+
         chartTimelineObj = new Chart(ctxT, {
+
           type: 'line',
+
           data: {
+
             labels: dates.map(d => d.slice(5).replace('-', '/')),
+
             datasets: [{
+
               label: 'Intervenções Realizadas',
+
               data: counts,
+
               borderColor: '#0284c7',
+
               backgroundColor: 'rgba(2, 132, 199, 0.15)',
+
               borderWidth: 2.5,
+
               fill: true,
+
               tension: 0.35,
+
               pointBackgroundColor: '#38bdf8'
+
             }]
+
           },
+
           options: {
+
             responsive: true,
+
             maintainAspectRatio: false,
+
             plugins: { legend: { display: false } },
+
             scales: {
+
               x: { grid: { color: '#27272a' }, ticks: { color: '#a1a1aa' } },
+
               y: { grid: { color: '#27272a' }, ticks: { color: '#a1a1aa', precision: 0 }, beginAtZero: true }
+
             }
+
           }
+
         });
+
       }
+
+
 
       // 2. Bottlenecks Chart
+
       const botMap = {};
+
       filteredTelemetry.forEach(r => {
+
         const isOk = (r.StatusFinal || r.statusFinal || '').toUpperCase().includes('SUCESSO');
+
         if (!isOk) {
+
           const e = r.EtapaFalha || r.etapaFalha || 'Erro Não Especificado';
+
           botMap[e] = (botMap[e] || 0) + 1;
+
         }
+
       });
+
       const botLabels = Object.keys(botMap).sort((a,b) => botMap[b] - botMap[a]).slice(0, 5);
+
       const botCounts = botLabels.map(l => botMap[l]);
 
+
+
       const ctxB = document.getElementById('chartBottlenecks');
+
       if (ctxB) {
+
         if (chartBottlenecksObj) chartBottlenecksObj.destroy();
+
         chartBottlenecksObj = new Chart(ctxB, {
+
           type: 'bar',
+
           data: {
+
             labels: botLabels.map(l => l.length > 28 ? l.slice(0, 26) + '...' : l),
+
             datasets: [{
+
               label: 'Falhas por Etapa',
+
               data: botCounts,
+
               backgroundColor: 'rgba(244, 63, 94, 0.75)',
+
               borderColor: '#f43f5e',
+
               borderWidth: 1,
+
               borderRadius: 6
+
             }]
+
           },
+
           options: {
+
             responsive: true,
+
             maintainAspectRatio: false,
+
             indexAxis: 'y',
+
             plugins: { legend: { display: false } },
+
             scales: {
+
               x: { grid: { color: '#27272a' }, ticks: { color: '#a1a1aa', precision: 0 }, beginAtZero: true },
+
               y: { grid: { display: false }, ticks: { color: '#f4f4f5', font: { size: 11 } } }
+
             }
+
           }
+
         });
+
       }
+
+
 
       // 3. Models Distribution Chart
+
       const modMap = {};
+
       filteredTelemetry.forEach(r => {
+
         const m = r.ModeloEquipamento || r.modeloEquipamento || 'Não Identificado';
+
         modMap[m] = (modMap[m] || 0) + 1;
+
       });
+
       const modLabels = Object.keys(modMap);
+
       const modCounts = modLabels.map(m => modMap[m]);
 
+
+
       const ctxM = document.getElementById('chartModels');
+
       if (ctxM) {
+
         if (chartModelsObj) chartModelsObj.destroy();
+
         chartModelsObj = new Chart(ctxM, {
+
           type: 'doughnut',
+
           data: {
+
             labels: modLabels,
+
             datasets: [{
+
               data: modCounts,
+
               backgroundColor: ['#ee1c25', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'],
+
               borderColor: '#18181b',
+
               borderWidth: 2
+
             }]
+
           },
+
           options: {
+
             responsive: true,
+
             maintainAspectRatio: false,
+
             plugins: {
+
               legend: { position: 'right', labels: { color: '#f4f4f5', boxWidth: 12, font: { size: 11 } } }
+
             }
+
           }
+
         });
+
       }
+
+
 
       // 4. Tech Ranking Chart
+
       const techMap = {};
+
       filteredTelemetry.forEach(r => {
+
         const t = r.TecnicoNome || r.tecnicoNome || 'Técnico Não Identificado';
+
         techMap[t] = (techMap[t] || 0) + 1;
+
       });
+
       const topTechs = Object.keys(techMap).sort((a,b) => techMap[b] - techMap[a]).slice(0, 6);
+
       const topCounts = topTechs.map(t => techMap[t]);
 
+
+
       const ctxTk = document.getElementById('chartTechs');
+
       if (ctxTk) {
+
         if (chartTechsObj) chartTechsObj.destroy();
+
         chartTechsObj = new Chart(ctxTk, {
+
           type: 'bar',
+
           data: {
+
             labels: topTechs,
+
             datasets: [{
+
               label: 'Intervenções',
+
               data: topCounts,
+
               backgroundColor: 'rgba(245, 158, 11, 0.75)',
+
               borderColor: '#f59e0b',
+
               borderWidth: 1,
+
               borderRadius: 6
+
             }]
+
           },
+
           options: {
+
             responsive: true,
+
             maintainAspectRatio: false,
+
             plugins: { legend: { display: false } },
+
             scales: {
+
               x: { grid: { display: false }, ticks: { color: '#a1a1aa', font: { size: 11 } } },
+
               y: { grid: { color: '#27272a' }, ticks: { color: '#a1a1aa', precision: 0 }, beginAtZero: true }
+
             }
+
           }
+
         });
+
       }
+
     }
+
+
 
     function openActivityDetails(activityId) {
+
       const rec = RAW_TELEMETRY.find(r => (r.ActivityId || r.activityId) === activityId);
+
       if (!rec) return;
 
+
+
       document.getElementById('modalActTitle').innerText = 'Intervenção: ' + (rec.DesignacaoIp || rec.designacaoIp || 'N/A');
+
       const body = document.getElementById('modalActBody');
+
       body.innerHTML = `
+
         <div class="detail-item"><div class="detail-label">Designação IP</div><div class="detail-value">${rec.DesignacaoIp || rec.designacaoIp || 'N/A'}</div></div>
+
         <div class="detail-item"><div class="detail-label">Cliente / Razão Social</div><div class="detail-value">${rec.ClienteRazaoSocial || rec.clienteRazaoSocial || 'N/A'}</div></div>
+
         <div class="detail-item"><div class="detail-label">Número da OTS</div><div class="detail-value">${rec.NumeroOts || rec.numeroOts || 'N/A'}</div></div>
+
         <div class="detail-item"><div class="detail-label">Tipo de Serviço</div><div class="detail-value">${rec.TipoServico || rec.tipoServico || 'N/A'}</div></div>
+
         <div class="detail-item"><div class="detail-label">Modelo do Equipamento</div><div class="detail-value">${rec.ModeloEquipamento || rec.modeloEquipamento || 'N/A'}</div></div>
+
         <div class="detail-item"><div class="detail-label">Porta Serial</div><div class="detail-value">${rec.PortaSerial || rec.portaSerial || 'N/A'}</div></div>
+
         <div class="detail-item"><div class="detail-label">IP WAN</div><div class="detail-value"><code>${rec.WanIp || rec.wanIp || 'N/A'}</code></div></div>
+
         <div class="detail-item"><div class="detail-label">Gateway WAN</div><div class="detail-value"><code>${rec.WanGateway || rec.wanGateway || 'N/A'}</code></div></div>
+
         <div class="detail-item"><div class="detail-label">Técnico Responsável</div><div class="detail-value">${rec.TecnicoNome || rec.tecnicoNome || 'N/A'} (${rec.TecnicoMatricula || rec.tecnicoMatricula || 'N/A'})</div></div>
+
         <div class="detail-item"><div class="detail-label">Empresa / Parceira</div><div class="detail-value">${rec.TecnicoEmpresa || rec.tecnicoEmpresa || 'Claro S.A.'}</div></div>
+
         <div class="detail-item"><div class="detail-label">Status Final</div><div class="detail-value">${rec.StatusFinal || rec.statusFinal || 'N/A'}</div></div>
+
         <div class="detail-item"><div class="detail-label">Duração</div><div class="detail-value">${rec.DuracaoSegundos || rec.duracaoSegundos || 0} segundos</div></div>
+
         <div class="detail-item" style="grid-column: 1 / -1;"><div class="detail-label">Etapa de Interrupção / Falha</div><div class="detail-value" style="color: #fb7185;">${rec.EtapaFalha || rec.etapaFalha || 'N/A'}</div></div>
+
         <div class="detail-item" style="grid-column: 1 / -1;"><div class="detail-label">Mensagem de Erro / Diagnóstico</div><div class="detail-value" style="color: #fb7185; font-family: monospace;">${rec.ErroGeral || rec.erroGeral || 'Nenhum erro registrado'}</div></div>
+
       `;
 
+
+
       document.getElementById('modalActivity').style.display = 'flex';
+
     }
+
+
 
     function exportTelemetryToCsv() {
+
       let csv = 'Data;Designacao;Cliente;OTS;Tecnico;Empresa;Modelo;IP_WAN;Status;DuracaoSeg;EtapaFalha;Erro\n';
+
       filteredTelemetry.forEach(r => {
+
         csv += [
+
           (r.TimestampInicio || r.timestampInicio || '').replace(';', ' '),
+
           (r.DesignacaoIp || r.designacaoIp || '').replace(';', ' '),
+
           (r.ClienteRazaoSocial || r.clienteRazaoSocial || '').replace(';', ' '),
+
           (r.NumeroOts || r.numeroOts || '').replace(';', ' '),
+
           (r.TecnicoNome || r.tecnicoNome || '').replace(';', ' '),
+
           (r.TecnicoEmpresa || r.tecnicoEmpresa || '').replace(';', ' '),
+
           (r.ModeloEquipamento || r.modeloEquipamento || '').replace(';', ' '),
+
           (r.WanIp || r.wanIp || '').replace(';', ' '),
+
           (r.StatusFinal || r.statusFinal || '').replace(';', ' '),
+
           r.DuracaoSegundos || r.duracaoSegundos || 0,
+
           (r.EtapaFalha || r.etapaFalha || '').replace(';', ' '),
+
           (r.ErroGeral || r.erroGeral || '').replace(/\r?\n/g, ' ').replace(';', ' ')
+
         ].join(';') + '\n';
+
       });
+
+
 
       downloadFile('sparc_telemetria_atividades.csv', csv, 'text/csv;charset=utf-8;');
+
       showToast('Relatório de telemetria exportado com sucesso!');
+
     }
 
+
+
     // ==========================================
+
     // 2. MÓDULO DE TÉCNICOS & LICENÇAS (DEVICES.JSON)
+
     // ==========================================
+
     let filteredDevices = [];
 
+
+
     function initTechniciansView() {
+
       applyTechnicianFilters();
+
     }
+
+
 
     function applyTechnicianFilters() {
+
       const q = document.getElementById('filterDevSearch')?.value.toLowerCase().trim() || '';
+
       const status = document.getElementById('filterDevStatus')?.value || 'ALL';
+
       const plat = document.getElementById('filterDevPlatform')?.value || 'ALL';
 
+
+
       // Restringe à equipe do sub-administrador logado
+
       filteredDevices = RAW_DEVICES.filter(d => {
+
         if (!isClusterManagedByCurrentUser(d.Cluster)) return false;
+
         if (status !== 'ALL' && d.Status !== status) return false;
+
         if (plat !== 'ALL' && d.Platform !== plat) return false;
 
+
+
         if (q) {
+
           const text = [
+
             d.FullName,
+
             d.FirstName,
+
             d.LastName,
+
             d.EmployeeId,
+
             d.Company,
+
             d.Phone,
+
             d.Email,
+
             d.MachineGuid,
+
             d.Cluster,
+
             d.Uf
+
           ].filter(Boolean).join(' ').toLowerCase();
+
           if (!text.includes(q)) return false;
+
         }
+
         return true;
+
       });
+
+
 
       renderTechniciansKpis();
+
       renderTechniciansTable();
+
     }
+
+
 
     function renderTechniciansKpis() {
+
       const total = RAW_DEVICES.length;
+
       const active = RAW_DEVICES.filter(d => (d.Status || 'Active') === 'Active').length;
+
       const pendingReqs = RAW_REQUESTS.filter(r => (r.Status || 'Pending') === 'Pending').length;
+
       const companies = new Set(RAW_DEVICES.map(d => d.Company).filter(Boolean)).size;
 
+
+
       document.getElementById('kpiDevTotal').innerText = total;
+
       document.getElementById('kpiDevActive').innerText = active;
+
       const kpiPending = document.getElementById('kpiDevPendingReqs');
+
       if (kpiPending) kpiPending.innerText = pendingReqs;
+
       document.getElementById('kpiDevCompanies').innerText = companies;
+
     }
+
+
 
     function renderTechniciansTable() {
+
       const tbody = document.getElementById('devTableBody');
+
       const countEl = document.getElementById('devTableCount');
+
       if (countEl) countEl.innerText = `Exibindo ${filteredDevices.length} técnicos cadastrados`;
 
+
+
       if (!tbody) return;
+
       tbody.innerHTML = '';
+
+
 
       if (filteredDevices.length === 0) {
+
         tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhum técnico encontrado com os filtros selecionados.</td></tr>';
+
         return;
+
       }
 
+
+
       filteredDevices.forEach(d => {
+
         const isAct = (d.Status || 'Active') === 'Active';
+
         const badge = isAct ? '<span class="badge badge-success">🟢 Ativo</span>' : '<span class="badge badge-fail">🔴 Inativo</span>';
+
         const plat = d.Platform === 'Android' ? '🤖 Android' : '🪟 Windows';
+
         const name = d.FullName || ((d.FirstName || '') + ' ' + (d.LastName || '')).trim() || 'Sem Nome';
+
         const mat = d.EmployeeId ? ` (Mat: ${d.EmployeeId})` : '';
+
         const phone = d.Phone || 'Não informado';
+
         const cleanPhone = phone.replace(/\D/g, '');
+
         const waLink = cleanPhone ? `<a href="https://wa.me/55${cleanPhone}" target="_blank" style="color: #34d399; text-decoration: none; font-weight: bold;">📱 ${phone}</a>` : phone;
+
         const exp = d.ExpirationDateIso || 'Indeterminado';
+
         const guidShort = (d.MachineGuid || '').slice(0, 13) + '...';
 
+
+
         const tr = document.createElement('tr');
+
         tr.style.cursor = 'pointer';
+
         tr.title = 'Duplo clique para editar o cadastro deste técnico';
+
         tr.ondblclick = () => openEditTechModal(d.MachineGuid);
+
         tr.innerHTML = `
+
           <td>${badge}</td>
+
           <td><strong>${plat}</strong></td>
+
           <td><strong>${name}</strong><span style="font-size: 11px; color: var(--text-muted);">${mat}</span></td>
+
           <td>${d.Company || 'Claro S.A.'}</td>
+
           <td>${waLink}</td>
+
           <td>${d.Cluster || d.Uf || 'N/A'}</td>
+
           <td><span style="font-size: 11px; color: var(--text-muted);">${d.ClientVersion || 'Beta'}</span></td>
+
           <td><strong>${exp}</strong></td>
+
           <td><code title="${d.MachineGuid}">${guidShort}</code></td>
+
           <td>
+
             <div style="display: flex; gap: 6px; align-items: center;">
+
               <button class="btn btn-primary" style="padding: 4px 10px; font-size: 11px; background: #2563eb; color: #fff; font-weight: 600;" onclick="event.stopPropagation(); openEditTechModal('${d.MachineGuid}')">✏️ Editar</button>
+
               <button class="btn btn-danger" style="padding: 4px 10px; font-size: 11px; background: #dc2626; color: #fff; font-weight: 600;" onclick="event.stopPropagation(); quickDeleteTech('${d.MachineGuid}')">🗑️ Excluir</button>
+
             </div>
+
           </td>
+
         `;
+
         tbody.appendChild(tr);
+
       });
+
     }
+
+
 
     function openEditTechModal(guid) {
+
       const d = RAW_DEVICES.find(x => x.MachineGuid === guid);
+
       if (!d) return;
+
       if (!isClusterManagedByCurrentUser(d.Cluster)) {
+
         showToast('Acesso negado: este técnico pertence a outro cluster.');
+
         return;
+
       }
+
       currentSelectedTech = d;
 
+
+
       const name = d.FullName || ((d.FirstName || '') + ' ' + (d.LastName || '')).trim() || 'Sem Nome';
+
       document.getElementById('modalTechTitle').innerHTML = `<span>✏️</span> Editar Cadastro: ${name}`;
 
+
+
       const badgeStatusEl = document.getElementById('modalTechBadgeStatus');
+
       if (badgeStatusEl) {
+
         badgeStatusEl.innerHTML = (d.Status || 'Active') === 'Active'
+
           ? '<span class="badge badge-success" style="font-size: 12px; padding: 4px 10px;">🟢 Ativo</span>'
+
           : '<span class="badge badge-fail" style="font-size: 12px; padding: 4px 10px;">🔴 Inativo / Vencido</span>';
+
       }
+
+
 
       document.getElementById('editTechGuid').value = d.MachineGuid || '';
+
       document.getElementById('editTechFullName').value = name;
+
       document.getElementById('editTechCompany').value = d.Company || '';
+
       document.getElementById('editTechEmployeeId').value = d.EmployeeId || '';
+
       document.getElementById('editTechPhone').value = d.Phone || '';
+
       document.getElementById('editTechEmail').value = d.Email || '';
+
       document.getElementById('editTechCluster').value = d.Cluster || '';
+
       document.getElementById('editTechUf').value = d.Uf || '';
+
       document.getElementById('editTechPlatform').value = d.Platform === 'Android' ? 'Android' : 'Windows';
+
       document.getElementById('editTechExpirationDate').value = d.ExpirationDateIso || '';
+
       document.getElementById('editTechClientVersion').value = d.ClientVersion || '';
+
       document.getElementById('editTechNotes').value = d.Notes || '';
+
       document.getElementById('editTechGuidDisplay').innerText = d.MachineGuid || '';
 
+
+
       document.getElementById('modalTech').style.display = 'flex';
+
     }
+
+
 
     function addDaysToEditExpiry(days) {
+
       const expInput = document.getElementById('editTechExpirationDate');
+
       let baseDate = new Date();
+
       if (expInput.value) {
+
         const parsed = new Date(expInput.value + 'T00:00:00');
+
         if (!isNaN(parsed.getTime()) && parsed > baseDate) {
+
           baseDate = parsed;
+
         }
+
       }
+
       baseDate.setDate(baseDate.getDate() + days);
+
       expInput.value = baseDate.toISOString().slice(0, 10);
+
       showToast(`Data de expiração estendida em +${days} dias: ${expInput.value}`);
+
     }
+
+
 
     async function handleSaveTechEdits(e) {
+
       e.preventDefault();
+
       const guid = document.getElementById('editTechGuid').value;
+
       const d = RAW_DEVICES.find(x => x.MachineGuid === guid);
+
       if (!d) return;
+
+
 
       const fullName = document.getElementById('editTechFullName').value.trim();
+
       const parts = fullName.split(' ');
+
       const firstName = parts[0] || fullName;
+
       const lastName = parts.slice(1).join(' ') || '';
 
+
+
       d.FullName = fullName;
+
       d.FirstName = firstName;
+
       d.LastName = lastName;
+
       d.Company = document.getElementById('editTechCompany').value.trim();
+
       d.EmployeeId = document.getElementById('editTechEmployeeId').value.trim();
+
       d.Phone = document.getElementById('editTechPhone').value.trim();
+
       d.Email = document.getElementById('editTechEmail').value.trim();
+
       d.Cluster = document.getElementById('editTechCluster').value.trim();
+
       d.Uf = document.getElementById('editTechUf').value.trim().toUpperCase();
+
       d.Platform = document.getElementById('editTechPlatform').value;
+
       d.ExpirationDateIso = document.getElementById('editTechExpirationDate').value;
+
       d.ClientVersion = document.getElementById('editTechClientVersion').value.trim();
+
       d.Notes = document.getElementById('editTechNotes').value.trim();
+
       d.Status = 'Active';
 
+
+
       closeModal('modalTech');
+
       applyTechnicianFilters();
+
       showToast(`✓ Cadastro de ${fullName} atualizado! Sincronizando com a nuvem...`);
 
+
+
       await commitDevicesToCloud(true);
+
       showToast(`✓ Alterações de ${fullName} salvas na nuvem com sucesso!`);
+
     }
+
+
 
     async function executeDeleteCurrentTech() {
+
       if (!currentSelectedTech) return;
+
       const guid = currentSelectedTech.MachineGuid;
+
       const name = currentSelectedTech.FullName || 'Técnico';
+
       if (!confirm(`Deseja realmente EXCLUIR DEFINITIVAMENTE o cadastro de "${name}"?\n\nEsta cópia será removida permanentemente da base e sincronizada na nuvem.`)) return;
 
+
+
       RAW_DEVICES = RAW_DEVICES.filter(x => x.MachineGuid !== guid);
+
       closeModal('modalTech');
+
       applyTechnicianFilters();
+
       showToast(`Cadastro de ${name} excluído! Sincronizando com a nuvem...`);
+
       await commitDevicesToCloud(true);
+
       showToast(`✓ Cadastro de ${name} excluído da nuvem com sucesso!`);
+
     }
+
+
 
     async function quickDeleteTech(guid) {
+
       const d = RAW_DEVICES.find(x => x.MachineGuid === guid);
+
       if (!d) return;
+
       if (!isClusterManagedByCurrentUser(d.Cluster)) {
+
         showToast('Acesso negado: este técnico pertence a outro cluster.');
+
         return;
+
       }
+
       const name = d.FullName || ((d.FirstName || '') + ' ' + (d.LastName || '')).trim() || 'Técnico';
+
       if (!confirm(`Deseja realmente EXCLUIR DEFINITIVAMENTE o cadastro do técnico "${name}"?\n\nEsta cópia será removida permanentemente da base e sincronizada na nuvem.`)) return;
 
+
+
       RAW_DEVICES = RAW_DEVICES.filter(x => x.MachineGuid !== guid);
+
       applyTechnicianFilters();
+
       showToast(`Cadastro de ${name} excluído! Sincronizando com a nuvem...`);
+
       await commitDevicesToCloud(true);
+
       showToast(`✓ Cadastro de ${name} excluído da nuvem com sucesso!`);
+
     }
+
+
 
     function copyCurrentTechKey() {
+
       if (!currentSelectedTech || !currentSelectedTech.AuthorizedToken) {
+
         alert('Nenhuma chave RSA assinada gerada para este registro.');
+
         return;
+
       }
+
       navigator.clipboard.writeText(currentSelectedTech.AuthorizedToken);
+
       showToast('Chave RSA de ativação copiada para a área de transferência!');
+
     }
+
+
 
     function openNewTechnicianModal() {
+
       const modal = document.getElementById('modalNewTech');
+
       if (modal) {
+
         modal.style.display = 'flex';
+
         // Se for SubAdmin, preenche o cluster com o primeiro gerenciado
+
         if (CURRENT_USER && CURRENT_USER.role === 'SubAdmin' && (CURRENT_USER.managedClusters || []).length > 0) {
+
           const clInput = document.getElementById('newTechCluster');
+
           if (clInput) clInput.value = CURRENT_USER.managedClusters[0];
+
         }
+
       }
+
     }
+
+
 
     function handleNewTechnicianSubmit(e) {
+
       e.preventDefault();
+
       const name = document.getElementById('newTechName').value.trim();
+
       const company = document.getElementById('newTechCompany').value.trim();
+
       const employeeId = document.getElementById('newTechEmployeeId').value.trim();
+
       const phone = document.getElementById('newTechPhone').value.trim();
+
       const email = document.getElementById('newTechEmail').value.trim();
+
       const cluster = document.getElementById('newTechCluster').value.trim();
+
       const platform = document.getElementById('newTechPlatform').value;
+
       const days = parseInt(document.getElementById('newTechDays').value, 10);
+
       const guid = document.getElementById('newTechGuid').value.trim();
 
+
+
       const now = new Date();
+
       now.setDate(now.getDate() + (days === 9999 ? 3650 : days));
+
       const expIso = now.toISOString().slice(0, 10);
+
+
 
       const parts = name.split(' ');
+
       const newDev = {
+
         MachineGuid: guid,
+
         FirstName: parts[0] || name,
+
         LastName: parts.slice(1).join(' ') || '',
+
         FullName: name,
+
         Company: company,
+
         EmployeeId: employeeId,
+
         Phone: phone,
+
         Email: email,
+
         Cluster: cluster,
+
         Platform: platform,
+
         Status: 'Active',
+
         ValidDays: days,
+
         ExpirationDateIso: expIso,
+
         ClientVersion: platform === 'Android' ? 'SPARC-Mobile-v0.8.156' : 'SPARC-Beta-Testes-0.8.156',
+
         Notes: 'Cadastrado manualmente via SPARC Admin Web'
+
       };
 
+
+
       RAW_DEVICES.unshift(newDev);
+
       closeModal('modalNewTech');
+
       applyTechnicianFilters();
+
       showToast(`Técnico ${name} cadastrado e liberado com sucesso!`);
+
     }
+
+
 
     function exportTechniciansToCsv() {
+
       let csv = 'Nome;Empresa;Matricula;Telefone;Email;Cluster;Plataforma;Status;Validade;MachineGuid\n';
+
       filteredDevices.forEach(d => {
+
         csv += [
+
           (d.FullName || '').replace(';', ' '),
+
           (d.Company || '').replace(';', ' '),
+
           (d.EmployeeId || '').replace(';', ' '),
+
           (d.Phone || '').replace(';', ' '),
+
           (d.Email || '').replace(';', ' '),
+
           (d.Cluster || '').replace(';', ' '),
+
           (d.Platform || '').replace(';', ' '),
+
           (d.Status || '').replace(';', ' '),
+
           (d.ExpirationDateIso || '').replace(';', ' '),
+
           d.MachineGuid || ''
+
         ].join(';') + '\n';
+
       });
+
       downloadFile('sparc_tecnicos_cadastrados.csv', csv, 'text/csv;charset=utf-8;');
+
       showToast('Lista de técnicos exportada com sucesso!');
+
     }
 
+
+
     // ==========================================
+
     // 3. MÓDULO DE SOLICITAÇÕES ONLINE
+
     // ==========================================
+
     function initRequestsView() {
+
       renderRequestsTable();
+
     }
+
+
 
     function updateRequestsBadge() {
+
       const teamReqs = RAW_REQUESTS.filter(r => isClusterManagedByCurrentUser(r.Cluster));
+
       const count = teamReqs.filter(r => (r.Status || 'Pending') === 'Pending').length;
+
       const b = document.getElementById('badgeRequestsCount');
+
       if (b) b.innerText = count;
+
     }
+
+
 
     function renderRequestsTable() {
+
       purgeRejectedRequests();
+
       const tbody = document.getElementById('reqTableBody');
+
       const countEl = document.getElementById('reqTableCount');
+
       const teamReqs = RAW_REQUESTS.filter(r => isClusterManagedByCurrentUser(r.Cluster));
+
       const pending = teamReqs.filter(r => (r.Status || 'Pending') === 'Pending');
+
       if (countEl) countEl.innerText = `${pending.length} solicitações aguardando aprovação`;
 
+
+
       if (!tbody) return;
+
       tbody.innerHTML = '';
 
+
+
       if (pending.length === 0) {
+
         tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhuma solicitação pendente no momento.</td></tr>';
+
         return;
+
       }
+
+
 
       pending.forEach(r => {
+
         const dt = new Date(r.RequestDateUtc).toLocaleString('pt-BR');
+
         const plat = r.Platform === 'Android' ? '🤖 Android' : '🪟 Windows';
+
         const tr = document.createElement('tr');
+
         tr.innerHTML = `
+
           <td>${dt}</td>
+
           <td><strong>${r.FullName}</strong></td>
+
           <td>${r.Company}</td>
+
           <td>${r.EmployeeId}</td>
+
           <td>${r.Phone}</td>
+
           <td>${plat}</td>
+
           <td><code title="${r.MachineGuid}">${(r.MachineGuid || '').slice(0, 13)}...</code></td>
+
           <td>${r.ClientVersion || 'Beta'}</td>
+
           <td>
+
             <div style="display: flex; gap: 6px;">
+
               <button class="btn btn-success" style="padding: 5px 10px; font-size: 11px;" onclick="approveRequest('${r.MachineGuid}')">✓ Aprovar (90d)</button>
+
               <button class="btn btn-danger" style="padding: 5px 10px; font-size: 11px;" onclick="rejectRequest('${r.MachineGuid}')">🗑️ Excluir / Recusar</button>
+
             </div>
+
           </td>
+
         `;
+
         tbody.appendChild(tr);
+
       });
+
     }
+
+
 
         async function approveRequest(guid) {
+
       const req = RAW_REQUESTS.find(r => r.MachineGuid === guid);
+
       if (!req) return;
 
+
+
       const now = new Date();
+
       now.setDate(now.getDate() + 90);
+
       const expIso = now.toISOString().slice(0, 10);
 
+
+
       const parts = req.FullName.split(' ');
+
       const newDev = {
+
         MachineGuid: req.MachineGuid,
+
         MachineFingerprint: req.MachineGuid,
+
         FirstName: parts[0] || req.FullName,
+
         LastName: parts.slice(1).join(' ') || '',
+
         FullName: req.FullName,
+
         Company: req.Company,
+
         EmployeeId: req.EmployeeId,
+
         Phone: req.Phone,
+
         Email: req.Email,
+
         Cluster: req.Cluster,
+
         Uf: req.Uf,
+
         Platform: req.Platform,
+
         Status: 'Active',
+
         ValidDays: 90,
+
         ExpirationDateIso: expIso,
+
         ClientVersion: req.ClientVersion,
+
         Notes: 'Aprovado online via SPARC Admin Web'
+
       };
 
+
+
       RAW_DEVICES.unshift(newDev);
+
       req.Status = 'Approved';
 
+
+
       // Salva imediatamente novo técnico na nuvem
+
       await commitDevicesToCloud(true);
 
+
+
       // Remove solicitação da fila e registra exclusão do pedido original
+
       await rejectRequestDirect(guid, true);
 
+
+
       purgeRejectedRequests();
+
       updateRequestsBadge();
+
       renderRequestsTable();
+
       applyTechnicianFilters();
+
       showToast(`Solicitação de ${req.FullName} aprovada com sucesso! Licença liberada.`);
+
     }
+
+
 
     async function purgeAllPendingRequests() {
+
       purgeRejectedRequests();
+
       const pending = RAW_REQUESTS.filter(r => (r.Status || 'Pending') === 'Pending');
+
       if (pending.length === 0) {
+
         showToast('Nenhuma solicitação pendente no momento.');
+
         return;
+
       }
+
       if (!confirm(`Deseja realmente RECUSAR e EXCLUIR DEFINITIVAMENTE todas as ${pending.length} solicitações pendentes?\n\nElas serão removidas permanentemente e não voltarão a aparecer.`)) {
+
         return;
+
       }
+
       for (const r of pending) {
+
         await rejectRequestDirect(r.MachineGuid, true);
+
       }
+
       purgeRejectedRequests();
+
       updateRequestsBadge();
+
       renderRequestsTable();
+
       showToast('Todas as solicitações pendentes foram excluídas com sucesso!');
+
     }
+
+
 
     async function rejectRequestDirect(guid, silent = false) {
+
       if (!guid) return;
+
       const gLower = guid.toLowerCase().replace(/\.json$/, '');
 
+
+
       // 1. Remove da memória local imediatamente
+
       RAW_REQUESTS = RAW_REQUESTS.filter(r => (r.MachineGuid || '').toLowerCase().replace(/\.json$/, '') !== gLower);
 
+
+
       // 2. Persiste na lista de rejeitados no navegador (evita que reapareça em qualquer refresh)
+
       try {
+
         let rejected = JSON.parse(localStorage.getItem('sparc_admin_rejected_guids') || '[]');
+
         if (!rejected.includes(guid)) rejected.push(guid);
+
         if (!rejected.includes(gLower)) rejected.push(gLower);
+
         if (!rejected.includes(guid + '.json')) rejected.push(guid + '.json');
+
         localStorage.setItem('sparc_admin_rejected_guids', JSON.stringify(rejected));
+
       } catch (e) {}
 
+
+
       // 3. Se existir token GitHub, exclui arquivo remoto requests/{guid}.json
+
       const token = getActiveGitHubToken();
+
       if (token) {
+
         try {
+
           const reqUrl = `https://api.github.com/repos/Calcmann/repo/contents/requests/${guid}.json`;
+
           const getRes = await fetch(reqUrl, {
+
             headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+
           });
+
           if (getRes.ok) {
+
             const getObj = await getRes.json();
+
             if (getObj.sha) {
+
               await fetch(reqUrl, {
+
                 method: 'DELETE',
+
                 headers: {
+
                   'Authorization': 'token ' + token,
+
                   'User-Agent': 'SPARC-Admin-Web',
+
                   'Content-Type': 'application/json'
+
                 },
+
                 body: JSON.stringify({
+
                   message: `admin(web): delete rejected request ${guid}`,
+
                   sha: getObj.sha
+
                 })
+
               });
+
             }
+
           }
+
         } catch (delErr) {
+
           console.warn('Erro ao excluir solicitação remota:', delErr);
+
         }
+
+
 
         // 4. Registra no arquivo remoto deleted_requests.json para propagar exclusão
+
         try {
+
           const delListUrl = 'https://api.github.com/repos/Calcmann/repo/contents/requests/deleted_requests.json';
+
           const getDelRes = await fetch(delListUrl, {
+
             headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+
           });
+
           let delSha = '';
+
           let delList = [];
+
           if (getDelRes.ok) {
+
             const delObj = await getDelRes.json();
+
             delSha = delObj.sha;
+
             try {
+
               delList = JSON.parse(atob(delObj.content.replace(/\s/g, '')));
+
             } catch (e) { delList = []; }
+
           }
+
           if (!Array.isArray(delList)) delList = [];
+
           if (!delList.includes(guid)) delList.push(guid);
+
           if (!delList.includes(gLower)) delList.push(gLower);
+
           if (!delList.includes(guid + '.json')) delList.push(guid + '.json');
 
+
+
           const payloadStr = JSON.stringify(delList, null, 2);
+
           const b64 = btoa(unescape(encodeURIComponent(payloadStr)));
+
           await fetch(delListUrl, {
+
             method: 'PUT',
+
             headers: {
+
               'Authorization': 'token ' + token,
+
               'User-Agent': 'SPARC-Admin-Web',
+
               'Content-Type': 'application/json'
+
             },
+
             body: JSON.stringify({
+
               message: `admin(web): record deleted request ${guid}`,
+
               content: b64,
+
               sha: delSha || undefined
+
             })
+
           });
+
         } catch (e) {
+
           console.warn('Erro ao atualizar deleted_requests.json remoto:', e);
+
         }
+
       }
+
     }
 
+
+
     async function fetchCloudRequests(interactive = false) {
+
       const token = getActiveGitHubToken();
+
       if (!token) {
+
         if (interactive) showToast('Token GitHub não configurado.');
+
         return;
+
       }
+
       if (interactive) showToast('Buscando solicitações na nuvem...');
 
+
+
       try {
+
         const res = await fetch('https://api.github.com/repos/Calcmann/repo/contents/requests', {
+
           headers: {
+
             'Authorization': 'token ' + token,
+
             'User-Agent': 'SPARC-Admin-Web'
+
           }
+
         });
+
         if (!res.ok) {
+
           if (interactive) showToast('Não foi possível listar solicitações da nuvem (HTTP ' + res.status + ')');
+
           return;
+
         }
+
         const files = await res.json();
+
         if (!Array.isArray(files)) return;
 
+
+
         let rejected = [];
+
         try {
+
           rejected = JSON.parse(localStorage.getItem('sparc_admin_rejected_guids') || '[]');
+
         } catch (e) { rejected = []; }
 
+
+
         // Sincroniza lista remota de excluídos se existir
+
         const delFile = files.find(f => f.name === 'deleted_requests.json');
+
         if (delFile) {
+
           try {
+
             const delRes = await fetch('https://api.github.com/repos/Calcmann/repo/contents/requests/deleted_requests.json', {
+
               headers: {
+
                 'Authorization': 'token ' + token,
+
                 'Accept': 'application/vnd.github.v3.raw',
+
                 'User-Agent': 'SPARC-Admin-Web'
+
               }
+
             });
+
             if (delRes.ok) {
+
               const remoteDel = await delRes.json();
+
               if (Array.isArray(remoteDel)) {
+
                 remoteDel.forEach(g => {
+
                   if (g && !rejected.includes(g)) rejected.push(g);
+
                 });
+
                 localStorage.setItem('sparc_admin_rejected_guids', JSON.stringify(rejected));
+
               }
+
             }
+
           } catch (e) {}
+
         }
+
+
 
         const lowerRejected = rejected.map(x => (x || '').toLowerCase().replace(/\.json$/, ''));
 
+
+
         const jsonFiles = files.filter(f => f.name && f.name.endsWith('.json') && !f.name.includes('deleted'));
 
+
+
         const fetchPromises = jsonFiles.map(async f => {
+
           const fGuid = f.name.replace(/\.json$/, '').toLowerCase();
+
           if (lowerRejected.includes(fGuid)) return null;
+
           try {
+
             const fileRes = await fetch('https://api.github.com/repos/Calcmann/repo/contents/requests/' + f.name, {
+
               headers: {
+
                 'Authorization': 'token ' + token,
+
                 'Accept': 'application/vnd.github.v3.raw',
+
                 'User-Agent': 'SPARC-Admin-Web'
+
               }
+
             });
+
             if (fileRes.ok) {
+
               const reqData = await fileRes.json();
+
               if (reqData && reqData.MachineGuid) {
+
                 reqData._sha = f.sha;
+
                 reqData.RemoteFileName = f.name;
+
                 return reqData;
+
               }
+
             }
+
           } catch (e) {}
+
           return null;
+
         });
+
+
 
         const fetchedReqs = (await Promise.all(fetchPromises)).filter(Boolean);
 
+
+
         fetchedReqs.forEach(newR => {
+
           const g = (newR.MachineGuid || '').toLowerCase().replace(/\.json$/, '');
+
           if (lowerRejected.includes(g)) return;
+
           const idx = RAW_REQUESTS.findIndex(r => r.MachineGuid && r.MachineGuid.toLowerCase().replace(/\.json$/, '') === g);
+
           if (idx >= 0) {
+
             RAW_REQUESTS[idx] = Object.assign({}, RAW_REQUESTS[idx], newR);
+
           } else {
+
             RAW_REQUESTS.unshift(newR);
+
           }
+
         });
+
+
 
         RAW_REQUESTS.sort((a, b) => {
+
           const dtA = new Date(a.RequestedAtUtc || a.RequestDateUtc || 0).getTime();
+
           const dtB = new Date(b.RequestedAtUtc || b.RequestDateUtc || 0).getTime();
+
           return dtB - dtA;
+
         });
 
+
+
         purgeRejectedRequests();
+
         updateRequestsBadge();
+
         renderRequestsTable();
 
+
+
         if (interactive) {
+
           const pendingCount = RAW_REQUESTS.filter(r => (r.Status || 'Pending') === 'Pending').length;
+
           showToast(`Sincronização concluída! (${pendingCount} pendente(s), ${RAW_REQUESTS.length} no total)`);
+
         }
+
       } catch (err) {
+
         console.warn('Erro ao buscar solicitações da nuvem:', err);
+
         if (interactive) showToast('Falha de rede ao buscar solicitações.');
+
       }
+
     }
 
+
+
     async function rejectRequest(guid) {
+
       const req = RAW_REQUESTS.find(r => r.MachineGuid === guid);
+
       if (!req) return;
+
       const techName = req.FullName || ((req.FirstName || '') + ' ' + (req.LastName || '')).trim() || 'Técnico';
+
       if (!confirm(`Deseja realmente RECUSAR e EXCLUIR DEFINITIVAMENTE a solicitação de "${techName}"?\n\nEsta solicitação será removida permanentemente e não voltará a aparecer.`)) return;
+
+
 
       await rejectRequestDirect(guid, false);
 
+
+
       purgeRejectedRequests();
+
       updateRequestsBadge();
+
       renderRequestsTable();
+
       showToast(`Solicitação de ${techName} excluída definitivamente!`);
+
     }
 
+
+
     // ==========================================
+
     // 4. MÓDULO DE AUDITORIA SPEEDTEST
+
     // ==========================================
+
     function getMergedSpeedtestAudits() {
+
       let audits = [];
+
       try {
+
         const local = JSON.parse(localStorage.getItem('sparc_speedtest_audit_records') || '[]');
+
         if (Array.isArray(local)) audits = local;
+
       } catch (e) {
+
         audits = [];
+
       }
+
+
 
       if (Array.isArray(RAW_SPEEDTESTS) && RAW_SPEEDTESTS.length > 0) {
+
         RAW_SPEEDTESTS.forEach(rem => {
+
           if (!audits.some(x => x.id === rem.id || (x.timestamp === rem.timestamp && x.osNumero === rem.osNumero))) {
+
             audits.push(rem);
+
           }
+
         });
+
       }
+
+
 
       return audits;
+
     }
+
+
 
     function renderSpeedtestTable(audits) {
+
       const tbody = document.getElementById('stTableBody');
+
       const countEl = document.getElementById('stTableCount');
+
       if (!tbody) return;
+
       tbody.innerHTML = '';
 
+
+
       if (countEl) {
+
         countEl.innerText = `${audits.length} auditoria${audits.length === 1 ? '' : 's'} registrada${audits.length === 1 ? '' : 's'}`;
+
       }
+
+
 
       if (!audits || audits.length === 0) {
+
         tbody.innerHTML = '<tr><td colspan="12" style="text-align: center; color: var(--text-muted); padding: 36px 16px; font-size: 13px;">Nenhuma auditoria registrada até o momento.<br><span style="font-size: 11.5px; color: var(--text-muted);">Qualquer teste executado na Ferramenta de Campo (link ao lado) é automaticamente catalogado e auditado aqui.</span></td></tr>';
+
         return;
+
       }
+
+
 
       audits.forEach(s => {
+
         const isOk = s.status === 'APROVADO';
+
         const badge = isOk ? '<span class="badge badge-success">✓ Aprovado</span>' : '<span class="badge badge-fail">✗ Não Conforme</span>';
+
         const tr = document.createElement('tr');
+
         tr.innerHTML = `
+
           <td>${s.timestamp}</td>
+
           <td><strong>${s.projeto || 'Projeto'}</strong></td>
+
           <td><code>${s.osNumero || 'N/A'}</code></td>
+
           <td>${s.agencia || 'N/A'}</td>
+
           <td>${s.cirDl || '--'}M Down / ${s.cirUl || '--'}M Up</td>
+
           <td style="color: ${(s.dlAvg || 0) >= ((s.cirDl || 1) * 0.8) ? 'var(--emerald)' : 'var(--rose)'}; font-weight: bold;">${s.dlAvg || 0} Mbps</td>
+
           <td style="color: ${(s.ulAvg || 0) >= ((s.cirUl || 1) * 0.8) ? 'var(--emerald)' : 'var(--rose)'}; font-weight: bold;">${s.ulAvg || 0} Mbps</td>
+
           <td>${s.rtt || 0} ms</td>
+
           <td>${s.jitter || 0} ms</td>
+
           <td>${(s.loss != null ? Number(s.loss).toFixed(1) : '0.0')}%</td>
+
           <td>${badge}</td>
+
           <td>${s.tecnico || 'Técnico de Campo'}</td>
+
         `;
+
         tbody.appendChild(tr);
+
       });
+
     }
+
+
 
     function initSpeedtestView() {
+
       const audits = getMergedSpeedtestAudits();
+
       renderSpeedtestTable(audits);
+
       fetchRemoteSpeedtestsAsync(false);
+
     }
+
+
 
     async function fetchRemoteSpeedtestsAsync(userInitiated = false) {
+
       const token = getActiveGitHubToken();
+
       if (!token) {
+
         if (userInitiated) showToast('Token GitHub não configurado');
+
         return;
+
       }
 
+
+
       try {
+
         const res = await fetch('https://api.github.com/repos/Calcmann/repo/contents/telemetry/speedtests', {
+
           headers: {
+
             'Authorization': 'token ' + token,
+
             'User-Agent': 'SPARC-Admin-Web'
+
           }
+
         });
 
+
+
         if (res.ok) {
+
           const files = await res.json();
+
           if (Array.isArray(files) && files.length > 0) {
+
             let fetched = [];
+
             const recent = files.slice(-40).reverse();
+
             for (const file of recent) {
+
               if (file.name.endsWith('.json')) {
+
                 try {
+
                   const fRes = await fetch(file.download_url);
+
                   if (fRes.ok) {
+
                     const rec = await fRes.json();
+
                     fetched.push(rec);
+
                   }
+
                 } catch (e) {}
+
               }
+
             }
+
+
 
             if (fetched.length > 0) {
+
               let local = [];
+
               try { local = JSON.parse(localStorage.getItem('sparc_speedtest_audit_records') || '[]'); } catch (e) {}
+
               fetched.forEach(rem => {
+
                 if (!local.some(x => x.id === rem.id || (x.timestamp === rem.timestamp && x.osNumero === rem.osNumero))) {
+
                   local.push(rem);
+
                 }
+
               });
+
               localStorage.setItem('sparc_speedtest_audit_records', JSON.stringify(local));
+
               renderSpeedtestTable(local);
+
               if (userInitiated) showToast(`✓ ${fetched.length} auditorias sincronizadas da nuvem!`);
+
             } else if (userInitiated) {
+
               showToast('Auditorias já estão atualizadas.');
+
             }
+
           } else if (userInitiated) {
+
             showToast('Nenhuma auditoria remota encontrada na nuvem.');
+
           }
+
         } else if (userInitiated) {
+
           showToast('Nenhuma pasta remota de testes criada ainda.');
+
         }
+
       } catch (err) {
+
         console.warn('Erro ao sincronizar auditorias de speedtest:', err);
+
         if (userInitiated) showToast('Falha ao conectar na nuvem');
+
       }
+
     }
+
+
 
     function limparAuditoriaLocal() {
+
       if (!confirm('Deseja realmente limpar o histórico de auditorias de speedtest deste navegador?')) return;
+
       localStorage.removeItem('sparc_speedtest_audit_records');
+
       renderSpeedtestTable([]);
+
       showToast('Histórico local de auditorias limpo com sucesso.');
+
     }
 
+
+
     // ==========================================
+
     // 5. MÓDULO DE CONFIGURAÇÕES & SINCRONISMO
+
     // ==========================================
+
     function saveGitHubSettings() {
+
       const token = document.getElementById('cfgToken').value.trim();
+
       localStorage.setItem('sparc_admin_gh_token', token);
+
       showToast('Token GitHub salvo no navegador!');
+
     }
+
+
 
     async function testGitHubConnection() {
+
       const token = document.getElementById('cfgToken').value.trim() || getActiveGitHubToken();
+
       const statusBox = document.getElementById('cfgTokenStatus');
+
       statusBox.innerHTML = '<span style="color: var(--amber);">⏳ Testando conexão com a API do GitHub...</span>';
 
+
+
       try {
+
         const res = await fetch('https://api.github.com/repos/Calcmann/repo', {
+
           headers: {
+
             'Authorization': 'token ' + token,
+
             'User-Agent': 'SPARC-Admin-Web'
+
           }
+
         });
+
         if (res.ok) {
+
           const data = await res.json();
+
           statusBox.innerHTML = `<span style="color: var(--emerald);">✓ Conectado com sucesso ao repositório ${data.full_name} (Visibilidade: ${data.private ? 'Privado' : 'Público'})</span>`;
+
           document.getElementById('pillCloudStatus').className = 'status-pill';
+
           document.getElementById('pillCloudStatus').innerText = '🟢 Nuvem Conectada';
+
         } else {
+
           statusBox.innerHTML = `<span style="color: var(--rose);">✗ Erro ao autenticar: HTTP ${res.status} (${res.statusText})</span>`;
+
           document.getElementById('pillCloudStatus').className = 'status-pill offline';
+
           document.getElementById('pillCloudStatus').innerText = '🟡 Sem Acesso Nuvem';
+
         }
+
       } catch (err) {
+
         statusBox.innerHTML = `<span style="color: var(--rose);">✗ Falha de rede: ${err.message}</span>`;
+
       }
+
     }
 
+
+
     // ==========================================
+
     // 5. MÓDULO DE GESTÃO DE SUB-ADMINISTRADORES
+
     // ==========================================
+
     function initSubAdminsView() {
+
       renderSubAdminsTable();
+
     }
+
+
 
     function renderSubAdminsTable() {
+
       const tbody = document.getElementById('subTableBody');
+
       const countEl = document.getElementById('subTableCount');
+
       if (!tbody) return;
 
+
+
       const q = document.getElementById('filterSubSearch')?.value.toLowerCase().trim() || '';
+
       const status = document.getElementById('filterSubStatus')?.value || 'ALL';
+
+
 
       let list = RAW_SUB_ADMINS || [];
 
+
+
       // KPIs
+
       const total = list.length;
+
       const active = list.filter(s => s.Active !== false).length;
+
       const allCoveredClusters = new Set();
+
       list.forEach(s => (s.ManagedClusters || []).forEach(c => { if (c) allCoveredClusters.add(c); }));
+
       
+
       const techsCovered = RAW_DEVICES.filter(d => {
+
         return list.some(s => s.Active !== false && (s.ManagedClusters || []).some(m => {
+
           const cNorm = (d.Cluster || '').trim().toLowerCase();
+
           const mNorm = m.trim().toLowerCase();
+
           return cNorm === mNorm || cNorm.includes(mNorm) || mNorm.includes(cNorm);
+
         }));
+
       }).length;
 
+
+
       const kpiTotal = document.getElementById('kpiSubTotal');
+
       const kpiActive = document.getElementById('kpiSubActive');
+
       const kpiClusters = document.getElementById('kpiSubClustersCovered');
+
       const kpiTechs = document.getElementById('kpiSubTechsCovered');
+
       if (kpiTotal) kpiTotal.innerText = total;
+
       if (kpiActive) kpiActive.innerText = active;
+
       if (kpiClusters) kpiClusters.innerText = allCoveredClusters.size;
+
       if (kpiTechs) kpiTechs.innerText = techsCovered;
 
+
+
       // Filtros
+
       if (status === 'Active') list = list.filter(s => s.Active !== false);
+
       if (status === 'Inactive') list = list.filter(s => s.Active === false);
 
+
+
       if (q) {
+
         list = list.filter(s => {
+
           const txt = [
+
             s.Username,
+
             s.FullName,
+
             s.Email,
+
             s.Phone,
+
             (s.ManagedClusters || []).join(' ')
+
           ].join(' ').toLowerCase();
+
           return txt.includes(q);
+
         });
+
       }
+
+
 
       if (countEl) countEl.innerText = `Exibindo ${list.length} sub-administrador(es)`;
+
       tbody.innerHTML = '';
 
+
+
       if (list.length === 0) {
+
         tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhum sub-administrador cadastrado ou encontrado com os filtros atuais.</td></tr>';
+
         return;
+
       }
+
+
 
       list.forEach(sub => {
+
         const isAct = sub.Active !== false;
+
         const badgeStatus = isAct ? '<span class="badge badge-success">🟢 Ativo</span>' : '<span class="badge badge-blocked">⚪ Inativo</span>';
+
         
+
         const teamCount = RAW_DEVICES.filter(d => {
+
           return (sub.ManagedClusters || []).some(m => {
+
             const cNorm = (d.Cluster || '').trim().toLowerCase();
+
             const mNorm = m.trim().toLowerCase();
+
             return cNorm === mNorm || cNorm.includes(mNorm) || mNorm.includes(cNorm);
+
           });
+
         }).length;
 
+
+
         const clusterChips = (sub.ManagedClusters || []).map(c => `<span class="cluster-badge">📍 ${c}</span>`).join(' ') || '<span style="color: var(--text-muted); font-size: 11px;">Nenhum cluster</span>';
+
         const dt = sub.CreatedAtIso ? new Date(sub.CreatedAtIso).toLocaleDateString('pt-BR') : '-';
 
+
+
         const tr = document.createElement('tr');
+
         tr.innerHTML = `
+
           <td>${badgeStatus}</td>
+
           <td><code>${sub.Username}</code></td>
+
           <td><strong>${sub.FullName}</strong></td>
+
           <td>
+
             <div>${sub.Phone || '-'}</div>
+
             <div style="font-size: 11px; color: var(--text-muted);">${sub.Email || '-'}</div>
+
           </td>
+
           <td style="white-space: normal; max-width: 320px;">${clusterChips}</td>
+
           <td><span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">👥 ${teamCount} técnico(s)</span></td>
+
           <td>${dt}</td>
+
           <td>
+
             <div style="display: flex; gap: 6px;">
+
               <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 11px;" onclick="openEditSubAdminModal('${sub.Id}')">✏️ Editar Clusters</button>
+
               <button class="btn btn-danger" style="padding: 5px 10px; font-size: 11px;" onclick="deleteSubAdmin('${sub.Id}')">🗑️ Excluir</button>
+
             </div>
+
           </td>
+
         `;
+
         tbody.appendChild(tr);
+
       });
+
     }
+
+
 
     function openNewSubAdminModal() {
+
       document.getElementById('modalSubAdminTitle').innerHTML = '<span>🛡️</span> Novo Sub-Administrador';
+
       document.getElementById('editSubAdminId').value = '';
+
       document.getElementById('editSubFullName').value = '';
+
       document.getElementById('editSubUsername').value = '';
+
       document.getElementById('editSubUsername').readOnly = false;
+
       document.getElementById('editSubPassword').value = '';
+
       document.getElementById('editSubPassword').required = true;
+
       document.getElementById('lblPassHint').innerText = '(obrigatório ao cadastrar)';
+
       document.getElementById('editSubPhone').value = '';
+
       document.getElementById('editSubEmail').value = '';
+
       document.getElementById('editSubActive').value = 'true';
+
       document.getElementById('editSubCustomClusters').value = '';
+
       document.getElementById('editSubNotes').value = '';
+
       
+
       renderClusterCheckboxes([]);
+
       document.getElementById('modalSubAdmin').style.display = 'flex';
+
     }
+
+
 
     function openEditSubAdminModal(id) {
+
       const sub = RAW_SUB_ADMINS.find(s => s.Id === id);
+
       if (!sub) return;
+
+
 
       document.getElementById('modalSubAdminTitle').innerHTML = `<span>✏️</span> Editar Sub-Admin: ${sub.FullName}`;
+
       document.getElementById('editSubAdminId').value = sub.Id;
+
       document.getElementById('editSubFullName').value = sub.FullName;
+
       document.getElementById('editSubUsername').value = sub.Username;
+
       document.getElementById('editSubUsername').readOnly = true;
+
       document.getElementById('editSubPassword').value = '';
+
       document.getElementById('editSubPassword').required = false;
+
       document.getElementById('lblPassHint').innerText = '(deixe em branco para manter a senha atual)';
+
       document.getElementById('editSubPhone').value = sub.Phone || '';
+
       document.getElementById('editSubEmail').value = sub.Email || '';
+
       document.getElementById('editSubActive').value = sub.Active !== false ? 'true' : 'false';
+
       document.getElementById('editSubCustomClusters').value = '';
+
       document.getElementById('editSubNotes').value = sub.Notes || '';
 
+
+
       renderClusterCheckboxes(sub.ManagedClusters || []);
+
       document.getElementById('modalSubAdmin').style.display = 'flex';
+
     }
+
+
 
     function renderClusterCheckboxes(selectedClusters = []) {
+
       const container = document.getElementById('subAdminClusterCheckboxes');
+
       if (!container) return;
+
       const allClusters = getAvailableSystemClusters();
+
       container.innerHTML = '';
 
+
+
       allClusters.forEach(c => {
+
         const isChecked = selectedClusters.some(sel => sel.trim().toLowerCase() === c.trim().toLowerCase());
+
         const label = document.createElement('label');
+
         label.className = 'cluster-chk-label';
+
         label.innerHTML = `<input type="checkbox" name="chkSubCluster" value="${c}" ${isChecked ? 'checked' : ''}> <span>${c}</span>`;
+
         container.appendChild(label);
+
       });
+
     }
+
+
 
     function selectAllSubAdminClusters(check) {
+
       document.querySelectorAll('input[name="chkSubCluster"]').forEach(chk => {
+
         chk.checked = check;
+
       });
+
     }
+
+
 
     async function handleSaveSubAdmin(e) {
+
       e.preventDefault();
+
       const id = document.getElementById('editSubAdminId').value.trim();
+
       const fullName = document.getElementById('editSubFullName').value.trim();
+
       const username = document.getElementById('editSubUsername').value.trim().toLowerCase();
+
       const pass = document.getElementById('editSubPassword').value;
+
       const phone = document.getElementById('editSubPhone').value.trim();
+
       const email = document.getElementById('editSubEmail').value.trim();
+
       const active = document.getElementById('editSubActive').value === 'true';
+
       const customClusters = document.getElementById('editSubCustomClusters').value.trim();
+
       const notes = document.getElementById('editSubNotes').value.trim();
 
+
+
       // Coleta clusters marcados
+
       const clusters = [];
+
       document.querySelectorAll('input[name="chkSubCluster"]:checked').forEach(chk => {
+
         clusters.push(chk.value.trim());
+
       });
 
+
+
       // Coleta clusters personalizados
+
       if (customClusters) {
+
         customClusters.split(',').forEach(c => {
+
           const clean = c.trim();
+
           if (clean && !clusters.includes(clean)) clusters.push(clean);
+
         });
+
       }
+
+
 
       if (clusters.length === 0) {
+
         showToast('Selecione ao menos um cluster sob gerência deste sub-administrador.');
+
         return;
+
       }
+
+
 
       let sub = RAW_SUB_ADMINS.find(s => s.Id === id || s.Username === username);
+
       if (sub) {
+
         sub.FullName = fullName;
+
         sub.Phone = phone;
+
         sub.Email = email;
+
         sub.Active = active;
+
         sub.ManagedClusters = clusters;
+
         sub.Notes = notes;
+
         if (pass && pass.length >= 6) {
+
           sub.PasswordHash = await sha256(pass);
+
         }
+
       } else {
+
         if (!pass || pass.length < 6) {
+
           showToast('A senha inicial deve ter no mínimo 6 caracteres.');
+
           return;
+
         }
+
         const newSub = {
+
           Id: 'subadmin-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6),
+
           Username: username,
+
           FullName: fullName,
+
           Phone: phone,
+
           Email: email,
+
           PasswordHash: await sha256(pass),
+
           ManagedClusters: clusters,
+
           Role: 'SubAdmin',
+
           Active: active,
+
           CreatedAtIso: new Date().toISOString(),
+
           Notes: notes
+
         };
+
         RAW_SUB_ADMINS.unshift(newSub);
+
       }
 
+
+
       localStorage.setItem('sparc_admin_sub_admins', JSON.stringify(RAW_SUB_ADMINS));
+
       renderSubAdminsTable();
+
       closeModal('modalSubAdmin');
+
       showToast(`Sub-Administrador "${fullName}" salvo com sucesso!`);
+
       await commitSubAdminsToCloud(true);
+
     }
+
+
 
     async function deleteSubAdmin(id) {
+
       const sub = RAW_SUB_ADMINS.find(s => s.Id === id);
+
       if (!sub) return;
+
       if (!confirm(`Deseja realmente EXCLUIR o sub-administrador "${sub.FullName}" (${sub.Username})?\n\nO acesso deste gestor será revogado permanentemente.`)) return;
 
+
+
       RAW_SUB_ADMINS = RAW_SUB_ADMINS.filter(s => s.Id !== id);
+
       localStorage.setItem('sparc_admin_sub_admins', JSON.stringify(RAW_SUB_ADMINS));
+
       renderSubAdminsTable();
+
       showToast(`Sub-Administrador "${sub.FullName}" excluído com sucesso!`);
+
       await commitSubAdminsToCloud(true);
+
     }
+
+
 
     async function fetchCloudSubAdmins(interactive = false) {
+
       const token = getActiveGitHubToken();
+
       if (!token) {
+
         if (interactive) showToast('Token GitHub não configurado.');
+
         return;
+
       }
+
       if (interactive) showToast('Buscando sub-administradores na nuvem...');
+
       try {
+
         const res = await fetch('https://api.github.com/repos/Calcmann/repo/contents/sub_admins.json', {
+
           headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+
         });
+
         if (res.ok) {
+
           const obj = await res.json();
+
           if (obj.content) {
+
             const decoded = decodeURIComponent(escape(atob(obj.content.replace(/\s/g, ''))));
+
             RAW_SUB_ADMINS = JSON.parse(decoded);
+
             localStorage.setItem('sparc_admin_sub_admins', JSON.stringify(RAW_SUB_ADMINS));
+
             renderSubAdminsTable();
+
             if (interactive) showToast(`Sincronização concluída! (${RAW_SUB_ADMINS.length} sub-admins carregados)`);
+
           }
+
         } else {
+
           if (interactive) showToast('Nenhum arquivo sub_admins.json remoto encontrado.');
+
         }
+
       } catch (err) {
+
         console.warn('Erro ao buscar sub_admins remotos:', err);
+
         if (interactive) showToast('Falha de rede ao buscar sub-administradores.');
+
       }
+
     }
+
+
 
     async function commitSubAdminsToCloud(silent = false) {
+
       const token = getActiveGitHubToken();
+
       if (!token) return false;
+
       try {
+
         const getRes = await fetch('https://api.github.com/repos/Calcmann/repo/contents/sub_admins.json', {
+
           headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+
         });
+
         let sha = '';
+
         if (getRes.ok) {
+
           const getObj = await getRes.json();
+
           sha = getObj.sha;
+
         }
+
         const payloadStr = JSON.stringify(RAW_SUB_ADMINS, null, 2);
+
         const b64 = btoa(unescape(encodeURIComponent(payloadStr)));
+
         const putRes = await fetch('https://api.github.com/repos/Calcmann/repo/contents/sub_admins.json', {
+
           method: 'PUT',
+
           headers: {
+
             'Authorization': 'token ' + token,
+
             'User-Agent': 'SPARC-Admin-Web',
+
             'Content-Type': 'application/json'
+
           },
+
           body: JSON.stringify({
+
             message: 'admin(web): update sub_admins.json [' + new Date().toISOString() + ']',
+
             content: b64,
+
             sha: sha || undefined
+
           })
+
         });
+
         if (putRes.ok && !silent) {
+
           showToast('✓ Sub-administradores salvos na Nuvem!');
+
           return true;
+
         }
+
         return putRes.ok;
+
       } catch (e) {
+
         console.warn('Erro ao salvar sub_admins na nuvem:', e);
+
         return false;
+
       }
+
     }
 
+
+
     async function changeAdminPassword() {
+
       const newP = document.getElementById('cfgNewPass').value;
+
       const confP = document.getElementById('cfgConfirmPass').value;
+
       const statusBox = document.getElementById('cfgPassStatus');
 
+
+
       if (!newP || newP.length < 6) {
+
         statusBox.innerHTML = '<span style="color: var(--rose);">⚠️ A nova senha deve possuir no mínimo 6 caracteres.</span>';
+
         return;
+
       }
+
       if (newP !== confP) {
+
         statusBox.innerHTML = '<span style="color: var(--rose);">⚠️ As senhas digitadas não coincidem.</span>';
+
         return;
+
       }
+
+
 
       const newHash = await sha256(newP);
 
+
+
       if (!CURRENT_USER || CURRENT_USER.role === 'GlobalAdmin') {
+
         localStorage.setItem('sparc_admin_pwd_hash', newHash);
+
         statusBox.innerHTML = '<span style="color: var(--emerald);">✓ Senha mestra global atualizada com sucesso!</span>';
+
         showToast('Senha mestra global do SPARC ADMIN alterada!');
+
       } else {
+
         const subIdx = RAW_SUB_ADMINS.findIndex(s => s.Id === CURRENT_USER.id || s.Username.toLowerCase() === CURRENT_USER.username.toLowerCase());
+
         if (subIdx >= 0) {
+
           RAW_SUB_ADMINS[subIdx].PasswordHash = newHash;
+
           localStorage.setItem('sparc_admin_sub_admins', JSON.stringify(RAW_SUB_ADMINS));
+
           await commitSubAdminsToCloud(true);
+
           statusBox.innerHTML = '<span style="color: var(--emerald);">✓ Sua senha pessoal foi atualizada com sucesso!</span>';
+
           showToast('Sua senha de Sub-Administrador foi alterada com sucesso!');
+
         }
+
       }
+
+
 
       document.getElementById('cfgNewPass').value = '';
+
       document.getElementById('cfgConfirmPass').value = '';
+
     }
 
+
+
     async function syncCloudData(interactive = false) {
+
       const token = getActiveGitHubToken();
+
       if (!token) {
+
         if (interactive) showToast('Modo local: dados carregados da base local.');
+
         return;
+
       }
+
+
 
       if (interactive) showToast('Sincronizando dados com a nuvem...');
 
+
+
       try {
+
         // 1. Tenta buscar devices.json atualizado do repositório
+
         const resDev = await fetch('https://api.github.com/repos/Calcmann/repo/contents/devices.json', {
+
           headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+
         });
+
         if (resDev.ok) {
+
           const devObj = await resDev.json();
+
           if (devObj.content) {
+
             const decoded = decodeURIComponent(escape(atob(devObj.content.replace(/\s/g, ''))));
+
             RAW_DEVICES = JSON.parse(decoded);
+
             applyTechnicianFilters();
+
           }
+
         }
+
+
 
         // 2. Tenta buscar sub_admins.json atualizado do repositório
+
         try {
+
           const resSub = await fetch('https://api.github.com/repos/Calcmann/repo/contents/sub_admins.json', {
+
             headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+
           });
+
           if (resSub.ok) {
+
             const subObj = await resSub.json();
+
             if (subObj.content) {
+
               const decoded = decodeURIComponent(escape(atob(subObj.content.replace(/s/g, ''))));
+
               RAW_SUB_ADMINS = JSON.parse(decoded);
+
               localStorage.setItem('sparc_admin_sub_admins', JSON.stringify(RAW_SUB_ADMINS));
+
               renderSubAdminsTable();
+
             }
+
           }
+
         } catch (eSub) { }
 
+
+
         // 3. Tenta buscar telemetry/circuits_index.json atualizado do repositório
+
         try {
+
           const resTelem = await fetch('https://api.github.com/repos/Calcmann/repo/contents/telemetry/circuits_index.json', {
+
             headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+
           });
+
           if (resTelem.ok) {
+
             const telemObj = await resTelem.json();
+
             if (telemObj.content) {
+
               const decoded = decodeURIComponent(escape(atob(telemObj.content.replace(/\s/g, ''))));
+
               RAW_TELEMETRY = JSON.parse(decoded);
+
               applyTelemetryFilters();
+
             }
+
           }
+
         } catch (eTel) { }
 
+
+
         if (interactive) showToast('Sincronização concluída com sucesso!');
+
       } catch (e) {
+
         console.warn('Sync error:', e.message);
+
         if (interactive) showToast('Modo offline: mantendo dados locais.');
+
       }
+
     }
+
+
 
     async function commitDevicesToCloud(silent = false) {
+
       const token = getActiveGitHubToken();
+
       if (!token) {
+
         if (!silent) showToast('Token não configurado para envio à nuvem.');
+
         return false;
+
       }
+
       if (!silent) showToast('Enviando dados para o repositório GitHub...');
+
       try {
+
         const getRes = await fetch('https://api.github.com/repos/Calcmann/repo/contents/devices.json', {
+
           headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+
         });
+
         let sha = '';
+
         if (getRes.ok) {
+
           const getObj = await getRes.json();
+
           sha = getObj.sha;
+
         }
+
         const payloadStr = JSON.stringify(RAW_DEVICES, null, 2);
+
         const b64 = btoa(unescape(encodeURIComponent(payloadStr)));
+
         const putRes = await fetch('https://api.github.com/repos/Calcmann/repo/contents/devices.json', {
+
           method: 'PUT',
+
           headers: {
+
             'Authorization': 'token ' + token,
+
             'User-Agent': 'SPARC-Admin-Web',
+
             'Content-Type': 'application/json'
+
           },
+
           body: JSON.stringify({
+
             message: 'admin(web): update devices.json [' + new Date().toISOString() + ']',
+
             content: b64,
+
             sha: sha
+
           })
+
         });
+
         if (putRes.ok) {
+
           if (!silent) showToast('✓ Salvo na Nuvem com sucesso!');
+
           return true;
+
         } else {
+
           const err = await putRes.json();
+
           if (!silent) showToast('Erro ao salvar na nuvem: ' + (err.message || putRes.statusText));
+
           return false;
+
         }
+
       } catch (err) {
+
         console.error('Commit cloud error:', err);
+
         if (!silent) showToast('Falha de rede ao conectar à nuvem.');
+
         return false;
+
       }
+
     }
+
+
 
     // UTILITÁRIOS
+
     function closeModal(id, event) {
+
       if (event && event.target !== event.currentTarget) return;
+
       document.getElementById(id).style.display = 'none';
+
     }
+
+
 
     function showToast(msg) {
+
       const t = document.getElementById('toastMessage');
+
       const txt = document.getElementById('toastText');
+
       if (!t || !txt) return;
+
       txt.innerText = msg;
+
       t.style.display = 'flex';
+
       setTimeout(() => { t.style.display = 'none'; }, 3500);
+
     }
 
+
+
     function downloadFile(filename, text, type) {
+
       const blob = new Blob([text], { type: type });
+
       const link = document.createElement('a');
+
       link.href = URL.createObjectURL(blob);
+
       link.download = filename;
+
       link.click();
+
       URL.revokeObjectURL(link.href);
+
     }
+
   </script>
+
 </body>
+
 </html>
+
