@@ -11,7 +11,7 @@
       --card-border: #2e384b;
       --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
       --text-main: #f8fafc;
-      --text-muted: #cbd5e1;
+      --text-muted: #94a3b8;
       --input-bg: #161b26;
       --input-border: #38445a;
       --canvas-bg: #10141e;
@@ -33,23 +33,23 @@
     }
 
     [data-theme="light"] {
-      --bg: #f1f5f9;
+      --bg: #f8fafc;
       --card-bg: #ffffff;
       --card-border: #cbd5e1;
-      --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.07);
+      --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
       --text-main: #0f172a;
-      --text-muted: #475569;
-      --input-bg: #f8fafc;
-      --input-border: #cbd5e1;
-      --canvas-bg: #f8fafc;
+      --text-muted: #334155;
+      --input-bg: #f1f5f9;
+      --input-border: #94a3b8;
+      --canvas-bg: #ffffff;
       --canvas-grid: #e2e8f0;
-      --hero-bg: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      --hero-bg: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
       
       --wine-primary: #881337;
       --wine-light: #be123c;
       --wine-accent: #9f1239;
       --wine-label: #881337;
-      --wine-border: #9f1239;
+      --wine-border: #be123c;
       
       --green: #059669;
       --blue: #be123c;
@@ -57,6 +57,33 @@
       --purple: #9f1239;
       --red: #dc2626;
       --amber: #d97706;
+    }
+
+    [data-theme="ocean"] {
+      --bg: #070d18;
+      --card-bg: #0f1b2e;
+      --card-border: #1e3352;
+      --card-shadow: 0 8px 26px rgba(2, 132, 199, 0.18);
+      --text-main: #f0f7ff;
+      --text-muted: #94a9c4;
+      --input-bg: #0b1424;
+      --input-border: #223c63;
+      --canvas-bg: #08101e;
+      --canvas-grid: #1a2d4a;
+      --hero-bg: linear-gradient(135deg, #10213d 0%, #0b1527 100%);
+      
+      --wine-primary: #0284c7;
+      --wine-light: #0ea5e9;
+      --wine-accent: #38bdf8;
+      --wine-label: #7dd3fc;
+      --wine-border: #0369a1;
+      
+      --green: #10b981;
+      --blue: #38bdf8;
+      --cyan: #06b6d4;
+      --purple: #818cf8;
+      --red: #f43f5e;
+      --amber: #fbbf24;
     }
 
     [data-theme="wine-dark"] {
@@ -367,11 +394,12 @@
       .topo-grid { grid-template-columns: 1fr; text-align: center; }
     }
     .topo-box {
-      background: #090d16;
+      background: var(--input-bg);
       border: 1px solid var(--card-border);
       border-radius: 8px;
       padding: 12px;
       font-size: 11.5px;
+      color: var(--text-main);
     }
     .topo-box h4 {
       font-size: 10.5px;
@@ -386,13 +414,14 @@
       padding: 2px 0;
     }
     .topo-row span:first-child { color: var(--text-muted); }
-    .topo-row span:last-child { font-weight: 700; font-family: monospace; }
+    .topo-row span:last-child { font-weight: 700; font-family: monospace; color: var(--text-main); }
     .fiber-bridge {
-      background: #090d16;
-      border: 1px solid #334155;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
       border-radius: 8px;
       padding: 12px 14px;
       text-align: center;
+      color: var(--text-main);
     }
     .fiber-dist {
       font-size: 14px;
@@ -402,6 +431,35 @@
     .fiber-sub {
       font-size: 9.5px;
       color: var(--text-muted);
+    }
+
+    .btn-modo-projetos {
+      background: rgba(136, 19, 55, 0.16);
+      border: 1px solid var(--wine-border);
+      color: var(--wine-label);
+      padding: 7px 12px;
+      border-radius: 7px;
+      font-size: 11.5px;
+      font-weight: 800;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-modo-projetos:hover {
+      background: rgba(136, 19, 55, 0.26);
+      color: var(--text-main);
+    }
+
+    select, input {
+      color: var(--text-main) !important;
+      background-color: var(--input-bg) !important;
+      border-color: var(--input-border) !important;
+    }
+    option {
+      background-color: var(--card-bg);
+      color: var(--text-main);
     }
 
     /* Hero Action Card (Painel de Destaque Superior) */
@@ -581,11 +639,12 @@
     <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
       <div class="theme-switcher">
         <button type="button" class="theme-btn" id="btnTheme_slate" onclick="setTheme('slate')" title="Tema Ardósia Neutro (Menos Escuro)">🌓 Slate Neutro</button>
+        <button type="button" class="theme-btn" id="btnTheme_ocean" onclick="setTheme('ocean')" title="Tema Oceano Safira (Harmonioso &amp; Descanso Visual)">🌊 Oceano Safira</button>
         <button type="button" class="theme-btn" id="btnTheme_light" onclick="setTheme('light')" title="Tema Claro Neutro Institucional">☀️ Claro Neutro</button>
         <button type="button" class="theme-btn" id="btnTheme_wine-dark" onclick="setTheme('wine-dark')" title="Tema Vinho Noturno">🍷 Vinho</button>
         <button type="button" class="theme-btn" id="btnTheme_original" onclick="setTheme('original')" title="Tema Original Cyber/Navy">⚡ Original</button>
       </div>
-      <a href="campo.html" style="background: rgba(136, 19, 55, 0.22); border: 1px solid #881337; color: #fecdd3; padding: 7px 12px; border-radius: 7px; font-size: 11.5px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+      <a href="campo.html" class="btn-modo-projetos">
         <span>🏢 Modo Projetos (O Boticário / Bradesco) ➔</span>
       </a>
       <div class="status-badge" id="badgeStatus">
@@ -609,7 +668,7 @@
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px;">
       <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Provedor / Motor de Teste:</label>
-        <select id="cbProvider" onchange="onProviderChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+        <select id="cbProvider" onchange="onProviderChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
           <option value="cloudflare" selected>⚡ Cloudflare Speed (Multi-Anycast Global — Alta Vazão)</option>
           <option value="sparc_cloud">🏢 SPARC Cloud Vinhedo (Servidor Dedicado OCI)</option>
           <option value="ookla">📡 Ookla Speedtest (Certificado Oficial &amp; Redes Parceiras)</option>
@@ -620,7 +679,7 @@
 
       <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Servidor Alvo (Georreferenciado ao Link):</label>
-        <select id="cbServers" onchange="onServerSelectChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+        <select id="cbServers" onchange="onServerSelectChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
           <option value="auto" selected>⭐ [AUTOMÁTICO] Menor Esforço (Descobrindo servidores locais...)</option>
           <option value="sparc_vinhedo">🔥 [DEDICADO SPARC] Vinhedo / SP (Oracle Cloud sa-vinhedo-1)</option>
         </select>
@@ -628,7 +687,7 @@
 
       <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Conexões Paralelas (RFC 6349):</label>
-        <select id="cbStreams" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+        <select id="cbStreams" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
           <option value="6" selected>⭐ 6 Streams Simultâneos (RFC 6349 / Alta Banda)</option>
           <option value="4">4 Streams Simultâneos (Equilibrado)</option>
           <option value="8">8 Streams Simultâneos (Gigabit 1Gbps+)</option>
@@ -638,7 +697,7 @@
 
       <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Duração da Saturação (Tempo Contínuo):</label>
-        <select id="cbTestDuration" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+        <select id="cbTestDuration" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
           <option value="15" selected>⚡ 15 segundos (Padrão RFC 6349)</option>
           <option value="30">⏱️ 30 segundos (Estendido)</option>
           <option value="60">🔥 60 segundos (1 Minuto Ininterrupto — Validação Plena)</option>
@@ -648,7 +707,7 @@
 
       <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Métrica de Bufferbloat (Filtro Estatístico):</label>
-        <select id="cbBloatMetric" onchange="onBloatMetricChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+        <select id="cbBloatMetric" onchange="onBloatMetricChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
           <option value="waveform" selected>⭐ Waveform P75 (Interquartil Robusto — Padrão)</option>
           <option value="median">📊 Mediana Estrita RFC 6349 (P50)</option>
           <option value="p90">🔥 Estresse de Pico P90 (Tolerância Zero)</option>
@@ -668,7 +727,7 @@
 
         <!-- MODO SIMÉTRICO (PADRÃO) -->
         <div id="boxSymmetricCir" style="display: flex; gap: 6px; align-items: center;">
-          <select id="cbCirPreset" onchange="onCirPresetChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; flex: 1; cursor: pointer;">
+          <select id="cbCirPreset" onchange="onCirPresetChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; flex: 1; cursor: pointer;">
             <option value="auto">⭐ [AUTO] Descoberta Livre</option>
             <option value="10">10 Mbps</option>
             <option value="20">20 Mbps</option>
@@ -682,7 +741,7 @@
             <option value="custom">✏️ Personalizado (Mbps)...</option>
           </select>
           <div id="boxCustomCir" style="display: none; align-items: center; gap: 3px;">
-            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 74px; background: var(--input-bg); border: 1.5px solid var(--input-border); color: #fff; padding: 7px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
+            <input type="number" id="txtCustomCir" min="1" max="10000" placeholder="Mbps" style="width: 74px; background: var(--input-bg); border: 1.5px solid var(--input-border); color: var(--text-main); padding: 7px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
             <span style="font-size: 10px; font-weight: 700; color: var(--text-muted);">Mbps</span>
           </div>
         </div>
@@ -692,7 +751,7 @@
           <!-- DOWNLOAD ASSIMÉTRICO -->
           <div style="display: flex; gap: 6px; align-items: center;">
             <span style="font-size: 10px; font-weight: 800; color: var(--green); width: 85px; white-space: nowrap;">↓ CIR DOWNLOAD:</span>
-            <select id="cbCirDlPreset" onchange="onCirDlPresetChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; flex: 1; cursor: pointer;">
+            <select id="cbCirDlPreset" onchange="onCirDlPresetChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; flex: 1; cursor: pointer;">
               <option value="auto">⭐ [AUTO] Descoberta Livre</option>
               <option value="50">50 Mbps</option>
               <option value="100">100 Mbps</option>
@@ -704,7 +763,7 @@
               <option value="custom">✏️ Personalizado (Mbps)...</option>
             </select>
             <div id="boxCustomCirDl" style="display: none; align-items: center; gap: 3px;">
-              <input type="number" id="txtCustomCirDl" min="1" max="10000" placeholder="Mbps" style="width: 68px; background: #0f172a; border: 1.5px solid var(--green); color: #fff; padding: 5px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
+              <input type="number" id="txtCustomCirDl" min="1" max="10000" placeholder="Mbps" style="width: 68px; background: var(--input-bg); border: 1.5px solid var(--green); color: var(--text-main); padding: 5px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
               <span style="font-size: 9.5px; font-weight: 700; color: var(--text-muted);">Mbps</span>
             </div>
           </div>
@@ -712,7 +771,7 @@
           <!-- UPLOAD ASSIMÉTRICO -->
           <div style="display: flex; gap: 6px; align-items: center;">
             <span style="font-size: 10px; font-weight: 800; color: var(--blue); width: 85px; white-space: nowrap;">↑ CIR UPLOAD:</span>
-            <select id="cbCirUlPreset" onchange="onCirUlPresetChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: #fff; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; flex: 1; cursor: pointer;">
+            <select id="cbCirUlPreset" onchange="onCirUlPresetChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; flex: 1; cursor: pointer;">
               <option value="auto">⭐ [AUTO] Descoberta Livre</option>
               <option value="10">10 Mbps</option>
               <option value="20">20 Mbps</option>
@@ -727,7 +786,7 @@
               <option value="custom">✏️ Personalizado (Mbps)...</option>
             </select>
             <div id="boxCustomCirUl" style="display: none; align-items: center; gap: 3px;">
-              <input type="number" id="txtCustomCirUl" min="1" max="10000" placeholder="Mbps" style="width: 68px; background: #0f172a; border: 1.5px solid var(--blue); color: #fff; padding: 5px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
+              <input type="number" id="txtCustomCirUl" min="1" max="10000" placeholder="Mbps" style="width: 68px; background: var(--input-bg); border: 1.5px solid var(--blue); color: var(--text-main); padding: 5px 6px; border-radius: 6px; font-size: 11px; font-weight: bold; text-align: right;" oninput="onCustomCirInput()" />
               <span style="font-size: 9.5px; font-weight: 700; color: var(--text-muted);">Mbps</span>
             </div>
           </div>
@@ -846,7 +905,7 @@
         <span id="txtBufferbloatGrade" style="color: var(--green);">—</span>
         <span class="kpi-unit" id="txtBufferbloatOverallDelta">Grade</span>
       </div>
-      <div class="kpi-sub" style="font-weight: 700; color: #f8fafc;" id="txtBufferbloatSplit">Aguardando início...</div>
+      <div class="kpi-sub" style="font-weight: 700; color: var(--text-main);" id="txtBufferbloatSplit">Aguardando início...</div>
       <div class="kpi-sub" id="txtBufferbloatDesc" style="font-size: 10.5px; color: var(--text-muted);">Sob carga contínua (Amostragem P75)</div>
     </div>
   </div>
@@ -857,7 +916,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <span style="font-size: 14px;">🎯</span>
-        <span style="font-size: 12px; font-weight: 800; color: #fff; letter-spacing: 0.5px;">AUDITORIA DE CIRCUITO & VALIDAÇÃO DE SLA (RFC 6349)</span>
+        <span style="font-size: 12px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px;">AUDITORIA DE CIRCUITO &amp; VALIDAÇÃO DE SLA (RFC 6349)</span>
       </div>
       <div id="rfcSlaBadge" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-muted); font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">
         Aguardando Início do Teste
@@ -866,28 +925,28 @@
     
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; font-size: 11.5px;">
       <!-- CIR e Atingimento SLA -->
-      <div style="background: #090d16; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 12px;">
+      <div style="background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 10px 12px;">
         <div style="color: var(--text-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 3px;">Banda Contratada (CIR)</div>
-        <div style="font-size: 16px; font-weight: 900; color: #fff;" id="rfcCirVal">—</div>
+        <div style="font-size: 16px; font-weight: 900; color: var(--text-main);" id="rfcCirVal">—</div>
         <div style="font-size: 10.5px; font-weight: 700; margin-top: 3px; color: var(--text-muted);" id="rfcSlaPct">SLA Target: ≥95%</div>
       </div>
 
       <!-- BDP (Bandwidth-Delay Product) -->
-      <div style="background: #090d16; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 12px;">
+      <div style="background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 10px 12px;">
         <div style="color: var(--text-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 3px;">BDP (Janela TCP Teórica)</div>
         <div style="font-size: 16px; font-weight: 900; color: var(--cyan);" id="rfcBdpVal">—</div>
         <div style="font-size: 10px; color: var(--text-muted); margin-top: 3px;" id="rfcBdpSub">Buffer ideal em trânsito</div>
       </div>
 
       <!-- TCP Transfer Time Ratio -->
-      <div style="background: #090d16; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 12px;">
+      <div style="background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 10px 12px;">
         <div style="color: var(--text-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 3px;">Transfer Time Ratio</div>
-        <div style="font-size: 16px; font-weight: 900; color: #fff;" id="rfcRatioVal">—</div>
+        <div style="font-size: 16px; font-weight: 900; color: var(--text-main);" id="rfcRatioVal">—</div>
         <div style="font-size: 10px; color: var(--text-muted); margin-top: 3px;" id="rfcRatioSub">Ideal: ≤ 1.05 (T_real / T_ideal)</div>
       </div>
 
       <!-- Buffer Delay (%) -->
-      <div style="background: #090d16; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 12px;">
+      <div style="background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 10px 12px;">
         <div style="color: var(--text-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 3px;">Buffer Delay RFC 6349</div>
         <div style="font-size: 16px; font-weight: 900; color: var(--green);" id="rfcBufferDelayVal">—</div>
         <div style="font-size: 10px; color: var(--text-muted); margin-top: 3px;" id="rfcBufferDelaySub">Incremento RTT sob estresse</div>
@@ -2609,19 +2668,19 @@
   }
 
   // ==========================================
-  // CONTROLE DE TEMAS (SLATE NEUTRO / CLARO / VINHO)
+  // CONTROLE DE TEMAS (SLATE NEUTRO / OCEANO SAFIRA / CLARO / VINHO / ORIGINAL)
   // ==========================================
   function setTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
     localStorage.setItem('sparc_theme', t);
-    ['slate', 'light', 'wine-dark', 'original'].forEach(name => {
+    ['slate', 'ocean', 'light', 'wine-dark', 'original'].forEach(name => {
       const btn = document.getElementById('btnTheme_' + name);
       if (btn) {
         if (name === t) btn.classList.add('active');
         else btn.classList.remove('active');
       }
     });
-    if (typeof redrawChart === 'function') redrawChart();
+    if (typeof redrawCanvas === 'function') redrawCanvas();
   }
 
   // Inicializa tema salvo ou padrão 'slate' (menos escuro e neutro)
