@@ -39,25 +39,25 @@
     }
 
     [data-theme="light"] {
-      --bg: #f1f5f9;
+      --bg: #f8fafc;
       --card-bg: #ffffff;
       --card-border: #cbd5e1;
-      --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.07);
+      --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
       --text-main: #0f172a;
-      --text-muted: #475569;
-      --input-bg: #f8fafc;
-      --input-border: #cbd5e1;
-      --canvas-bg: #f8fafc;
+      --text-muted: #334155;
+      --input-bg: #f1f5f9;
+      --input-border: #94a3b8;
+      --canvas-bg: #ffffff;
       --canvas-grid: #e2e8f0;
       --rule-bg: #fff1f2;
       --rule-border: #fecdd3;
-      --hero-bg: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      --hero-bg: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
       
       --wine-primary: #881337;
       --wine-light: #be123c;
       --wine-accent: #9f1239;
       --wine-label: #881337;
-      --wine-border: #9f1239;
+      --wine-border: #be123c;
       
       --green: #059669;
       --blue: #be123c;
@@ -67,6 +67,37 @@
       --amber: #d97706;
       --boticario: #be123c;
       --bradesco: #9f1239;
+    }
+
+    [data-theme="ocean"] {
+      --bg: #070d18;
+      --card-bg: #0f1b2e;
+      --card-border: #1e3352;
+      --card-shadow: 0 8px 26px rgba(2, 132, 199, 0.18);
+      --text-main: #f0f7ff;
+      --text-muted: #94a9c4;
+      --input-bg: #0b1424;
+      --input-border: #223c63;
+      --canvas-bg: #08101e;
+      --canvas-grid: #1a2d4a;
+      --rule-bg: rgba(15, 27, 46, 0.75);
+      --rule-border: #1e3352;
+      --hero-bg: linear-gradient(135deg, #10213d 0%, #0b1527 100%);
+      
+      --wine-primary: #0284c7;
+      --wine-light: #0ea5e9;
+      --wine-accent: #38bdf8;
+      --wine-label: #7dd3fc;
+      --wine-border: #0369a1;
+      
+      --green: #10b981;
+      --blue: #38bdf8;
+      --cyan: #06b6d4;
+      --purple: #818cf8;
+      --red: #f43f5e;
+      --amber: #fbbf24;
+      --boticario: #38bdf8;
+      --bradesco: #0ea5e9;
     }
 
     [data-theme="wine-dark"] {
@@ -222,9 +253,9 @@
       color: var(--text-muted);
     }
     .nav-toggle-btn {
-      background: rgba(136, 19, 55, 0.22);
-      border: 1px solid #881337;
-      color: #fecdd3;
+      background: rgba(136, 19, 55, 0.16);
+      border: 1px solid var(--wine-border);
+      color: var(--wine-label);
       padding: 7px 12px;
       border-radius: 7px;
       font-size: 11.5px;
@@ -236,8 +267,12 @@
       transition: all 0.2s;
     }
     .nav-toggle-btn:hover {
-      background: rgba(136, 19, 55, 0.45);
-      color: #fff;
+      background: rgba(136, 19, 55, 0.28);
+      color: var(--text-main);
+    }
+    option {
+      background-color: var(--card-bg);
+      color: var(--text-main);
     }
     .status-badge {
       display: flex;
@@ -324,8 +359,9 @@
 
     .rule-explanation-box {
       margin-top: 12px;
-      background: rgba(76, 5, 25, 0.35);
-      border: 1px solid #581024;
+      background: var(--rule-bg);
+      border: 1px solid var(--rule-border);
+      color: var(--text-main);
       border-radius: 8px;
       padding: 10px 14px;
       font-size: 11.5px;
@@ -626,6 +662,7 @@
     <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
       <div class="theme-switcher">
         <button type="button" class="theme-btn" id="btnTheme_slate" onclick="setTheme('slate')" title="Tema Ardósia Neutro (Menos Escuro)">🌓 Slate Neutro</button>
+        <button type="button" class="theme-btn" id="btnTheme_ocean" onclick="setTheme('ocean')" title="Tema Oceano Safira (Harmonioso &amp; Descanso Visual)">🌊 Oceano Safira</button>
         <button type="button" class="theme-btn" id="btnTheme_light" onclick="setTheme('light')" title="Tema Claro Neutro Institucional">☀️ Claro Neutro</button>
         <button type="button" class="theme-btn" id="btnTheme_wine-dark" onclick="setTheme('wine-dark')" title="Tema Vinho Noturno">🍷 Vinho</button>
         <button type="button" class="theme-btn" id="btnTheme_original" onclick="setTheme('original')" title="Tema Original Cyber/Navy">⚡ Original</button>
@@ -2080,12 +2117,12 @@
   }
 
   // ==========================================
-  // CONTROLE DE TEMAS (SLATE NEUTRO / CLARO / VINHO)
+  // CONTROLE DE TEMAS (SLATE NEUTRO / OCEANO SAFIRA / CLARO / VINHO / ORIGINAL)
   // ==========================================
   function setTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
     localStorage.setItem('sparc_theme', t);
-    ['slate', 'light', 'wine-dark', 'original'].forEach(name => {
+    ['slate', 'ocean', 'light', 'wine-dark', 'original'].forEach(name => {
       const btn = document.getElementById('btnTheme_' + name);
       if (btn) {
         if (name === t) btn.classList.add('active');
