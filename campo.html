@@ -655,7 +655,7 @@
       <div class="badge-tag">⚡ SPARC WEB</div>
       <div>
         <div class="brand-title">Validação de Enlaces &amp; Aceite de Projetos</div>
-        <div class="brand-sub">Perfis de RFP Automatizados (O Boticário, Bradesco) • Teste One-Click</div>
+        <div class="brand-sub">Perfis de RFP Automatizados (Bradesco, Banda Larga Padrão, O Boticário) • Teste One-Click</div>
       </div>
     </div>
     
@@ -742,6 +742,7 @@
         <select id="cbProjetoPerfil" class="select-control" onchange="onPerfilChange()">
           <option value="bradesco_dedicado" selected>🏦 Banco Bradesco — Internet Dedicada (PPB-030-B: Simétrico L4 ≥ 95% RFC 6349 • RTT ≤ 60ms)</option>
           <option value="bradesco_bandalarga">🏦 Banco Bradesco — Banda Larga Assimétrica (PPB-030-A: OS ≥ 80% Anatel • RTT ≤ 80ms)</option>
+          <option value="bandalarga_padrao">🌐 Banda Larga Padrão (Regulatório Anatel: Download ≥ 80% • Upload ≥ 80% • RTT ≤ 80ms)</option>
           <option value="boticario">🌸 O Boticário (RFP Varejo: Download ≥ 80% • Upload ≥ 20%)</option>
           <option value="rfc6349">📋 Padrão Telecom RFC 6349 (Download ≥ 95% • Upload ≥ 95%)</option>
         </select>
@@ -1030,6 +1031,20 @@
       title: 'Critério Oficial Bradesco — Banda Larga Assimétrica (PPB-030-A):',
       desc: 'Acesso <strong>assimétrico</strong> conforme especificado na OS com garantia de <strong>no mínimo 80% da velocidade contratada de Download e Upload (Piso Regulatório Anatel)</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
     },
+    bandalarga_padrao: {
+      name: 'Banda Larga Padrão',
+      fullName: 'Banda Larga Padrão (Regulatório Anatel / Mercado)',
+      icon: '🌐',
+      isAsymmetric: true,  // Assimétrico
+      dlPctReq: 0.80,      // 80% do Download contratado (Piso Anatel)
+      ulPctReq: 0.80,      // 80% do Upload contratado na OS (Piso Anatel)
+      defaultUlRatio: 0.35,// Padrão 35% da banda de Download
+      maxRtt: 80,          // Latência RTT ≤ 80 ms (Padrão Anatel nacional)
+      maxJitter: 50,       // Jitter ≤ 50 ms
+      maxLoss: 2.0,        // Perda de Pacotes < 2,0%
+      title: 'Critério Oficial — Banda Larga Padrão (Regulatório Anatel):',
+      desc: 'Validação de acesso <strong>Banda Larga Padrão</strong> em conformidade com as metas da Anatel (RGC): entrega de <strong>no mínimo 80% da velocidade contratada em Download e Upload</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
+    },
     boticario: {
       name: 'O Boticário',
       fullName: 'O Boticário (RFP Varejo)',
@@ -1144,7 +1159,7 @@
     if (val === 'custom' && txt) txt.focus();
 
     const profKey = document.getElementById('cbProjetoPerfil').value;
-    if (profKey === 'bradesco_bandalarga') {
+    if (profKey === 'bradesco_bandalarga' || profKey === 'bandalarga_padrao') {
       populateAsymmetricUploadOptions();
     }
 
@@ -1154,7 +1169,7 @@
 
   function onCustomCirInput() {
     const profKey = document.getElementById('cbProjetoPerfil').value;
-    if (profKey === 'bradesco_bandalarga') {
+    if (profKey === 'bradesco_bandalarga' || profKey === 'bandalarga_padrao') {
       populateAsymmetricUploadOptions();
     }
     updateTargetsDisplay();
@@ -1213,21 +1228,21 @@
 
   function toggleAsymmetricControls() {
     const profKey = document.getElementById('cbProjetoPerfil').value;
-    const isAsymBrad = (profKey === 'bradesco_bandalarga');
+    const isAsym = (profKey === 'bradesco_bandalarga' || profKey === 'bandalarga_padrao');
     const boxAsym = document.getElementById('boxAsymmetricUpload');
     const boxAsymInfo = document.getElementById('boxAsymmetricInfo');
     const lblCir = document.getElementById('lblCirBanda');
 
     if (boxAsym) {
-      boxAsym.style.display = isAsymBrad ? 'block' : 'none';
+      boxAsym.style.display = isAsym ? 'block' : 'none';
     }
     if (boxAsymInfo) {
-      boxAsymInfo.style.display = isAsymBrad ? 'block' : 'none';
+      boxAsymInfo.style.display = isAsym ? 'block' : 'none';
     }
     if (lblCir) {
-      lblCir.innerText = isAsymBrad ? '🎯 Banda de Download Contratada (CIR):' : '🎯 Banda Contratada do Link (CIR):';
+      lblCir.innerText = isAsym ? '🎯 Banda de Download Contratada (CIR):' : '🎯 Banda Contratada do Link (CIR):';
     }
-    if (isAsymBrad) {
+    if (isAsym) {
       populateAsymmetricUploadOptions();
     }
   }
@@ -1329,7 +1344,7 @@
     if (!lastCompletedConfig) return false;
     const cur = getCurrentConfig();
     const isBrad = cur.profileKey && cur.profileKey.startsWith('bradesco');
-    const isAsym = (cur.profileKey === 'bradesco_bandalarga');
+    const isAsym = (cur.profileKey === 'bradesco_bandalarga' || cur.profileKey === 'bandalarga_padrao');
     return (
       cur.cirPreset !== lastCompletedConfig.cirPreset ||
       (cur.cirPreset === 'custom' && cur.customCir !== lastCompletedConfig.customCir) ||
