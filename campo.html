@@ -740,11 +740,11 @@
       <div>
         <label class="select-label" for="cbProjetoPerfil">🏢 Perfil do Projeto / Cliente (RFP):</label>
         <select id="cbProjetoPerfil" class="select-control" onchange="onPerfilChange()">
-          <option value="bradesco_dedicado" selected>🏦 Banco Bradesco — Internet Dedicada (PPB-030-B: Simétrico L4 ≥ 95% RFC 6349 • RTT ≤ 60ms)</option>
-          <option value="bradesco_bandalarga">🏦 Banco Bradesco — Banda Larga Assimétrica (PPB-030-A: OS ≥ 80% Anatel • RTT ≤ 80ms)</option>
-          <option value="bandalarga_padrao">🌐 Banda Larga Padrão (Regulatório Anatel: Download ≥ 80% • Upload ≥ 80% • RTT ≤ 80ms)</option>
-          <option value="boticario">🌸 O Boticário (RFP Varejo: Download ≥ 80% • Upload ≥ 20%)</option>
-          <option value="rfc6349">📋 Padrão Telecom RFC 6349 (Download ≥ 95% • Upload ≥ 95%)</option>
+          <option value="bandalarga_padrao" selected>🌐 Banda Larga Padrão</option>
+          <option value="bradesco_dedicado">🏦 Banco Bradesco — Internet Dedicada</option>
+          <option value="bradesco_bandalarga">🏦 Banco Bradesco — Banda Larga Assimétrica</option>
+          <option value="boticario">🌸 O Boticário</option>
+          <option value="rfc6349">📋 Link Dedicado Simétrico - RFC 6349</option>
         </select>
       </div>
 
@@ -768,11 +768,11 @@
 
     <!-- CAIXA EXPLICATIVA DINÂMICA DA REGRA DO PROJETO -->
     <div class="rule-explanation-box" id="ruleExplanationBox">
-      <span style="font-size: 18px;" id="ruleIcon">🌸</span>
+      <span style="font-size: 18px;" id="ruleIcon">🌐</span>
       <div>
-        <strong id="ruleTitle">Critério de Validação — O Boticário:</strong>
+        <strong id="ruleTitle">Critério Oficial — Banda Larga Padrão (Regulatório Anatel):</strong>
         <div id="ruleText" style="color: var(--text-muted); margin-top: 2px;">
-          Em conformidade com a RFP de Varejo do Boticário, o circuito será <strong>Aprovado</strong> se entregar no mínimo <strong>80% da banda nominal em Download</strong> (ex.: ≥ 80.0 Mbps em 100M) e <strong>20% em Upload</strong> (ex.: ≥ 20.0 Mbps em 100M).
+          Validação de acesso <strong>Banda Larga Padrão</strong> em conformidade com as metas da Anatel (RGC): entrega de <strong>no mínimo 80% da velocidade contratada em Download e Upload</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.
         </div>
       </div>
     </div>
@@ -1004,9 +1004,23 @@
 
   // PERFIS DE PROJETO OFICIAIS COM CRITÉRIOS DE RFP / ANS
   const PROJECT_PROFILES = {
+    bandalarga_padrao: {
+      name: 'Banda Larga Padrão',
+      fullName: 'Banda Larga Padrão',
+      icon: '🌐',
+      isAsymmetric: true,  // Assimétrico
+      dlPctReq: 0.80,      // 80% do Download contratado (Piso Anatel)
+      ulPctReq: 0.80,      // 80% do Upload contratado na OS (Piso Anatel)
+      defaultUlRatio: 0.35,// Padrão 35% da banda de Download
+      maxRtt: 80,          // Latência RTT ≤ 80 ms (Padrão Anatel nacional)
+      maxJitter: 50,       // Jitter ≤ 50 ms
+      maxLoss: 2.0,        // Perda de Pacotes < 2,0%
+      title: 'Critério Oficial — Banda Larga Padrão (Regulatório Anatel):',
+      desc: 'Validação de acesso <strong>Banda Larga Padrão</strong> em conformidade com as metas da Anatel (RGC): entrega de <strong>no mínimo 80% da velocidade contratada em Download e Upload</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
+    },
     bradesco_dedicado: {
       name: 'Bradesco Dedicado',
-      fullName: 'Banco Bradesco — Internet Dedicada (PPB-030-B)',
+      fullName: 'Banco Bradesco — Internet Dedicada',
       icon: '🏦',
       isAsymmetric: false, // 100% Simétrico
       dlPctReq: 0.95,      // 95% CIR nominal no L4 conforme RFC 6349
@@ -1019,7 +1033,7 @@
     },
     bradesco_bandalarga: {
       name: 'Bradesco Banda Larga Assimétrica',
-      fullName: 'Banco Bradesco — Banda Larga Assimétrica (PPB-030-A)',
+      fullName: 'Banco Bradesco — Banda Larga Assimétrica',
       icon: '🏦',
       isAsymmetric: true,  // Assimétrico
       dlPctReq: 0.80,      // 80% do Download contratado na OS (Piso Regulatório Anatel)
@@ -1031,23 +1045,9 @@
       title: 'Critério Oficial Bradesco — Banda Larga Assimétrica (PPB-030-A):',
       desc: 'Acesso <strong>assimétrico</strong> conforme especificado na OS com garantia de <strong>no mínimo 80% da velocidade contratada de Download e Upload (Piso Regulatório Anatel)</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
     },
-    bandalarga_padrao: {
-      name: 'Banda Larga Padrão',
-      fullName: 'Banda Larga Padrão (Regulatório Anatel / Mercado)',
-      icon: '🌐',
-      isAsymmetric: true,  // Assimétrico
-      dlPctReq: 0.80,      // 80% do Download contratado (Piso Anatel)
-      ulPctReq: 0.80,      // 80% do Upload contratado na OS (Piso Anatel)
-      defaultUlRatio: 0.35,// Padrão 35% da banda de Download
-      maxRtt: 80,          // Latência RTT ≤ 80 ms (Padrão Anatel nacional)
-      maxJitter: 50,       // Jitter ≤ 50 ms
-      maxLoss: 2.0,        // Perda de Pacotes < 2,0%
-      title: 'Critério Oficial — Banda Larga Padrão (Regulatório Anatel):',
-      desc: 'Validação de acesso <strong>Banda Larga Padrão</strong> em conformidade com as metas da Anatel (RGC): entrega de <strong>no mínimo 80% da velocidade contratada em Download e Upload</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
-    },
     boticario: {
       name: 'O Boticário',
-      fullName: 'O Boticário (RFP Varejo)',
+      fullName: 'O Boticário',
       icon: '🌸',
       isAsymmetric: true,
       dlPctReq: 0.80,      // 80% do CIR nominal
@@ -1060,8 +1060,8 @@
       desc: 'Em conformidade com a RFP de Varejo do Boticário, o circuito será <strong>Aprovado</strong> se entregar no mínimo <strong>80% da banda nominal em Download</strong> (ex.: ≥ 80.0 Mbps em 100M) e <strong>20% em Upload</strong> (ex.: ≥ 20.0 Mbps em 100M).'
     },
     rfc6349: {
-      name: 'Padrão Telecom',
-      fullName: 'Padrão Telecom (RFC 6349)',
+      name: 'Link Dedicado Simétrico - RFC 6349',
+      fullName: 'Link Dedicado Simétrico - RFC 6349',
       icon: '📋',
       isAsymmetric: false,
       dlPctReq: 0.95,      // 95% padrão IETF
@@ -1069,8 +1069,8 @@
       maxRtt: 100,
       maxJitter: 50,
       maxLoss: 2.0,
-      title: 'Critério Oficial RFC 6349:',
-      desc: 'Padrão formal IETF para ativação de enlaces corporativos, exigindo entrega útil de no mínimo <strong>95% da velocidade nominal em Download e Upload</strong>.'
+      title: 'Critério Oficial — Link Dedicado Simétrico (RFC 6349):',
+      desc: 'Padrão formal IETF para ativação de enlaces corporativos dedicados, exigindo entrega útil de no mínimo <strong>95% da velocidade nominal em Download e Upload (1:1 Simétrico)</strong>.'
     }
   };
 
@@ -1200,7 +1200,7 @@
   }
 
   function updateAgenciaFieldVisibility() {
-    const profKey = document.getElementById('cbProjetoPerfil')?.value || 'bradesco_dedicado';
+    const profKey = document.getElementById('cbProjetoPerfil')?.value || 'bandalarga_padrao';
     const isBrad = profKey.startsWith('bradesco');
     const boxAgencia = document.getElementById('boxCampoAgencia');
     const boxOs = document.getElementById('boxCampoOs');
@@ -1277,7 +1277,7 @@
 
   function updateProfileExplaining() {
     const profKey = document.getElementById('cbProjetoPerfil').value;
-    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bradesco_dedicado;
+    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bandalarga_padrao;
     document.getElementById('ruleIcon').innerText = p.icon;
     document.getElementById('ruleTitle').innerText = p.title;
     document.getElementById('ruleText').innerHTML = p.desc;
@@ -1285,7 +1285,7 @@
 
   function updateTargetsDisplay() {
     const profKey = document.getElementById('cbProjetoPerfil').value;
-    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bradesco_dedicado;
+    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bandalarga_padrao;
     const cirDl = getCirNominal();
     const cirUl = getUlCirNominal(p, cirDl);
 
@@ -1322,7 +1322,7 @@
 
   function getCurrentConfig() {
     const profKey = document.getElementById('cbProjetoPerfil').value;
-    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bradesco_dedicado;
+    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bandalarga_padrao;
     const cirDl = getCirNominal();
     const cirUl = getUlCirNominal(p, cirDl);
     return {
@@ -1513,7 +1513,7 @@
     const signal = abortController.signal;
 
     const profKey = document.getElementById('cbProjetoPerfil').value;
-    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bradesco_dedicado;
+    const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bandalarga_padrao;
     const cirDl = getCirNominal();
     const cirUl = getUlCirNominal(p, cirDl);
 
