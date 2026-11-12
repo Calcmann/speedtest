@@ -543,6 +543,12 @@
     .badge-fail { background: var(--rose-bg); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
     .badge-pending { background: var(--amber-bg); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
     .badge-blocked { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .badge-global { background: rgba(234, 179, 8, 0.15) !important; color: #facc15 !important; border: 1px solid rgba(234, 179, 8, 0.4) !important; }
+    .badge-subadmin { background: rgba(56, 189, 248, 0.15) !important; color: #38bdf8 !important; border: 1px solid rgba(56, 189, 248, 0.4) !important; }
+    .cluster-badge { display: inline-flex; align-items: center; background: #27272a; border: 1px solid #3f3f46; color: #e4e4e7; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin: 2px; }
+    .cluster-checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 180px; overflow-y: auto; background: #18181b; border: 1px solid #3f3f46; border-radius: 8px; padding: 10px; margin-top: 6px; }
+    .cluster-chk-label { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #d4d4d8; cursor: pointer; user-select: none; }
+    .cluster-chk-label input { cursor: pointer; accent-color: var(--claro-red); }
 
     /* MODAL */
     .modal-overlay {
@@ -707,12 +713,16 @@
           <button class="nav-tab" onclick="switchTab('technicians')">
             <span>👥</span> Técnicos e Licenças
           </button>
+          <button class="nav-tab" id="navTabSubAdmins" onclick="switchTab('subadmins')">
+            <span>🛡️</span> Sub-Administradores
+          </button>
           <button class="nav-tab" onclick="switchTab('settings')">
             <span>⚙️</span> Configurações
           </button>
         </nav>
 
         <div class="header-right">
+          <span class="status-pill badge-global" id="pillUserProfile" style="display: inline-flex; align-items: center; gap: 6px;">👑 Administrador Global</span>
           <span class="status-pill" id="pillCloudStatus">🟢 Nuvem Conectada</span>
           <button class="btn btn-dark" onclick="syncCloudData(true)" title="Sincronizar dados agora">
             <span>🔄</span> Sync
@@ -1010,6 +1020,83 @@
         </div>
       </section>
 
+      <!-- ================= ABA: SUB-ADMINISTRADORES (EXCLUSIVO GLOBAL ADMIN) ================= -->
+      <section id="tab-subadmins" class="tab-content">
+        <!-- KPIs Sub-Administradores -->
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-total">
+            <div class="kpi-title">Total de Sub-Admins</div>
+            <div class="kpi-value" id="kpiSubTotal">0</div>
+            <div class="kpi-sub"><span>🛡️</span> Perfis com delegação de cluster</div>
+          </div>
+          <div class="kpi-card kpi-success">
+            <div class="kpi-title">Gestores Ativos</div>
+            <div class="kpi-value" id="kpiSubActive">0</div>
+            <div class="kpi-sub"><span style="color: var(--emerald);">🟢</span> Acesso habilitado no painel</div>
+          </div>
+          <div class="kpi-card" style="border-left: 3px solid #38bdf8;">
+            <div class="kpi-title">Clusters sob Cobertura</div>
+            <div class="kpi-value" id="kpiSubClustersCovered" style="color: #38bdf8;">0</div>
+            <div class="kpi-sub"><span>📍</span> Regiões atendidas por gestores</div>
+          </div>
+          <div class="kpi-card kpi-tech">
+            <div class="kpi-title">Técnicos Supervisionados</div>
+            <div class="kpi-value" id="kpiSubTechsCovered">0</div>
+            <div class="kpi-sub"><span>👥</span> Membros em equipes atribuídas</div>
+          </div>
+        </div>
+
+        <!-- Filtros e Ações Sub-Admins -->
+        <div class="filter-panel">
+          <div class="filter-group search-box">
+            <label>Buscar Gestor / Sub-Admin</label>
+            <input type="text" id="filterSubSearch" class="filter-input" placeholder="Nome, usuário, e-mail, telefone, cluster gerenciado..." oninput="renderSubAdminsTable()">
+          </div>
+          <div class="filter-group">
+            <label>Status do Perfil</label>
+            <select id="filterSubStatus" class="filter-select" onchange="renderSubAdminsTable()">
+              <option value="ALL">Todos os Perfis</option>
+              <option value="Active">🟢 Somente Ativos</option>
+              <option value="Inactive">⚪ Inativos / Bloqueados</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Ações do Administrador Global</label>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary" onclick="openNewSubAdminModal()">➕ Novo Sub-Administrador</button>
+              <button class="btn btn-secondary" onclick="fetchCloudSubAdmins(true)">🔄 Sincronizar Nuvem</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabela Sub-Admins -->
+        <div class="table-card">
+          <div class="table-header">
+            <div>
+              <div class="table-title">🛡️ Gestão de Sub-Administradores &amp; Clusters Autorizados</div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;" id="subTableCount">Exibindo 0 sub-administradores</div>
+            </div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>Usuário (Login)</th>
+                  <th>Nome do Gestor</th>
+                  <th>Contato (WhatsApp / E-mail)</th>
+                  <th>Clusters sob sua Gerência</th>
+                  <th>Equipe Ativa</th>
+                  <th>Data Cadastro</th>
+                  <th>Ações de Controle</th>
+                </tr>
+              </thead>
+              <tbody id="subTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- ================= ABA 5: CONFIGURAÇÕES & NUVEM ================= -->
       <section id="tab-settings" class="tab-content">
         <div class="charts-grid" style="grid-template-columns: 1fr 1fr;">
@@ -1216,6 +1303,91 @@
           <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
             <button type="button" class="btn btn-dark" onclick="closeModal('modalNewTech')">Cancelar</button>
             <button type="submit" class="btn btn-success">💾 Salvar e Liberar Acesso</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+        <!-- ================= MODAL: CADASTRAR / EDITAR SUB-ADMINISTRADOR ================= -->
+    <div class="modal-overlay" id="modalSubAdmin" onclick="closeModal('modalSubAdmin', event)">
+      <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 780px;">
+        <button class="modal-close" onclick="closeModal('modalSubAdmin')">&times;</button>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+          <div>
+            <h2 style="font-size: 17.5px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0;" id="modalSubAdminTitle">
+              <span>🛡️</span> Cadastrar Sub-Administrador
+            </h2>
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Atribua os clusters que este gestor poderá visualizar, aprovar, editar e excluir membros da sua equipe</div>
+          </div>
+          <span class="badge badge-success" id="modalSubAdminBadge">🟢 Ativo</span>
+        </div>
+
+        <form id="formSubAdmin" onsubmit="handleSaveSubAdmin(event)">
+          <input type="hidden" id="editSubAdminId">
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px;">
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Nome Completo do Gestor *</label>
+              <input type="text" id="editSubFullName" class="form-input" required placeholder="Ex: Carlos Roberto Lima" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Usuário de Acesso (Login) *</label>
+              <input type="text" id="editSubUsername" class="form-input" required placeholder="Ex: carlos.supervisor" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Senha de Acesso <span id="lblPassHint" style="color: var(--text-muted); font-size: 10px;">(preencha para definir ou redefinir)</span></label>
+              <input type="password" id="editSubPassword" class="form-input" placeholder="Mínimo 6 caracteres" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Telefone / WhatsApp</label>
+              <input type="text" id="editSubPhone" class="form-input" placeholder="(DD) 99999-9999" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">E-mail Corporativo</label>
+              <input type="email" id="editSubEmail" class="form-input" placeholder="gestor@claro.com.br" style="width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Status do Perfil</label>
+              <select id="editSubActive" class="form-select" style="width: 100%;">
+                <option value="true">🟢 Ativo (Acesso Liberado)</option>
+                <option value="false">⚪ Inativo (Acesso Suspenso)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Clusters sob Gerência -->
+          <div class="form-group" style="margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label class="form-label" style="font-size: 11.5px; font-weight: 700; color: #38bdf8; margin: 0;">
+                📍 Clusters sob sua Gerência (Selecione todos os autorizados para esta equipe) *
+              </label>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" class="btn btn-secondary" style="font-size: 10.5px; padding: 2px 8px;" onclick="selectAllSubAdminClusters(true)">Marcar Todos</button>
+                <button type="button" class="btn btn-secondary" style="font-size: 10.5px; padding: 2px 8px;" onclick="selectAllSubAdminClusters(false)">Limpar</button>
+              </div>
+            </div>
+            
+            <div class="cluster-checkbox-grid" id="subAdminClusterCheckboxes"></div>
+
+            <div style="margin-top: 8px;">
+              <label style="font-size: 11px; color: #a1a1aa;">Adicionar outros clusters personalizados (separados por vírgula):</label>
+              <input type="text" id="editSubCustomClusters" class="form-input" placeholder="Ex: Ribeirão Preto, Santos, São José dos Campos" style="width: 100%; margin-top: 3px;">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 18px;">
+            <label class="form-label" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Observações / Notas Internas</label>
+            <textarea id="editSubNotes" class="form-input" rows="2" placeholder="Ex: Coordenador responsável pelo rollout Bradesco na regional interior..." style="width: 100%; resize: vertical;"></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border); padding-top: 14px;">
+            <button type="button" class="btn btn-dark" onclick="closeModal('modalSubAdmin')">Cancelar</button>
+            <button type="submit" class="btn btn-primary" style="padding: 9px 20px;">💾 Salvar Sub-Administrador</button>
           </div>
         </form>
       </div>
@@ -2225,6 +2397,66 @@
   }
 ];
     let RAW_SPEEDTESTS = [];
+    let RAW_SUB_ADMINS = [
+  {
+    "Id": "subadmin-001",
+    "Username": "gestor.sc",
+    "FullName": "Gestor Regional SC",
+    "Email": "gestor.sc@claro.com.br",
+    "Phone": "(48) 99888-1001",
+    "PasswordHash": "2f334bb046307e76085fa89e84da9c7804d5650656ee032c56e84c636aa4eaab",
+    "ManagedClusters": [
+      "Blumenau",
+      "FNS",
+      "Florianopolis",
+      "Florianópolis",
+      "Itajaí",
+      "Joinville",
+      "SC",
+      "SC Interior",
+      "Empresarial DE SC"
+    ],
+    "Role": "SubAdmin",
+    "Active": true,
+    "CreatedAtIso": "2026-11-12T14:00:00Z",
+    "Notes": "Gestor de Equipe Regional Santa Catarina"
+  },
+  {
+    "Id": "subadmin-002",
+    "Username": "gestor.sp",
+    "FullName": "Gestor Regional SP",
+    "Email": "gestor.sp@claro.com.br",
+    "Phone": "(19) 99777-2002",
+    "PasswordHash": "2f334bb046307e76085fa89e84da9c7804d5650656ee032c56e84c636aa4eaab",
+    "ManagedClusters": [
+      "Campinas",
+      "Campinas / Interior",
+      "Interior",
+      "SP Interior",
+      "SPI",
+      "Capital",
+      "São Paulo Capital",
+      "Casbc"
+    ],
+    "Role": "SubAdmin",
+    "Active": true,
+    "CreatedAtIso": "2026-11-12T14:00:00Z",
+    "Notes": "Gestor de Equipe Regional São Paulo e Interior"
+  }
+];
+    let CURRENT_USER = null;
+
+    // Carrega sub-administradores do cache local se existir
+    try {
+      const localSubs = JSON.parse(localStorage.getItem('sparc_admin_sub_admins') || '[]');
+      if (Array.isArray(localSubs) && localSubs.length > 0) {
+        localSubs.forEach(ls => {
+          const idx = RAW_SUB_ADMINS.findIndex(s => s.Id === ls.Id || s.Username.toLowerCase() === (ls.Username || '').toLowerCase());
+          if (idx >= 0) RAW_SUB_ADMINS[idx] = ls;
+          else RAW_SUB_ADMINS.push(ls);
+        });
+      }
+    } catch (e) {}
 
     // CREDENCIAL CRIPTOGRAFADA PARA EVITAR GITHUB SECRET SCANNER FALSE POSITIVE
     const BUNDLED_ENC_TOKEN = [52,56,49,13,47,56,20,5,23,38,125,61,107,42,119,7,3,23,60,63,32,16,47,70,114,72,117,49,40,37,24,21,102,114,119,20,15,122,39,9];
@@ -2291,17 +2523,87 @@
       return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
     }
 
+    // ==========================================
+    // CONTROLE DE ACESSO E PERFIS (SUB-ADMINS)
+    // ==========================================
+    function isClusterManagedByCurrentUser(clusterName) {
+      if (!CURRENT_USER || CURRENT_USER.role === 'GlobalAdmin') return true;
+      if (!clusterName) return false;
+      const managed = CURRENT_USER.managedClusters || [];
+      if (managed.length === 0) return false;
+      const cNorm = clusterName.trim().toLowerCase();
+      return managed.some(m => {
+        if (!m) return false;
+        const mNorm = m.trim().toLowerCase();
+        return cNorm === mNorm || cNorm.includes(mNorm) || mNorm.includes(cNorm);
+      });
+    }
+
+    function getAvailableSystemClusters() {
+      const set = new Set();
+      (RAW_DEVICES || []).forEach(d => { if (d.Cluster && d.Cluster.trim()) set.add(d.Cluster.trim()); });
+      (RAW_TELEMETRY || []).forEach(t => { if (t.Cluster && t.Cluster.trim()) set.add(t.Cluster.trim()); });
+      (RAW_REQUESTS || []).forEach(r => { if (r.Cluster && r.Cluster.trim()) set.add(r.Cluster.trim()); });
+      (RAW_SUB_ADMINS || []).forEach(s => {
+        (s.ManagedClusters || []).forEach(c => { if (c && c.trim() && c !== '*') set.add(c.trim()); });
+      });
+      return Array.from(set).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    }
+
+    function updateUserHeaderProfile() {
+      const pill = document.getElementById('pillUserProfile');
+      if (!pill) return;
+      if (!CURRENT_USER || CURRENT_USER.role === 'GlobalAdmin') {
+        pill.innerHTML = '👑 <strong>Administrador Global</strong> (Acesso Completo)';
+        pill.className = 'status-pill badge-global';
+      } else {
+        const list = (CURRENT_USER.managedClusters || []).join(', ') || 'Nenhum';
+        pill.innerHTML = `👤 <strong>${CURRENT_USER.fullName}</strong> (Sub-Admin) &bull; <span title="${list}">📍 ${list}</span>`;
+        pill.className = 'status-pill badge-subadmin';
+      }
+    }
+
+    function updateUserPermissionsUi() {
+      const isGlobal = !CURRENT_USER || CURRENT_USER.role === 'GlobalAdmin';
+      
+      // Aba Sub-Administradores
+      const tabBtn = document.getElementById('navTabSubAdmins');
+      if (tabBtn) tabBtn.style.display = isGlobal ? 'flex' : 'none';
+
+      // Bloco de Token GitHub em Configurações
+      const cfgGit = document.getElementById('cfgRepo')?.closest('.chart-card');
+      if (cfgGit) cfgGit.style.display = isGlobal ? 'block' : 'none';
+
+      // Título do card de senha
+      const passTitle = document.getElementById('cfgNewPass')?.closest('.chart-card')?.querySelector('.chart-title');
+      if (passTitle) {
+        passTitle.innerHTML = isGlobal ? '🔐 Senha Mestra do Painel Admin (Global)' : '🔐 Alterar Minha Senha de Acesso (Sub-Admin)';
+      }
+    }
     // CONTROLE DE SESSÃO
     function checkSession() {
-      const sess = sessionStorage.getItem('sparc_admin_session');
-      if (sess) {
+      const sessStr = sessionStorage.getItem('sparc_admin_session');
+      if (sessStr) {
+        try {
+          CURRENT_USER = JSON.parse(sessStr);
+        } catch (e) {
+          CURRENT_USER = { username: 'admin', fullName: 'Administrador Global', role: 'GlobalAdmin', managedClusters: ['*'] };
+        }
         document.getElementById('loginView').style.display = 'none';
         document.getElementById('appShell').style.display = 'flex';
+
+        updateUserHeaderProfile();
+        updateUserPermissionsUi();
+
         initTelemetryView();
         initTechniciansView();
         initRequestsView();
         initSpeedtestView();
+        if (CURRENT_USER.role === 'GlobalAdmin') {
+          initSubAdminsView();
+        }
       } else {
+        CURRENT_USER = null;
         document.getElementById('loginView').style.display = 'flex';
         document.getElementById('appShell').style.display = 'none';
       }
@@ -2316,19 +2618,51 @@
       const passHash = await sha256(pass);
       const targetHash = localStorage.getItem('sparc_admin_pwd_hash') || DEFAULT_PWD_HASH;
 
+      // 1. Administrador Global
       if ((user.toLowerCase() === 'admin' || user.toLowerCase() === 'coordenador') && passHash === targetHash) {
         alertBox.style.display = 'none';
-        sessionStorage.setItem('sparc_admin_session', JSON.stringify({ user, at: Date.now() }));
+        CURRENT_USER = {
+          username: user,
+          fullName: 'Administrador Global',
+          role: 'GlobalAdmin',
+          managedClusters: ['*'],
+          loginAt: Date.now()
+        };
+        sessionStorage.setItem('sparc_admin_session', JSON.stringify(CURRENT_USER));
         checkSession();
-        showToast('Login realizado com sucesso! Bem-vindo ao SPARC ADMIN.');
-      } else {
-        alertBox.style.display = 'block';
-        alertBox.innerText = '⚠️ Usuário ou senha inválidos. Tente novamente.';
+        showToast('Login realizado com sucesso! Bem-vindo, Administrador Global.');
+        return;
       }
+
+      // 2. Sub-Administrador Regional
+      const sub = (RAW_SUB_ADMINS || []).find(s => 
+        s.Username && s.Username.trim().toLowerCase() === user.toLowerCase() && s.Active !== false
+      );
+      if (sub && sub.PasswordHash === passHash) {
+        alertBox.style.display = 'none';
+        CURRENT_USER = {
+          id: sub.Id,
+          username: sub.Username,
+          fullName: sub.FullName,
+          email: sub.Email,
+          phone: sub.Phone,
+          role: 'SubAdmin',
+          managedClusters: sub.ManagedClusters || [],
+          loginAt: Date.now()
+        };
+        sessionStorage.setItem('sparc_admin_session', JSON.stringify(CURRENT_USER));
+        checkSession();
+        showToast(`Bem-vindo, ${sub.FullName}! Acesso liberado para a sua equipe.`);
+        return;
+      }
+
+      alertBox.style.display = 'block';
+      alertBox.innerText = '⚠️ Usuário ou senha inválidos. Tente novamente.';
     }
 
     function handleLogout() {
       sessionStorage.removeItem('sparc_admin_session');
+      CURRENT_USER = null;
       checkSession();
     }
 
@@ -2345,6 +2679,9 @@
 
       if (tabId === 'telemetry') {
         setTimeout(initCharts, 50);
+      }
+      if (tabId === 'subadmins') {
+        renderSubAdminsTable();
       }
     }
 
@@ -2684,7 +3021,9 @@
       const status = document.getElementById('filterDevStatus')?.value || 'ALL';
       const plat = document.getElementById('filterDevPlatform')?.value || 'ALL';
 
+      // Restringe à equipe do sub-administrador logado
       filteredDevices = RAW_DEVICES.filter(d => {
+        if (!isClusterManagedByCurrentUser(d.Cluster)) return false;
         if (status !== 'ALL' && d.Status !== status) return false;
         if (plat !== 'ALL' && d.Platform !== plat) return false;
 
@@ -2776,6 +3115,10 @@
     function openEditTechModal(guid) {
       const d = RAW_DEVICES.find(x => x.MachineGuid === guid);
       if (!d) return;
+      if (!isClusterManagedByCurrentUser(d.Cluster)) {
+        showToast('Acesso negado: este técnico pertence a outro cluster.');
+        return;
+      }
       currentSelectedTech = d;
 
       const name = d.FullName || ((d.FirstName || '') + ' ' + (d.LastName || '')).trim() || 'Sem Nome';
@@ -2870,6 +3213,10 @@
     async function quickDeleteTech(guid) {
       const d = RAW_DEVICES.find(x => x.MachineGuid === guid);
       if (!d) return;
+      if (!isClusterManagedByCurrentUser(d.Cluster)) {
+        showToast('Acesso negado: este técnico pertence a outro cluster.');
+        return;
+      }
       const name = d.FullName || ((d.FirstName || '') + ' ' + (d.LastName || '')).trim() || 'Técnico';
       if (!confirm(`Deseja realmente EXCLUIR DEFINITIVAMENTE o cadastro do técnico "${name}"?\n\nEsta cópia será removida permanentemente da base e sincronizada na nuvem.`)) return;
 
@@ -2890,7 +3237,15 @@
     }
 
     function openNewTechnicianModal() {
-      document.getElementById('modalNewTech').style.display = 'flex';
+      const modal = document.getElementById('modalNewTech');
+      if (modal) {
+        modal.style.display = 'flex';
+        // Se for SubAdmin, preenche o cluster com o primeiro gerenciado
+        if (CURRENT_USER && CURRENT_USER.role === 'SubAdmin' && (CURRENT_USER.managedClusters || []).length > 0) {
+          const clInput = document.getElementById('newTechCluster');
+          if (clInput) clInput.value = CURRENT_USER.managedClusters[0];
+        }
+      }
     }
 
     function handleNewTechnicianSubmit(e) {
@@ -2962,7 +3317,8 @@
     }
 
     function updateRequestsBadge() {
-      const count = RAW_REQUESTS.filter(r => r.Status === 'Pending').length;
+      const teamReqs = RAW_REQUESTS.filter(r => isClusterManagedByCurrentUser(r.Cluster));
+      const count = teamReqs.filter(r => (r.Status || 'Pending') === 'Pending').length;
       const b = document.getElementById('badgeRequestsCount');
       if (b) b.innerText = count;
     }
@@ -2971,7 +3327,8 @@
       purgeRejectedRequests();
       const tbody = document.getElementById('reqTableBody');
       const countEl = document.getElementById('reqTableCount');
-      const pending = RAW_REQUESTS.filter(r => r.Status === 'Pending');
+      const teamReqs = RAW_REQUESTS.filter(r => isClusterManagedByCurrentUser(r.Cluster));
+      const pending = teamReqs.filter(r => (r.Status || 'Pending') === 'Pending');
       if (countEl) countEl.innerText = `${pending.length} solicitações aguardando aprovação`;
 
       if (!tbody) return;
@@ -3447,6 +3804,320 @@
       }
     }
 
+    // ==========================================
+    // 5. MÓDULO DE GESTÃO DE SUB-ADMINISTRADORES
+    // ==========================================
+    function initSubAdminsView() {
+      renderSubAdminsTable();
+    }
+
+    function renderSubAdminsTable() {
+      const tbody = document.getElementById('subTableBody');
+      const countEl = document.getElementById('subTableCount');
+      if (!tbody) return;
+
+      const q = document.getElementById('filterSubSearch')?.value.toLowerCase().trim() || '';
+      const status = document.getElementById('filterSubStatus')?.value || 'ALL';
+
+      let list = RAW_SUB_ADMINS || [];
+
+      // KPIs
+      const total = list.length;
+      const active = list.filter(s => s.Active !== false).length;
+      const allCoveredClusters = new Set();
+      list.forEach(s => (s.ManagedClusters || []).forEach(c => { if (c) allCoveredClusters.add(c); }));
+      
+      const techsCovered = RAW_DEVICES.filter(d => {
+        return list.some(s => s.Active !== false && (s.ManagedClusters || []).some(m => {
+          const cNorm = (d.Cluster || '').trim().toLowerCase();
+          const mNorm = m.trim().toLowerCase();
+          return cNorm === mNorm || cNorm.includes(mNorm) || mNorm.includes(cNorm);
+        }));
+      }).length;
+
+      const kpiTotal = document.getElementById('kpiSubTotal');
+      const kpiActive = document.getElementById('kpiSubActive');
+      const kpiClusters = document.getElementById('kpiSubClustersCovered');
+      const kpiTechs = document.getElementById('kpiSubTechsCovered');
+      if (kpiTotal) kpiTotal.innerText = total;
+      if (kpiActive) kpiActive.innerText = active;
+      if (kpiClusters) kpiClusters.innerText = allCoveredClusters.size;
+      if (kpiTechs) kpiTechs.innerText = techsCovered;
+
+      // Filtros
+      if (status === 'Active') list = list.filter(s => s.Active !== false);
+      if (status === 'Inactive') list = list.filter(s => s.Active === false);
+
+      if (q) {
+        list = list.filter(s => {
+          const txt = [
+            s.Username,
+            s.FullName,
+            s.Email,
+            s.Phone,
+            (s.ManagedClusters || []).join(' ')
+          ].join(' ').toLowerCase();
+          return txt.includes(q);
+        });
+      }
+
+      if (countEl) countEl.innerText = `Exibindo ${list.length} sub-administrador(es)`;
+      tbody.innerHTML = '';
+
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhum sub-administrador cadastrado ou encontrado com os filtros atuais.</td></tr>';
+        return;
+      }
+
+      list.forEach(sub => {
+        const isAct = sub.Active !== false;
+        const badgeStatus = isAct ? '<span class="badge badge-success">🟢 Ativo</span>' : '<span class="badge badge-blocked">⚪ Inativo</span>';
+        
+        const teamCount = RAW_DEVICES.filter(d => {
+          return (sub.ManagedClusters || []).some(m => {
+            const cNorm = (d.Cluster || '').trim().toLowerCase();
+            const mNorm = m.trim().toLowerCase();
+            return cNorm === mNorm || cNorm.includes(mNorm) || mNorm.includes(cNorm);
+          });
+        }).length;
+
+        const clusterChips = (sub.ManagedClusters || []).map(c => `<span class="cluster-badge">📍 ${c}</span>`).join(' ') || '<span style="color: var(--text-muted); font-size: 11px;">Nenhum cluster</span>';
+        const dt = sub.CreatedAtIso ? new Date(sub.CreatedAtIso).toLocaleDateString('pt-BR') : '-';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${badgeStatus}</td>
+          <td><code>${sub.Username}</code></td>
+          <td><strong>${sub.FullName}</strong></td>
+          <td>
+            <div>${sub.Phone || '-'}</div>
+            <div style="font-size: 11px; color: var(--text-muted);">${sub.Email || '-'}</div>
+          </td>
+          <td style="white-space: normal; max-width: 320px;">${clusterChips}</td>
+          <td><span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">👥 ${teamCount} técnico(s)</span></td>
+          <td>${dt}</td>
+          <td>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 11px;" onclick="openEditSubAdminModal('${sub.Id}')">✏️ Editar Clusters</button>
+              <button class="btn btn-danger" style="padding: 5px 10px; font-size: 11px;" onclick="deleteSubAdmin('${sub.Id}')">🗑️ Excluir</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openNewSubAdminModal() {
+      document.getElementById('modalSubAdminTitle').innerHTML = '<span>🛡️</span> Novo Sub-Administrador';
+      document.getElementById('editSubAdminId').value = '';
+      document.getElementById('editSubFullName').value = '';
+      document.getElementById('editSubUsername').value = '';
+      document.getElementById('editSubUsername').readOnly = false;
+      document.getElementById('editSubPassword').value = '';
+      document.getElementById('editSubPassword').required = true;
+      document.getElementById('lblPassHint').innerText = '(obrigatório ao cadastrar)';
+      document.getElementById('editSubPhone').value = '';
+      document.getElementById('editSubEmail').value = '';
+      document.getElementById('editSubActive').value = 'true';
+      document.getElementById('editSubCustomClusters').value = '';
+      document.getElementById('editSubNotes').value = '';
+      
+      renderClusterCheckboxes([]);
+      document.getElementById('modalSubAdmin').style.display = 'flex';
+    }
+
+    function openEditSubAdminModal(id) {
+      const sub = RAW_SUB_ADMINS.find(s => s.Id === id);
+      if (!sub) return;
+
+      document.getElementById('modalSubAdminTitle').innerHTML = `<span>✏️</span> Editar Sub-Admin: ${sub.FullName}`;
+      document.getElementById('editSubAdminId').value = sub.Id;
+      document.getElementById('editSubFullName').value = sub.FullName;
+      document.getElementById('editSubUsername').value = sub.Username;
+      document.getElementById('editSubUsername').readOnly = true;
+      document.getElementById('editSubPassword').value = '';
+      document.getElementById('editSubPassword').required = false;
+      document.getElementById('lblPassHint').innerText = '(deixe em branco para manter a senha atual)';
+      document.getElementById('editSubPhone').value = sub.Phone || '';
+      document.getElementById('editSubEmail').value = sub.Email || '';
+      document.getElementById('editSubActive').value = sub.Active !== false ? 'true' : 'false';
+      document.getElementById('editSubCustomClusters').value = '';
+      document.getElementById('editSubNotes').value = sub.Notes || '';
+
+      renderClusterCheckboxes(sub.ManagedClusters || []);
+      document.getElementById('modalSubAdmin').style.display = 'flex';
+    }
+
+    function renderClusterCheckboxes(selectedClusters = []) {
+      const container = document.getElementById('subAdminClusterCheckboxes');
+      if (!container) return;
+      const allClusters = getAvailableSystemClusters();
+      container.innerHTML = '';
+
+      allClusters.forEach(c => {
+        const isChecked = selectedClusters.some(sel => sel.trim().toLowerCase() === c.trim().toLowerCase());
+        const label = document.createElement('label');
+        label.className = 'cluster-chk-label';
+        label.innerHTML = `<input type="checkbox" name="chkSubCluster" value="${c}" ${isChecked ? 'checked' : ''}> <span>${c}</span>`;
+        container.appendChild(label);
+      });
+    }
+
+    function selectAllSubAdminClusters(check) {
+      document.querySelectorAll('input[name="chkSubCluster"]').forEach(chk => {
+        chk.checked = check;
+      });
+    }
+
+    async function handleSaveSubAdmin(e) {
+      e.preventDefault();
+      const id = document.getElementById('editSubAdminId').value.trim();
+      const fullName = document.getElementById('editSubFullName').value.trim();
+      const username = document.getElementById('editSubUsername').value.trim().toLowerCase();
+      const pass = document.getElementById('editSubPassword').value;
+      const phone = document.getElementById('editSubPhone').value.trim();
+      const email = document.getElementById('editSubEmail').value.trim();
+      const active = document.getElementById('editSubActive').value === 'true';
+      const customClusters = document.getElementById('editSubCustomClusters').value.trim();
+      const notes = document.getElementById('editSubNotes').value.trim();
+
+      // Coleta clusters marcados
+      const clusters = [];
+      document.querySelectorAll('input[name="chkSubCluster"]:checked').forEach(chk => {
+        clusters.push(chk.value.trim());
+      });
+
+      // Coleta clusters personalizados
+      if (customClusters) {
+        customClusters.split(',').forEach(c => {
+          const clean = c.trim();
+          if (clean && !clusters.includes(clean)) clusters.push(clean);
+        });
+      }
+
+      if (clusters.length === 0) {
+        showToast('Selecione ao menos um cluster sob gerência deste sub-administrador.');
+        return;
+      }
+
+      let sub = RAW_SUB_ADMINS.find(s => s.Id === id || s.Username === username);
+      if (sub) {
+        sub.FullName = fullName;
+        sub.Phone = phone;
+        sub.Email = email;
+        sub.Active = active;
+        sub.ManagedClusters = clusters;
+        sub.Notes = notes;
+        if (pass && pass.length >= 6) {
+          sub.PasswordHash = await sha256(pass);
+        }
+      } else {
+        if (!pass || pass.length < 6) {
+          showToast('A senha inicial deve ter no mínimo 6 caracteres.');
+          return;
+        }
+        const newSub = {
+          Id: 'subadmin-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6),
+          Username: username,
+          FullName: fullName,
+          Phone: phone,
+          Email: email,
+          PasswordHash: await sha256(pass),
+          ManagedClusters: clusters,
+          Role: 'SubAdmin',
+          Active: active,
+          CreatedAtIso: new Date().toISOString(),
+          Notes: notes
+        };
+        RAW_SUB_ADMINS.unshift(newSub);
+      }
+
+      localStorage.setItem('sparc_admin_sub_admins', JSON.stringify(RAW_SUB_ADMINS));
+      renderSubAdminsTable();
+      closeModal('modalSubAdmin');
+      showToast(`Sub-Administrador "${fullName}" salvo com sucesso!`);
+      await commitSubAdminsToCloud(true);
+    }
+
+    async function deleteSubAdmin(id) {
+      const sub = RAW_SUB_ADMINS.find(s => s.Id === id);
+      if (!sub) return;
+      if (!confirm(`Deseja realmente EXCLUIR o sub-administrador "${sub.FullName}" (${sub.Username})?\n\nO acesso deste gestor será revogado permanentemente.`)) return;
+
+      RAW_SUB_ADMINS = RAW_SUB_ADMINS.filter(s => s.Id !== id);
+      localStorage.setItem('sparc_admin_sub_admins', JSON.stringify(RAW_SUB_ADMINS));
+      renderSubAdminsTable();
+      showToast(`Sub-Administrador "${sub.FullName}" excluído com sucesso!`);
+      await commitSubAdminsToCloud(true);
+    }
+
+    async function fetchCloudSubAdmins(interactive = false) {
+      const token = getActiveGitHubToken();
+      if (!token) {
+        if (interactive) showToast('Token GitHub não configurado.');
+        return;
+      }
+      if (interactive) showToast('Buscando sub-administradores na nuvem...');
+      try {
+        const res = await fetch('https://api.github.com/repos/Calcmann/repo/contents/sub_admins.json', {
+          headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+        });
+        if (res.ok) {
+          const obj = await res.json();
+          if (obj.content) {
+            const decoded = decodeURIComponent(escape(atob(obj.content.replace(/\s/g, ''))));
+            RAW_SUB_ADMINS = JSON.parse(decoded);
+            localStorage.setItem('sparc_admin_sub_admins', JSON.stringify(RAW_SUB_ADMINS));
+            renderSubAdminsTable();
+            if (interactive) showToast(`Sincronização concluída! (${RAW_SUB_ADMINS.length} sub-admins carregados)`);
+          }
+        } else {
+          if (interactive) showToast('Nenhum arquivo sub_admins.json remoto encontrado.');
+        }
+      } catch (err) {
+        console.warn('Erro ao buscar sub_admins remotos:', err);
+        if (interactive) showToast('Falha de rede ao buscar sub-administradores.');
+      }
+    }
+
+    async function commitSubAdminsToCloud(silent = false) {
+      const token = getActiveGitHubToken();
+      if (!token) return false;
+      try {
+        const getRes = await fetch('https://api.github.com/repos/Calcmann/repo/contents/sub_admins.json', {
+          headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+        });
+        let sha = '';
+        if (getRes.ok) {
+          const getObj = await getRes.json();
+          sha = getObj.sha;
+        }
+        const payloadStr = JSON.stringify(RAW_SUB_ADMINS, null, 2);
+        const b64 = btoa(unescape(encodeURIComponent(payloadStr)));
+        const putRes = await fetch('https://api.github.com/repos/Calcmann/repo/contents/sub_admins.json', {
+          method: 'PUT',
+          headers: {
+            'Authorization': 'token ' + token,
+            'User-Agent': 'SPARC-Admin-Web',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: 'admin(web): update sub_admins.json [' + new Date().toISOString() + ']',
+            content: b64,
+            sha: sha || undefined
+          })
+        });
+        if (putRes.ok && !silent) {
+          showToast('✓ Sub-administradores salvos na Nuvem!');
+          return true;
+        }
+        return putRes.ok;
+      } catch (e) {
+        console.warn('Erro ao salvar sub_admins na nuvem:', e);
+        return false;
+      }
+    }
+
     async function changeAdminPassword() {
       const newP = document.getElementById('cfgNewPass').value;
       const confP = document.getElementById('cfgConfirmPass').value;
@@ -3462,9 +4133,24 @@
       }
 
       const newHash = await sha256(newP);
-      localStorage.setItem('sparc_admin_pwd_hash', newHash);
-      statusBox.innerHTML = '<span style="color: var(--emerald);">✓ Senha mestra atualizada com sucesso! Use a nova senha nos próximos acessos.</span>';
-      showToast('Senha de acesso do SPARC ADMIN alterada!');
+
+      if (!CURRENT_USER || CURRENT_USER.role === 'GlobalAdmin') {
+        localStorage.setItem('sparc_admin_pwd_hash', newHash);
+        statusBox.innerHTML = '<span style="color: var(--emerald);">✓ Senha mestra global atualizada com sucesso!</span>';
+        showToast('Senha mestra global do SPARC ADMIN alterada!');
+      } else {
+        const subIdx = RAW_SUB_ADMINS.findIndex(s => s.Id === CURRENT_USER.id || s.Username.toLowerCase() === CURRENT_USER.username.toLowerCase());
+        if (subIdx >= 0) {
+          RAW_SUB_ADMINS[subIdx].PasswordHash = newHash;
+          localStorage.setItem('sparc_admin_sub_admins', JSON.stringify(RAW_SUB_ADMINS));
+          await commitSubAdminsToCloud(true);
+          statusBox.innerHTML = '<span style="color: var(--emerald);">✓ Sua senha pessoal foi atualizada com sucesso!</span>';
+          showToast('Sua senha de Sub-Administrador foi alterada com sucesso!');
+        }
+      }
+
+      document.getElementById('cfgNewPass').value = '';
+      document.getElementById('cfgConfirmPass').value = '';
     }
 
     async function syncCloudData(interactive = false) {
@@ -3490,7 +4176,23 @@
           }
         }
 
-        // 2. Tenta buscar telemetry/circuits_index.json atualizado do repositório
+        // 2. Tenta buscar sub_admins.json atualizado do repositório
+        try {
+          const resSub = await fetch('https://api.github.com/repos/Calcmann/repo/contents/sub_admins.json', {
+            headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+          });
+          if (resSub.ok) {
+            const subObj = await resSub.json();
+            if (subObj.content) {
+              const decoded = decodeURIComponent(escape(atob(subObj.content.replace(/s/g, ''))));
+              RAW_SUB_ADMINS = JSON.parse(decoded);
+              localStorage.setItem('sparc_admin_sub_admins', JSON.stringify(RAW_SUB_ADMINS));
+              renderSubAdminsTable();
+            }
+          }
+        } catch (eSub) { }
+
+        // 3. Tenta buscar telemetry/circuits_index.json atualizado do repositório
         try {
           const resTelem = await fetch('https://api.github.com/repos/Calcmann/repo/contents/telemetry/circuits_index.json', {
             headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
