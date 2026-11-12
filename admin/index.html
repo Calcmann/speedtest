@@ -896,8 +896,20 @@
       <section id="tab-requests" class="tab-content">
         <div class="table-card">
           <div class="table-header">
-            <div class="table-title">🔔 Fila de Solicitações de Ativação Online (Novos Técnicos em Campo)</div>
-            <div style="font-size: 11.5px; color: var(--text-muted);" id="reqTableCount">0 pendentes</div>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <div class="table-title">🔔 Fila de Solicitações de Ativação Online (Técnicos em Campo)</div>
+              <button class="btn btn-dark" onclick="fetchCloudRequests(true)" style="padding: 4px 10px; font-size: 11.5px;" title="Atualizar solicitações da nuvem agora">
+                <span>🔄</span> Atualizar da Nuvem
+              </button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <div style="font-size: 11.5px; color: var(--text-muted);" id="reqTableCount">0 solicitações</div>
+              <select id="selFilterRequestsStatus" class="form-input" style="width: auto; padding: 4px 10px; font-size: 11.5px; margin: 0;" onchange="renderRequestsTable()">
+                <option value="Pending">⏳ Somente Pendentes</option>
+                <option value="ALL">📋 Todas as Solicitações</option>
+                <option value="Approved">✅ Aprovadas</option>
+              </select>
+            </div>
           </div>
           <div class="table-container">
             <table>
@@ -909,9 +921,10 @@
                   <th>Matrícula</th>
                   <th>Telefone</th>
                   <th>Plataforma</th>
-                  <th>Machine GUID / Display</th>
+                  <th>Cluster / UF</th>
                   <th>Versão do App</th>
-                  <th>Aprovação Imediata</th>
+                  <th>Status</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody id="reqTableBody"></tbody>
@@ -1150,13 +1163,42 @@
     </div>
 
     <footer>
-      SPARC ADMIN WEB &bull; Sistema de Provisionamento e Ativação de Roteadores Claro &bull; Telemetria Centralizada &bull; 11/11/2026
+      SPARC ADMIN WEB &bull; Sistema de Provisionamento e Ativação de Roteadores Claro &bull; Telemetria Centralizada &bull; 12/11/2026
     </footer>
   </div>
 
   <script>
     // DADOS INICIAIS EMBUTIDOS (SNAPSHOTS PARA DISPONIBILIDADE OFFLINE E INSTANTÂNEA)
     let RAW_DEVICES = [
+  {
+    "MachineGuid": "c50381ba-6c76-4d7a-94b0-a5da7afc582d",
+    "MachineFingerprint": "FE9E04EB9A21D2CB13968BD85CF0E0954E091F316E34C354B5DAA520C6BEBB0C",
+    "FirstName": "George",
+    "LastName": "Calcmann (notebook)",
+    "Phone": "(48) 98803-6632",
+    "Email": "george.calcmann@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "9114406",
+    "Cluster": "FNS",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.9.1-20261109",
+    "FirstRegisteredUtc": "2026-11-12T15:22:55.5577893Z",
+    "LastSeenUtc": "2026-11-12T15:22:55.557808Z",
+    "ExpirationDateIso": "2027-02-10",
+    "ValidDays": 90,
+    "Status": "Active",
+    "AuthorizedToken": "SPB1.eyJnIjoiYzUwMzgxYmEtNmM3Ni00ZDdhLTk0YjAtYTVkYTdhZmM1ODJkIiwiZiI6IkZFOUUwNEVCOUEyMUQyQ0IxMzk2OEJEODVDRjBFMDk1NEUwOTFGMzE2RTM0QzM1NEI1REFBNTIwQzZCRUJCMEMiLCJleHAiOiIyMDI3LTAyLTEwVDAwOjAwOjAwWiJ9.eQivZgbqeawgNef_vko0le4U8jf7P1uWMsrKKNhr4E7x74oPI0c27se3UnRdh3McycOuPDVOT9rFfwkwX7D3MxbEyhZZg88z3qCZPHGDnLJaLdqgZK0mqEuJrGuA7PiPqLGOSnCWo0Hq2o9mZVrIduW3i2e-xD0KhDrNx66KWP-32NPEtcMJQm3swOkYGlpojbj6NlFbwdJKeS4FOI_a6Gxd-hOUzDtYxPSaRJajvNj9TbayA5lWBTWsjGGPADzzMVZXs9w4g2WOfl6YIJRFgEvhZR9kiM6V6PV3UtnHSxzBX9Ert3adzfle5nNnJVG3Nm7SX00Bg40nq4lTDn0EuQ",
+    "Notes": "Aprovado online (90 dias)",
+    "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": true,
+    "RoleBadge": "🛡️ Administrador",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "George Calcmann (notebook)",
+    "CalculatedStatus": 0,
+    "StatusBadge": "🟢 Ativo",
+    "WhatsAppUrl": "https://wa.me/5548988036632"
+  },
   {
     "MachineGuid": "637ee96a-247f-46e7-932e-665c2b931a09",
     "MachineFingerprint": "FA3956EA4471DF1B3FAE71816F76564258F4D9E501D7FD84F166E9B8D507E95E",
@@ -1177,12 +1219,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiNjM3ZWU5NmEtMjQ3Zi00NmU3LTkzMmUtNjY1YzJiOTMxYTA5IiwiZiI6IkZBMzk1NkVBNDQ3MURGMUIzRkFFNzE4MTZGNzY1NjQyNThGNEQ5RTUwMUQ3RkQ4NEYxNjZFOUI4RDUwN0U5NUUiLCJleHAiOiIyMDI3LTAxLTI1VDAwOjAwOjAwWiJ9.pVkQZfCZ52I6QACZqa5KFvtKkwPXSZrv5jHSv9_4RSvAis5YV8IIxB-w1GYPI4Ath0arQBUNvu-pBA_4py9douTowk4fSGlgv_XlMohniXQej-UjNkEGnRVo12qnn5qsZTpLozXFABzbwvNbjjmNxxE-aAWNKwlc3ZGW30JXrxqnJ0fKEZA2KrQgIDA4_K0K4_ipEoLcayfMRGfOeZRrI6BiKPb5BOP_n1EOI8BnPwzm28nWo8BXhAUtjeO_1NfjBzUPx9xpPgEjYj_kaSrIg4JgBqOOYGRookwrruKNDUy9sERRs6X845rlEIRCuTGctQ2sigzG20hKxHqtiWjudg",
     "Notes": "Aprovado online (90 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "Denis André",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/018996939701",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/018996939701"
   },
   {
     "MachineGuid": "8246e85f-4051-4e10-8283-d3324b4d6e40",
@@ -1204,12 +1248,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiODI0NmU4NWYtNDA1MS00ZTEwLTgyODMtZDMzMjRiNGQ2ZTQwIiwiZiI6IkU2MzdFRjJBQTU4REY4REE3RkExRjkxOTNEOEIxMzA1NDQwNjc1MzVBQzFERDE2RDQwNTM5QzlCNzBCM0JFOTgiLCJleHAiOiIyMDI3LTAxLTI1VDAwOjAwOjAwWiJ9.SubYKu5UxcrcZXukyKJki1wTpEQOaBLCHkYRZDdoilwzTUKUa5vISU_1p1jTi61J4tFtXW7rkuHk3D3HOJkv1yMcDwcjTMh4Z5DeWoC0-3ooYlPx4NE2MYO_dvKnuBl5eR_C5Nj4Q6b8BBpVDfTPveEeMxh33684tzef9gq-KPJB4v6yt4g8lIG87WFJ7IVSaM0xhjSBVOIUhBPoGLVUqls62OoJCe8hq86d2ci7-OQ0yTx5UNYRYEvHge-iwpiS9J-sAp2oq_ztUtxcqceo73kavfEpmu5rQMSH2wANXrhzW7i_p9KChw9SD7m-6M1ABv1KkkOPrlVen0PFh7fShA",
     "Notes": "Aprovado online (90 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "Gabriel Lucas",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/5511913681942",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/5511913681942"
   },
   {
     "MachineGuid": "0ef227fa-c79b-4d01-817b-95d8373896a0",
@@ -1229,14 +1275,16 @@
     "ValidDays": 90,
     "Status": "Active",
     "AuthorizedToken": "SPB1.eyJnIjoiMGVmMjI3ZmEtYzc5Yi00ZDAxLTgxN2ItOTVkODM3Mzg5NmEwIiwiZiI6IkRFNEExMjgyMEJEMDdCNUQyQzgwRUZDODM0NjFBNkNFMzMxODUwNDYxRTMyMDJDMDg1MjM3Qjg2QjFCNzcyNjYiLCJleHAiOiIyMDI3LTAxLTIxVDAwOjAwOjAwWiJ9.Y69PNuDrG0QylU00hewf1B0YWzfIhNucusOITtfHPVdJoYRktMzXa6vY1KhLyt3VFmz3ReywKlTrZCgUrTQawsjANnNG8z8gB5g5oIhdogFhm287OJ5vbawfoWI2GppRuCwMlzvfH6rYwNq4YS7pNxzHBUHESBmrzcBafUvvAhOhRAxZsKVaVqHrWZ4p5x69EuN3Ki_Y03xu20WGS2ZIMj7Y1CJkWAegTzc2deDc_HFHy_07RbUBWVRM_9sYRQgvGvFiZbOwadBEf3tEY4Sp2wcrkNsxKnIHgzNONkbrKC00Nq64rhTpbebyK38gWgMqNMx9W2bLb0eUohieIdiUrQ",
-    "Notes": "Administrador do Sistema (Ambiente de Desenvolvimento)",
+    "Notes": "Aprovado online (90 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": true,
+    "RoleBadge": "🛡️ Administrador",
     "PlatformBadge": "🪟 Windows",
     "FullName": "George Luís Calcmann",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/5500000000000",
-    "Role": "Administrador"
+    "WhatsAppUrl": "https://wa.me/5500000000000"
   },
   {
     "MachineGuid": "4a5d9b04-6b99-449c-bff2-72dc252a4300",
@@ -1258,12 +1306,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiNGE1ZDliMDQtNmI5OS00NDljLWJmZjItNzJkYzI1MmE0MzAwIiwiZiI6IjBGRUZCODRDMjEyNUVCNkY5QTRENTJGNTAwMDYwMTdBMUJCRDk2OUNEMkI3QTE1Qzc5Q0ExMzRDMDI2MDk5QTMiLCJleHAiOiIyMDI3LTAxLTE0VDAwOjAwOjAwWiJ9.o1jf21mWfF1hnvksU2gYpWqgiAiw-df5plmERjlD353iiv7m30NPlQz_M5PvvgpOi8I_W16q7wma8MQ-FiDNHOLv3MyUBaGwwF4hdJQTWcxFmTdpj2DQGaRl0jDQsj4fSe3BjEvlvdmHWAU8NNlGlhNZr6Cm3zYo-B0BEpby5vzuQf-zdXegpVWOjp-cDEct_aC81ChToyi9Id761KbYy7jRdG9iKUE2JiereWS69uHQipxeHYfNwcYC1rken9QYPpFZP4sE3Hcb0yIC1SRS9gQfjNMTvQfwpQXgKUIqBbZnSwAods31_uoLnXQ6C6S2CLb32hl-1W11WbDZTnEbkQ",
     "Notes": "Aprovado online (90 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "José Volmir Pavão",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/5549988632386",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/5549988632386"
   },
   {
     "MachineGuid": "53af585e-cb1b-464d-95fd-f8f98a8f6663",
@@ -1285,12 +1335,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiNTNhZjU4NWUtY2IxYi00NjRkLTk1ZmQtZjhmOThhOGY2NjYzIiwiZiI6IjFFQzIxNEQ4QTg4NkE0NUJDNjgxNTFCMjUzOEQwQURGMzZCN0E1MTFDRUU1QTUxMTA3OTk5NUJBMEQ2OEMzMUQiLCJleHAiOiIyMDI3LTAxLTEzVDAwOjAwOjAwWiJ9.jVEwAcjImp5KxlDWWwtVBnPAvk_9TmJ5KE2QTTkS-JhbZ7S05KiWzN5ubAO36iNuKYfm8VkjLA5roJ_Gy7gd_FT-HxVkiJpkW7K-a0OdS3SFlXhWRQZD8ix-0m6Z955JXtv7U49BpHTvMuAVosKV6frem3ovOmwsq8i7MY-Jmfrlwr00nBrIgJJW8U7pd9vneeSBaB2jhSfRPEYNqD0GhJz-9qXqgl2Xqm8zBHL_Zz0jYrfIPbs-sgkVHz-Akin_ab_TjcasQgUT4peNOFfKG3lroylBw3gG3njJocABqHyNpGcXvxdKFv8VrUgVBI-D2p6Iisu2-7Q5SWfKWE03dQ",
     "Notes": "Aprovado online (90 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "Abimael Barbosa",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/5519994646840",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/5519994646840"
   },
   {
     "MachineGuid": "a4155838-321f-4019-878e-e79ed3a195f0",
@@ -1312,12 +1364,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiYTQxNTU4MzgtMzIxZi00MDE5LTg3OGUtZTc5ZWQzYTE5NWYwIiwiZiI6IkZDOTNCQkJBNEZGMjIzRTI2NTUzNkU5RDg3NzM5NjkyRkMyNTA4QzY2NDQ2RkI3QTAwODQ1NTNBQUYzRjRGMkIiLCJleHAiOiIyMDI3LTAxLTA2VDAwOjAwOjAwWiJ9.SjWhMGH6ubR6q3aeiAmrPX8l7HBhybpIdzXuysxp9STybqx1giXOQp7mrB3P7sgphKYXlYavwXtha6GwAWJZG71q3-Wis-SHVKARgoyj26RvNW1_20ZfIzZHrAgXJOob9ShLhDLIkjnwZ2stsrFj7OTY_GljcRxQapPUt4ru2N4RlR5rBNkDOBvzIYrmcQgCeh8rwS5WOyT0mBc2NdANVxm64uwMIOTq9rfIaX74mgePV-XXuMMY1yohAQVLBpTiQK2TlAb0GYELo4Ha1lgLsP9h1UXGIqskth6hOKG4wQqk1S0wg-GdK9M380WXxs1kYC6kCpJgyTA66BruzlmzoQ",
     "Notes": "Aprovado online (90 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "Henrique Silvino",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/5516991254729",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/5516991254729"
   },
   {
     "MachineGuid": "e5ce2cf7-5445-4a7f-8bda-f4164d777ab1",
@@ -1339,12 +1393,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiZTVjZTJjZjctNTQ0NS00YTdmLThiZGEtZjQxNjRkNzc3YWIxIiwiZiI6IjI1MzA3Q0UwMDdEM0U3RDU2RkM3QzVEM0ZDN0QxQzgwMkRCMTFDMzA2OTA0REU3MDZCMTg3N0Q3RDNCRURBNEQiLCJleHAiOiIyMDI3LTAxLTA1VDAwOjAwOjAwWiJ9.jjE8EE5MBeny5mwBA_8vgfwlOeUEgAU7fgPlECqLy-OdidXzIGIEk-gEXYx0GdYI2s9ON8H_0LsQYlC9cjVMA13lb0OGjGOoqBfdtRRVpi_0rfXyFomOGhfxX6g3d19SEAwSIjBjMho59_TlNNCm_FOznOfELiHYUMXOFb-IT1WzG9cSo60mHEs43bOHcINjxUocL1ZIfFQxGDTXS7YB10Nzc46CQyjnE0xtTQGUOV4KA7Ho2mMjbwNzWIuGot3LcDuCTZFL3T4t1uVaFJ2cMRoyze8chT548zDNHiCnglgfXFY0i07zV48ENFaZz0QzsAiyGK9W_7OCz-6hfFQtZQ",
     "Notes": "Aprovado online (90 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "Lucas Ratier",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/5548998125397",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/5548998125397"
   },
   {
     "MachineGuid": "bb4ed47f-c035-42aa-a7ff-59683fdaefbf",
@@ -1366,12 +1422,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiYmI0ZWQ0N2YtYzAzNS00MmFhLWE3ZmYtNTk2ODNmZGFlZmJmIiwiZiI6IkY0MzYwQTZCRTRGNDE5QUREQkNBRUFBQzcxQUZDMUZEQzhBRjE4QzJFMEYzRjFENjBBQUU3NTQ1QTE4MkM1NUMiLCJleHAiOiIyMDI2LTEyLTA1VDAwOjAwOjAwWiJ9.cV_BwkPra3FmGRi8prR_a3jGOpDpVP1DT_54Ubx3n9FBQ5riE_eRQ-hzdTP70-xY_hU9vXB4S2NJjR2Wh6x0raqhg4od3U1KwJxWocoNIAtf95Jndla8DtA4HmnnWaOZlRJ796nmCRHvEm-tCy2gmXfSOKVm9rKkm49NhwIrDxMVJLam1ggP7B0SkfL-dEcFwtuhnSO5jWe8MNVdYlwz0lF3PPYXVN21Mi97IZAXtyq6yQnFG_sY13oV5fH2iAvhCUS4xRbsVNVDyyYe-3hxMGHuE_V52KRekFotqUCGjB9LrXoTFmZzJLRbqezvmurqwjHUhkBZEvlbZLBWy_8cfw",
     "Notes": "Aprovado online (60 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "Luiz Silva",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/5547996502815",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/5547996502815"
   },
   {
     "MachineGuid": "923d6621-ffa5-48de-b7b0-ff0b9a351c22",
@@ -1393,12 +1451,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiOTIzZDY2MjEtZmZhNS00OGRlLWI3YjAtZmYwYjlhMzUxYzIyIiwiZiI6IjNFOTRDN0MyMDY1NDM2OUQzOENDRjZDNEQyNjc2RDNGMTREQzJCOTk3OTYxQzY3NUEwODBBRjE5OTcxOTI0NzciLCJleHAiOiIyMDI3LTAyLTA4VDAwOjAwOjAwWiJ9.mB1hNvzqkPEtIg7W-UocTEo6mcfPjT6RVnMCEFLjhUVO6aF55vfGxzU5dqtl6lyJwMGbtNmzyZxBhUF1YEdZFhJZpf4dWoJaGNzdv3_uIZ4e5la1qZVGHrmvZXGQ7Y2WZ1KeK5EihXgUxHrIDF0jCoqGe1NxYvxAhTvuxP7yMUxjrGt-YMlPZkxazA5cPgTXNH45ONV5kEDSMP7YjNEzXMng96foO_2hpbUqqFGICm6COitdq1_CDdAydAjMygCDxfZ_5ZVQcJh1blTP965M5GfyP1q3PCZZxeaOp-z62slomh_qMqOnvNfLz5nkBEo47DV4YlaRKgyvZI-jFU8hAA",
     "Notes": "Aprovado online (90 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "Claudinei Dorow",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/5547991113537",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/5547991113537"
   },
   {
     "MachineGuid": "50ea7d73-4ec0-4a2a-9e6a-7ffbe413e47b",
@@ -1418,14 +1478,16 @@
     "ValidDays": 90,
     "Status": "Active",
     "AuthorizedToken": "SPB1.eyJnIjoiNTBlYTdkNzMtNGVjMC00YTJhLTllNmEtN2ZmYmU0MTNlNDdiIiwiZiI6IjVEMUJCNEQ3MjBFRjIyQUNDMkE2MjZCNTgxRTJCNzFDRjNDNjExRDE4MTdBQ0FGMDlDMzRFOTU0RjY1NENCQ0UiLCJleHAiOiIyMDI3LTAyLTAzVDAwOjAwOjAwWiJ9.uNtn0F4PmYByYs9bg2K02mbXM-XzaXnKFt5y4ol_4amWF-6xG1GtCFaFAIYg8xLtW3o_Garn9lClLqQSuQ64xnV9VbtQrx3u5lm_6vKXXiMEvVQmBhxAThQ4-9j5GuZRaco0CK56SgVK-zt7ePuxv_lW0pp83naQfhaEiKgAE9ub8jSMA0DulpUKSAadlsQ0oMhCOw8K3vR6fm9UjOQhItiXzIwOPqUOB1Z_Q2Dk1FZjJaNOYpPgBiqmL6w09s7D_5tSHRSE17GsMRliJ8G-hqy2E8N_0AEqjEB7jEdN5mEj8eLHOFqHNYAXEDhilJGAeN5iLJdDHpdMzgtioBqx7Q",
-    "Notes": "Administrador do Sistema (Ambiente de Desenvolvimento)",
+    "Notes": "Aprovado online (90 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": true,
+    "RoleBadge": "🛡️ Administrador",
     "PlatformBadge": "🪟 Windows",
     "FullName": "George Luís Calcmann",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/5548988036632",
-    "Role": "Administrador"
+    "WhatsAppUrl": "https://wa.me/5548988036632"
   },
   {
     "MachineGuid": "9d66dbff-30e6-473d-a2e6-f6f87dac75a5",
@@ -1447,12 +1509,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiOWQ2NmRiZmYtMzBlNi00NzNkLWEyZTYtZjZmODdkYWM3NWE1IiwiZiI6IjYzODRBM0U4RkI4OUQ5QzI0MTI4QUFBMTc5QzY4QTA3NDFCQkJBMzg3MzUxRkVFM0JCRDA0QkZBMzhCNTUwQkYiLCJleHAiOiIyMDI3LTAyLTAzVDAwOjAwOjAwWiJ9.m-OVhcoQPPu38Cg13RnIHs-P5-lso7PWwbQWVeX8mlB6VdSJkh0qBi6EmjKuJSBwS3nswRTRomvqK6gBLTYUOgLrptsrbvsFNqfm2eEhEjaz3W0ICW86zlnmaucNoOVLZ6iN9dwhGAl_OF3E96wJdS2jGAYw54fLU1G5ndLlpf3gOTZV42yVVAJ-RtrtqpwIe-1i-u4nb_nNMd8rzL8FjEDxxgzR9Grr69TzFknL43HB12ugpGv86eQ4q2njeM9dxeokX6USBEB5EGqrKmgB1SbFpKaZEx_lDNxag-6YZAaawUUAk8TF5mP7UeUljEL2msb5ROvRfGwMU7n-3Wz3rQ",
     "Notes": "Aprovado online (30 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "Sandro Ancini",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/5549988078685",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/5549988078685"
   },
   {
     "MachineGuid": "b50aa681-5a20-4b2b-87c7-750cd1d635a5",
@@ -1474,12 +1538,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiYjUwYWE2ODEtNWEyMC00YjJiLTg3YzctNzUwY2QxZDYzNWE1IiwiZiI6IjZCQTQ4MDJBMENCRTM0MDI5MzVGQ0FBRDc1RTgzQzAwMkRFMjdCRUFCNTI2NzkzRkJFRkFDRjQ5OUE0NDVDQzUiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.gfwol0IwyjskPqv1wUDA0d4ttnYjIvOLxzt0bN57kB0J7NebulZat8hSn0ueIuE85Vh0hl0_ELpJMzGY1L4BiKLSA5ODum6LyLG6n12sIrhPG87f6hHcFek6nBH0ePjV8oSW1ePQqGT0NZnMBxZULaLCcOO5v39eofsCzRK1mw8t6ptaojCr4n9OfYTgtJFW5miNMCbl1YT4zIjI9hAUaxN1qj6pYBrjeWRqMGx_qKDxOzrbJ7b8ggmTV6bhtPVj4Lzp6PYHR8PA8lJ6zTA7Yz0zHpuIKmefwSXzzSmRf-4nQ6fsU3MJCqukytPvlURtU7ty7okKUxciztcjORL9Rw",
     "Notes": "Aprovado online (30 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "Oniel Santiago",
     "CalculatedStatus": 2,
     "StatusBadge": "🔴 Expirado",
-    "WhatsAppUrl": "https://wa.me/5547988074934",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/5547988074934"
   },
   {
     "MachineGuid": "9aec2337-832f-4615-9c67-7962bc810db1",
@@ -1501,12 +1567,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiOWFlYzIzMzctODMyZi00NjE1LTljNjctNzk2MmJjODEwZGIxIiwiZiI6Ijc0QUVBRkYzODA5NzhDOUY2RjYyNzBBQUU4N0M0MTg2MEI4MkM2RjlCNDNFQzBFQzcyNERBQzVBNkZCQzhBQjUiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.JyZS0z9BVMgRY-kQx3xnnHJbXooK4laKLlvUFMVUC71Uw9Pvu79KCe2C2M03508ZPli7DFTV4tlSY5FW7-Pw0J7tfI2GYLACQNeeVpWgBae5vKIr-bx19Ep9h0brn9N9AkLx5RD7-LHxru2edYmWjH8oelVHw7Mo8kp6iKPaxOuNaibkMX1xcFIPOmGeWah2u1ULv-OpGMQ5usnlUrl-ojEz3ZtHk0CuBVcCnyN7mbC_Iilp0vt1R4Or49izvO3RCddcd5di340WbYBEQulc4x6iXmSXkN20jiLPjtgYH-kJkoqdvHNZdeeGqRA7h0aAaBmlFqQIuFD3_Ey2_Q3n0w",
     "Notes": "Aprovado online (30 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "Everson Ferreira",
     "CalculatedStatus": 2,
     "StatusBadge": "🔴 Expirado",
-    "WhatsAppUrl": "https://wa.me/5548999575693",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/5548999575693"
   },
   {
     "MachineGuid": "b4f6dec3-7669-4f6d-b32a-1ffbb8dd596c",
@@ -1528,12 +1596,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiYjRmNmRlYzMtNzY2OS00ZjZkLWIzMmEtMWZmYmI4ZGQ1OTZjIiwiZiI6IjdBODVBMzczRkFGOTdFOUI3NzU3MzdCNDM5QkIxNTUzQkREOEM5MDQxRDkxNTI2MkNGOUZBNkY2Q0U4QUQxMTciLCJleHAiOiIyMDI2LTEwLTMxVDAwOjAwOjAwWiJ9.jyeR-qsduwoG4zZRKNANRqVGCFsUkuVX7CqHJvUsrmQbiWhO-mOHgYdKfdUyMgBh2T9iR7pr9egkAeliVZpmSomJpy9ZaWZxjWV7K1XEbsPF9mHTvudM4VG2p70uZwLNPKEhuSYwtFQiivNLfAWSMzXplpwtn-Ej_FYgr_UqOY4Agf0HBWqhgOK0gNbdpnzrFXFKi7a0J0s40U74pPzC8QcktOWUk39vLGgdcRiDCR_kiGn3zL3w6BE9yhikViSy4XIp_Fq3n-RWpgDVNZdUzRjc5kwOCXVWALxLK8kqxD3kw9pRyWjeOZ9ximY7FATH4MWCRXIGnNmi71yNpQcm0g",
     "Notes": "Aprovado online (30 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "Adriano Salgueiro",
     "CalculatedStatus": 2,
     "StatusBadge": "🔴 Expirado",
-    "WhatsAppUrl": "https://wa.me/5548988705438",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/5548988705438"
   },
   {
     "MachineGuid": "671f60c6-a75f-42a7-bea9-3395c7cde777",
@@ -1555,12 +1625,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiNjcxZjYwYzYtYTc1Zi00MmE3LWJlYTktMzM5NWM3Y2RlNzc3IiwiZiI6IjBDMzUxREM4RDY2QUFFQzk2Q0FCRjQyNTRDQ0IzMjYyREI3NkYyRDk3MDI5NEFDQjIxRDVBMjA1MEIxQTI1OTIiLCJleHAiOiIyMDI3LTAyLTAzVDAwOjAwOjAwWiJ9.gfiuYAtVc3uoE-05jx7jKExuPQWC9piy4VEWnZ1Y3zerReSczKpn3XURqtGqlVmsNgyghmEujenP1g3pTAfZawA6V75JnZ6Kd_obD569gRH2Y7HW-BqLhjLtPK2jSek_o7W9sHOQWGck_kcLHLmp-9uNEcAxKOD7hd9PAflgm1uKqN4WupjazVYDT92queQPMS15Msffu6PHwCH0-9rnSggtwdfeVSo3mG6HOxOACihUoc5eeGnGRSuVDbQe9WJZQLC7mtWcaF6m7hUvEbiS0S1wRV3BwToaT_uIk3Llnl8vFxEYwYDGK85-WfE-HH5a3ELQ2_6jUPAZ7dt8diJLKg",
     "Notes": "Aprovado online (30 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "Andre Luis Severo Dias",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/5549988030123",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/5549988030123"
   },
   {
     "MachineGuid": "9e0a4a99-eb83-4e2d-b7a5-29871556c3ac",
@@ -1582,12 +1654,14 @@
     "AuthorizedToken": "SPB1.eyJnIjoiOWUwYTRhOTktZWI4My00ZTJkLWI3YTUtMjk4NzE1NTZjM2FjIiwiZiI6IjE1ODdDQzU1RDhBMzEwMDc0MUMyQjM0QUM4NzBBNDU0MzFCQzBGQzlCMkQwRTM3RTFDNUQxRDBEQzJDRTMzNkMiLCJleHAiOiIyMDI3LTAyLTA4VDAwOjAwOjAwWiJ9.Y_MLC0_agc8CJqcG0SUMkL7ltdRuurdLd9K5Vc5weAmNE9giOe3JrEDFe-aUinrT-Ca1PYqJ6PZ4ns66IQUrLK2msRn_LLmhVjHg1B2TfCwGCKhJq0pE2xUI-N2XqYpeBlIzDy0rpAAmzdfxtvZ0KUvnbl7Mi4Frj26OMY6_ARAQoIHAjjW0a91Y_IMZD2YywgECkkhOhgEoDK9qMFkyH9FeAudC1bvfgGuM7zl7nsSFY0vc2AYK3i5Vr6ZCt5mXBqr2I9jJq-SFrQt5_kIDb9v4r74ixSAHmyuD0Oit7vPjFsYNHhF2BQ7ZaYaBJEWOWX9MXVMFiDN75PMMCafdCw",
     "Notes": "Aprovado online (30 dias)",
     "Platform": "Windows",
+    "Role": "Técnico",
+    "IsAdministrator": false,
+    "RoleBadge": "👷 Técnico",
     "PlatformBadge": "🪟 Windows",
     "FullName": "Sandro Varlei Borges Ancini",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/5549988078685",
-    "Role": "Técnico"
+    "WhatsAppUrl": "https://wa.me/5549988078685"
   },
   {
     "MachineGuid": "729651b2-b5c1-42e7-97b0-b0f9048ce5a0",
@@ -1607,202 +1681,48 @@
     "ValidDays": 90,
     "Status": "Active",
     "AuthorizedToken": "SPB1.eyJnIjoiNzI5NjUxYjItYjVjMS00MmU3LTk3YjAtYjBmOTA0OGNlNWEwIiwiZiI6ImZhOTc1ZmNjN2VhMjExMTIwMTMzZmY2Mjc4ZjJhZDA3YjExOTI4ODczMTdkYWFlNzI5OWE5NzdmYWFmMTYwMjUiLCJleHAiOiIyMDI3LTAyLTAzVDAwOjAwOjAwWiJ9.J5aV-F8ZJDV9S7SVCaUJHQBIcsYOw_y6FJoa7nqN5pfQHKzK0qke0Z6CilpXgVsmz7x07Dntt2nwrqn-x8AT-vsnyHLQQc01GWpoQEw8rk9-CTeFW6xRG24DSkkW334pVPxhtTdIr0mNy2ESLw0Eo_vkpIN14ccEC3PadZdt8K-DT2kdACH8nFMODb7lCPLv2Xtp54_Fr4ks9KTgNdsO242v2_rr_ltI6bFORfV12HBcnyc3EH2rGOc7jAYSaksPC7RwngMy8ZbrYbHFeIZI7OWHXnKF65KvkrXp-vR_89KY6TpE7MLRgBgoHd8_oXO2BcWjwvP55Fj254U7NXmuWg",
-    "Notes": "Administrador do Sistema (Ambiente de Desenvolvimento)",
+    "Notes": "Aprovado online (30 dias)",
     "Platform": "Android",
+    "Role": "Técnico",
+    "IsAdministrator": true,
+    "RoleBadge": "🛡️ Administrador",
     "PlatformBadge": "📱 Android",
     "FullName": "George Luís Calcmann",
     "CalculatedStatus": 0,
     "StatusBadge": "🟢 Ativo",
-    "WhatsAppUrl": "https://wa.me/5548988036632",
-    "Role": "Administrador"
+    "WhatsAppUrl": "https://wa.me/5548988036632"
   }
 ];
     let RAW_TELEMETRY = [];
     let RAW_REQUESTS = [
   {
-    "MachineGuid": "4a5d9b04-6b99-449c-bff2-72dc252a4300",
-    "MachineFingerprint": "0FEFB84C2125EB6F9A4D52F50006017A1BBD969CD2B7A15C79CA134C026099A3",
-    "RawRequestCode": "SPBREQ.eyJnIjoiNGE1ZDliMDQtNmI5OS00NDljLWJmZjItNzJkYzI1MmE0MzAwIiwiZiI6IjBGRUZCODRDMjEyNUVCNkY5QTRENTJGNTAwMDYwMTdBMUJCRDk2OUNEMkI3QTE1Qzc5Q0ExMzRDMDI2MDk5QTMiLCJuIjoiSm9zw6kgVm9sbWlyIiwicyI6IlBhdsOjbyIsInAiOiIoNDkpIDk4ODYzLTIzODYiLCJlIjoiam9zZS5wYXZhb0BjbGFyby5jb20uYnIiLCJjIjoiU0MiLCJ1IjoiU0MiLCJ2IjoiQkVUQS1URVNURVMtMC44LjEwMC0yMDI2MTAxNCIsInBsdCI6IldpbmRvd3MiLCJjbXAiOiJDbGFybyIsIm1hdCI6IjE0Mzg3MyIsInQiOiIyMDI2LTEwLTE2VDEyOjUwOjQzWiJ9",
-    "FirstName": "José Volmir",
-    "LastName": "Pavão",
-    "Phone": "(49) 98863-2386",
-    "Email": "jose.pavao@claro.com.br",
-    "Company": "Claro",
-    "EmployeeId": "143873",
-    "Cluster": "SC",
-    "Uf": "SC",
-    "ClientVersion": "BETA-TESTES-0.8.100-20261014",
-    "RequestedAtUtc": "2026-10-16T12:52:48.2123881Z",
-    "Status": "Approved",
-    "ApprovedToken": "SPB1.eyJnIjoiNGE1ZDliMDQtNmI5OS00NDljLWJmZjItNzJkYzI1MmE0MzAwIiwiZiI6IjBGRUZCODRDMjEyNUVCNkY5QTRENTJGNTAwMDYwMTdBMUJCRDk2OUNEMkI3QTE1Qzc5Q0ExMzRDMDI2MDk5QTMiLCJleHAiOiIyMDI3LTAxLTE0VDAwOjAwOjAwWiJ9.o1jf21mWfF1hnvksU2gYpWqgiAiw-df5plmERjlD353iiv7m30NPlQz_M5PvvgpOi8I_W16q7wma8MQ-FiDNHOLv3MyUBaGwwF4hdJQTWcxFmTdpj2DQGaRl0jDQsj4fSe3BjEvlvdmHWAU8NNlGlhNZr6Cm3zYo-B0BEpby5vzuQf-zdXegpVWOjp-cDEct_aC81ChToyi9Id761KbYy7jRdG9iKUE2JiereWS69uHQipxeHYfNwcYC1rken9QYPpFZP4sE3Hcb0yIC1SRS9gQfjNMTvQfwpQXgKUIqBbZnSwAods31_uoLnXQ6C6S2CLb32hl-1W11WbDZTnEbkQ",
-    "ExpirationDateIso": "2027-01-14",
-    "ValidDays": 90,
-    "RejectionReason": null,
-    "AdminNotes": "Aprovado online (90 dias)",
-    "RemoteSha": "9d8af027426cb81d6ab8be453273cf2c022c98de",
-    "RemoteFileName": "4a5d9b04-6b99-449c-bff2-72dc252a4300.json",
-    "Platform": "Windows",
-    "PlatformBadge": "🪟 Windows",
-    "FullName": "José Volmir Pavão",
-    "RegionInfo": "SC / SC",
-    "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5549988632386",
-    "_sha": "65715f9d1e813543649e0fa45b1f866fce6aa71c",
-    "_path": "requests/4a5d9b04-6b99-449c-bff2-72dc252a4300.json"
-  },
-  {
-    "MachineGuid": "53af585e-cb1b-464d-95fd-f8f98a8f6663",
-    "MachineFingerprint": "1EC214D8A886A45BC68151B2538D0ADF36B7A511CEE5A511079995BA0D68C31D",
-    "RawRequestCode": "SPBREQ.eyJnIjoiNTNhZjU4NWUtY2IxYi00NjRkLTk1ZmQtZjhmOThhOGY2NjYzIiwiZiI6IjFFQzIxNEQ4QTg4NkE0NUJDNjgxNTFCMjUzOEQwQURGMzZCN0E1MTFDRUU1QTUxMTA3OTk5NUJBMEQ2OEMzMUQiLCJuIjoiQWJpbWFlbCIsInMiOiJCYXJib3NhIiwicCI6IigxOSkgOTk0NjQtNjg0MCIsImUiOiJhYmltYWpiQGVtYnJhdGVsLmNvbS5iciIsImMiOiJDYXNiYyIsInUiOiJTUCIsInYiOiJCRVRBLVRFU1RFUy0wLjguMTAwLTIwMjYxMDE0IiwicGx0IjoiV2luZG93cyIsImNtcCI6IkNsYXJvIiwibWF0IjoiOTQ3OTczNiIsInQiOiIyMDI2LTEwLTE1VDE3OjI4OjAyWiJ9",
-    "FirstName": "Abimael",
-    "LastName": "Barbosa",
-    "Phone": "(19) 99464-6840",
-    "Email": "abimajb@embratel.com.br",
-    "Company": "Claro",
-    "EmployeeId": "9479736",
-    "Cluster": "Casbc",
-    "Uf": "SP",
-    "ClientVersion": "BETA-TESTES-0.8.100-20261014",
-    "RequestedAtUtc": "2026-10-15T17:28:24.6600603Z",
-    "Status": "Approved",
-    "ApprovedToken": "SPB1.eyJnIjoiNTNhZjU4NWUtY2IxYi00NjRkLTk1ZmQtZjhmOThhOGY2NjYzIiwiZiI6IjFFQzIxNEQ4QTg4NkE0NUJDNjgxNTFCMjUzOEQwQURGMzZCN0E1MTFDRUU1QTUxMTA3OTk5NUJBMEQ2OEMzMUQiLCJleHAiOiIyMDI3LTAxLTEzVDAwOjAwOjAwWiJ9.jVEwAcjImp5KxlDWWwtVBnPAvk_9TmJ5KE2QTTkS-JhbZ7S05KiWzN5ubAO36iNuKYfm8VkjLA5roJ_Gy7gd_FT-HxVkiJpkW7K-a0OdS3SFlXhWRQZD8ix-0m6Z955JXtv7U49BpHTvMuAVosKV6frem3ovOmwsq8i7MY-Jmfrlwr00nBrIgJJW8U7pd9vneeSBaB2jhSfRPEYNqD0GhJz-9qXqgl2Xqm8zBHL_Zz0jYrfIPbs-sgkVHz-Akin_ab_TjcasQgUT4peNOFfKG3lroylBw3gG3njJocABqHyNpGcXvxdKFv8VrUgVBI-D2p6Iisu2-7Q5SWfKWE03dQ",
-    "ExpirationDateIso": "2027-01-13",
-    "ValidDays": 90,
-    "RejectionReason": null,
-    "AdminNotes": "Aprovado online (90 dias)",
-    "RemoteSha": "97cff7a793128c726d055c8ebf6ce0232cdc0dd4",
-    "RemoteFileName": "53af585e-cb1b-464d-95fd-f8f98a8f6663.json",
-    "Platform": "Windows",
-    "PlatformBadge": "🪟 Windows",
-    "FullName": "Abimael Barbosa",
-    "RegionInfo": "Casbc / SP",
-    "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5519994646840",
-    "_sha": "1a98ea2ed0cba5c37b106e2d38667dd6de112cb1",
-    "_path": "requests/53af585e-cb1b-464d-95fd-f8f98a8f6663.json"
-  },
-  {
-    "MachineGuid": "637ee96a-247f-46e7-932e-665c2b931a09",
-    "MachineFingerprint": "FA3956EA4471DF1B3FAE71816F76564258F4D9E501D7FD84F166E9B8D507E95E",
-    "RawRequestCode": "SPBREQ.eyJnIjoiNjM3ZWU5NmEtMjQ3Zi00NmU3LTkzMmUtNjY1YzJiOTMxYTA5IiwiZiI6IkZBMzk1NkVBNDQ3MURGMUIzRkFFNzE4MTZGNzY1NjQyNThGNEQ5RTUwMUQ3RkQ4NEYxNjZFOUI4RDUwN0U5NUUiLCJuIjoiRGVuaXMiLCJzIjoiQW5kcsOpIiwicCI6IjAxODk5NjkzOTcwMSIsImUiOiJkZW5pcy5hbmRyZXBwZUBnbWFpbC5vbSIsImMiOiJJbnRlcmlvciIsInUiOiJTUCIsInYiOiJCRVRBLVRFU1RFUy0wLjguNzYtMjAyNjEwMDgiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiUHJvY2lzYSIsIm1hdCI6IjE1NjYyIiwidCI6IjIwMjYtMTAtMjdUMTc6NDk6NDhaIn0",
-    "FirstName": "Denis",
-    "LastName": "André",
-    "Phone": "018996939701",
-    "Email": "denis.andreppe@gmail.om",
-    "Company": "Procisa",
-    "EmployeeId": "15662",
-    "Cluster": "Interior",
-    "Uf": "SP",
-    "ClientVersion": "BETA-TESTES-0.8.76-20261008",
-    "RequestedAtUtc": "2026-10-27T17:50:08.6003734Z",
-    "Status": "Approved",
-    "ApprovedToken": "SPB1.eyJnIjoiNjM3ZWU5NmEtMjQ3Zi00NmU3LTkzMmUtNjY1YzJiOTMxYTA5IiwiZiI6IkZBMzk1NkVBNDQ3MURGMUIzRkFFNzE4MTZGNzY1NjQyNThGNEQ5RTUwMUQ3RkQ4NEYxNjZFOUI4RDUwN0U5NUUiLCJleHAiOiIyMDI3LTAxLTI1VDAwOjAwOjAwWiJ9.pVkQZfCZ52I6QACZqa5KFvtKkwPXSZrv5jHSv9_4RSvAis5YV8IIxB-w1GYPI4Ath0arQBUNvu-pBA_4py9douTowk4fSGlgv_XlMohniXQej-UjNkEGnRVo12qnn5qsZTpLozXFABzbwvNbjjmNxxE-aAWNKwlc3ZGW30JXrxqnJ0fKEZA2KrQgIDA4_K0K4_ipEoLcayfMRGfOeZRrI6BiKPb5BOP_n1EOI8BnPwzm28nWo8BXhAUtjeO_1NfjBzUPx9xpPgEjYj_kaSrIg4JgBqOOYGRookwrruKNDUy9sERRs6X845rlEIRCuTGctQ2sigzG20hKxHqtiWjudg",
-    "ExpirationDateIso": "2027-01-25",
-    "ValidDays": 90,
-    "RejectionReason": null,
-    "AdminNotes": "Aprovado online (90 dias)",
-    "RemoteSha": "d1ac1eb7839ba6777c746f60b921daa4fa5c96da",
-    "RemoteFileName": "637ee96a-247f-46e7-932e-665c2b931a09.json",
-    "Platform": "Windows",
-    "PlatformBadge": "🪟 Windows",
-    "FullName": "Denis André",
-    "RegionInfo": "Interior / SP",
-    "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/018996939701",
-    "_sha": "a5a44301a7157d5fa72473b9d93c51b55d2dc582",
-    "_path": "requests/637ee96a-247f-46e7-932e-665c2b931a09.json"
-  },
-  {
-    "MachineGuid": "671f60c6-a75f-42a7-bea9-3395c7cde777",
-    "MachineFingerprint": "402E49B95564F4D6D2AED75EEC2E2C6C89BFDAB2654D509BF1642F75C50309EE",
-    "RawRequestCode": "SPBREQ.eyJnIjoiNjcxZjYwYzYtYTc1Zi00MmE3LWJlYTktMzM5NWM3Y2RlNzc3IiwiZiI6IjQwMkU0OUI5NTU2NEY0RDZEMkFFRDc1RUVDMkUyQzZDODlCRkRBQjI2NTRENTA5QkYxNjQyRjc1QzUwMzA5RUUiLCJuIjoiQW5kcmUiLCJzIjoiTHVpcyBTZXZlcm8gRGlhcyIsInAiOiIoNDkpIDk4ODAzLTAxMjMiLCJlIjoiYW5kcmUuc2V2ZXJvQGNsYXJvLmNvbS5iciIsImMiOiJTQyBJbnRlcmlvciIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguMzQtMjAyNjA5MzAiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiQ2xhcm8iLCJtYXQiOiI5NDEwNjQiLCJ0IjoiMjAyNi0xMC0wMlQxNzo0MjowMVoifQ",
-    "FirstName": "Andre",
-    "LastName": "Luis Severo Dias",
-    "Phone": "(49) 98803-0123",
-    "Email": "andre.severo@claro.com.br",
-    "Company": "Claro",
-    "EmployeeId": "941064",
-    "Cluster": "SC Interior",
-    "Uf": "SC",
-    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
-    "RequestedAtUtc": "2026-10-02T17:42:05.0934842Z",
-    "Status": "Approved",
-    "ApprovedToken": "SPB1.eyJnIjoiNjcxZjYwYzYtYTc1Zi00MmE3LWJlYTktMzM5NWM3Y2RlNzc3IiwiZiI6IjQwMkU0OUI5NTU2NEY0RDZEMkFFRDc1RUVDMkUyQzZDODlCRkRBQjI2NTRENTA5QkYxNjQyRjc1QzUwMzA5RUUiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.WOcjW4JSaASBlcBH1MKdj9s8cuP5ulLpb1JhNIsED7mBxSN5pNRIEfGXhU2LlFXd6Fb3xqs0-u_2zyiXzcY1qcuCB384NfR1bjAXO0Hm92nRKUGAMAmBfYcpESmahYuvDLA_vFozycKalyshDyDmNQuVw63_q_1WOXheIfj_cypzEb_cE7EqFeGGM3XzTuytNX4tlqMRGky1e3y6gCYpQxHpmh4xL0l1VXWX_vu68LgZGhv4PsYlSiW4WKnxihSRX49D1iqbl6UL4rIOBCQwofJDYpZ37BY7HOWeA2AQdtwD2f5zVsH8f4cvb7ZGQelRKe5CQbd6oSAXBVOroyB8Kw",
-    "ExpirationDateIso": "2026-11-01",
-    "ValidDays": 30,
-    "RejectionReason": null,
-    "AdminNotes": "Aprovado online (30 dias)",
-    "RemoteSha": "01c94489ddc78f71cca07aa668fa293349ae93be",
-    "RemoteFileName": "671f60c6-a75f-42a7-bea9-3395c7cde777.json",
-    "Platform": "Windows",
-    "PlatformBadge": "🪟 Windows",
-    "FullName": "Andre Luis Severo Dias",
-    "RegionInfo": "SC Interior / SC",
-    "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5549988030123",
-    "_sha": "cab33ef4376bb82b28769b6542e0187e9d99cc32",
-    "_path": "requests/671f60c6-a75f-42a7-bea9-3395c7cde777.json"
-  },
-  {
-    "MachineGuid": "729651b2-b5c1-42e7-97b0-b0f9048ce5a0",
-    "MachineFingerprint": "fa975fcc7ea211120133ff6278f2ad07b1192887317daae7299a977faaf16025",
-    "RawRequestCode": "SPBREQ.eyJnIjoiNzI5NjUxYjItYjVjMS00MmU3LTk3YjAtYjBmOTA0OGNlNWEwIiwiZiI6ImZhOTc1ZmNjN2VhMjExMTIwMTMzZmY2Mjc4ZjJhZDA3YjExOTI4ODczMTdkYWFlNzI5OWE5NzdmYWFmMTYwMjUiLCJuIjoiR2VvcmdlIEx1w61zIiwicyI6IkNhbGNtYW5uIiwicCI6Iig0OCkgOTg4MDMtNjYzMiIsImUiOiIiLCJjIjoiRmxvcmlhbsOzcG9saXMiLCJ1IjoiU0MiLCJ2IjoiMC44LjQxIiwicGx0IjoiQW5kcm9pZCIsImNtcCI6IkNsYXJvIiwibWF0IjoiOTExMTQ0MDYiLCJ0IjoiMjAyNi0wOS0zMFQyMjowMjo1OFoifQ",
-    "FirstName": "George Luís",
-    "LastName": "Calcmann",
+    "MachineGuid": "c50381ba-6c76-4d7a-94b0-a5da7afc582d",
+    "MachineFingerprint": "FE9E04EB9A21D2CB13968BD85CF0E0954E091F316E34C354B5DAA520C6BEBB0C",
+    "RawRequestCode": "SPBREQ.eyJnIjoiYzUwMzgxYmEtNmM3Ni00ZDdhLTk0YjAtYTVkYTdhZmM1ODJkIiwiZiI6IkZFOUUwNEVCOUEyMUQyQ0IxMzk2OEJEODVDRjBFMDk1NEUwOTFGMzE2RTM0QzM1NEI1REFBNTIwQzZCRUJCMEMiLCJuIjoiR2VvcmdlIiwicyI6IkNhbGNtYW5uIChub3RlYm9vaykiLCJwIjoiKDQ4KSA5ODgwMy02NjMyIiwiZSI6Imdlb3JnZS5jYWxjbWFubkBjbGFyby5jb20uYnIiLCJjIjoiRk5TIiwidSI6IlNDIiwidiI6IkJFVEEtVEVTVEVTLTAuOS4xLTIwMjYxMTA5IiwicGx0IjoiV2luZG93cyIsImNtcCI6IkNsYXJvIiwibWF0IjoiOTExNDQwNiIsInQiOiIyMDI2LTExLTEyVDE1OjAyOjI1WiJ9",
+    "FirstName": "George",
+    "LastName": "Calcmann (notebook)",
     "Phone": "(48) 98803-6632",
-    "Email": "",
+    "Email": "george.calcmann@claro.com.br",
     "Company": "Claro",
-    "EmployeeId": "91114406",
-    "Cluster": "Florianópolis",
+    "EmployeeId": "9114406",
+    "Cluster": "FNS",
     "Uf": "SC",
-    "ClientVersion": "0.8.41",
-    "RequestedAtUtc": "2026-09-30T22:02:58.4347897Z",
+    "ClientVersion": "BETA-TESTES-0.9.1-20261109",
+    "RequestedAtUtc": "2026-11-12T15:02:27.7394825Z",
     "Status": "Approved",
-    "ApprovedToken": "SPB1.eyJnIjoiNzI5NjUxYjItYjVjMS00MmU3LTk3YjAtYjBmOTA0OGNlNWEwIiwiZiI6ImZhOTc1ZmNjN2VhMjExMTIwMTMzZmY2Mjc4ZjJhZDA3YjExOTI4ODczMTdkYWFlNzI5OWE5NzdmYWFmMTYwMjUiLCJleHAiOiIyMDI2LTEwLTMwVDAwOjAwOjAwWiJ9.T8DYNDFZvZOgtDA2fDetdzMt_3Omonz1yKbEvVaGOcFwqRaOvgA8WGUtbYH-OoDLHmXLcOSgfgsSd_xLqKoHirtHco2RPq4r4MBc4HFRYqYZ_F5_cm_EHjWytIPWdSmroTkY28bKVISs6EljyEarnLz-VUfi6I5Z3cocTErMAJ3L-cpUPxJLqTXC0LUElZzfAM1l3bvd4QQrMawHRb1AQfUGuce9mHhLdSvZurmPasZFxfumcusxKpqEk39wZXGCCBPJZSkY_w2VZyHmyFpI8z0zjM7sR9uoa0mX4CnG3jBiN5ePJKBasGv90VJqHRnHxD2MmcACHvuDXtZMwLzE8Q",
-    "ExpirationDateIso": "2026-10-30",
-    "ValidDays": 30,
-    "RejectionReason": null,
-    "AdminNotes": "Aprovado online (30 dias)",
-    "RemoteSha": "4125b840ed6dc2dcfdd95d78d62eed2bad9c6267",
-    "Platform": "Android",
-    "PlatformBadge": "📱 Android",
-    "FullName": "George Luís Calcmann",
-    "RegionInfo": "Florianópolis / SC",
-    "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5548988036632",
-    "_sha": "a2c97417346d308a266c8f07e17b828d58287a60",
-    "_path": "requests/729651b2-b5c1-42e7-97b0-b0f9048ce5a0.json"
-  },
-  {
-    "MachineGuid": "8246e85f-4051-4e10-8283-d3324b4d6e40",
-    "MachineFingerprint": "E637EF2AA58DF8DA7FA1F9193D8B130544067535AC1DD16D40539C9B70B3BE98",
-    "RawRequestCode": "SPBREQ.eyJnIjoiODI0NmU4NWYtNDA1MS00ZTEwLTgyODMtZDMzMjRiNGQ2ZTQwIiwiZiI6IkU2MzdFRjJBQTU4REY4REE3RkExRjkxOTNEOEIxMzA1NDQwNjc1MzVBQzFERDE2RDQwNTM5QzlCNzBCM0JFOTgiLCJuIjoiR2FicmllbCIsInMiOiJMdWNhcyIsInAiOiIoMTEpIDkxMzY4LTE5NDIiLCJlIjoiZy5tb3JhaXNAcHJvY2lzYS5jb20uYnIiLCJjIjoiU1AgSW50ZXJpb3IiLCJ1IjoiU1AiLCJ2IjoiQkVUQS1URVNURVMtMC44Ljc2LTIwMjYxMDA4IiwicGx0IjoiV2luZG93cyIsImNtcCI6IlByb2Npc2EiLCJtYXQiOiIxNTEyMDAiLCJ0IjoiMjAyNi0xMC0yN1QxMzo1MDoyNFoifQ",
-    "FirstName": "Gabriel",
-    "LastName": "Lucas",
-    "Phone": "(11) 91368-1942",
-    "Email": "g.morais@procisa.com.br",
-    "Company": "Procisa",
-    "EmployeeId": "151200",
-    "Cluster": "SP Interior",
-    "Uf": "SP",
-    "ClientVersion": "BETA-TESTES-0.8.76-20261008",
-    "RequestedAtUtc": "2026-10-27T13:50:40.8819984Z",
-    "Status": "Approved",
-    "ApprovedToken": "SPB1.eyJnIjoiODI0NmU4NWYtNDA1MS00ZTEwLTgyODMtZDMzMjRiNGQ2ZTQwIiwiZiI6IkU2MzdFRjJBQTU4REY4REE3RkExRjkxOTNEOEIxMzA1NDQwNjc1MzVBQzFERDE2RDQwNTM5QzlCNzBCM0JFOTgiLCJleHAiOiIyMDI3LTAxLTI1VDAwOjAwOjAwWiJ9.SubYKu5UxcrcZXukyKJki1wTpEQOaBLCHkYRZDdoilwzTUKUa5vISU_1p1jTi61J4tFtXW7rkuHk3D3HOJkv1yMcDwcjTMh4Z5DeWoC0-3ooYlPx4NE2MYO_dvKnuBl5eR_C5Nj4Q6b8BBpVDfTPveEeMxh33684tzef9gq-KPJB4v6yt4g8lIG87WFJ7IVSaM0xhjSBVOIUhBPoGLVUqls62OoJCe8hq86d2ci7-OQ0yTx5UNYRYEvHge-iwpiS9J-sAp2oq_ztUtxcqceo73kavfEpmu5rQMSH2wANXrhzW7i_p9KChw9SD7m-6M1ABv1KkkOPrlVen0PFh7fShA",
-    "ExpirationDateIso": "2027-01-25",
+    "ApprovedToken": "SPB1.eyJnIjoiYzUwMzgxYmEtNmM3Ni00ZDdhLTk0YjAtYTVkYTdhZmM1ODJkIiwiZiI6IkZFOUUwNEVCOUEyMUQyQ0IxMzk2OEJEODVDRjBFMDk1NEUwOTFGMzE2RTM0QzM1NEI1REFBNTIwQzZCRUJCMEMiLCJleHAiOiIyMDI3LTAyLTEwVDAwOjAwOjAwWiJ9.eQivZgbqeawgNef_vko0le4U8jf7P1uWMsrKKNhr4E7x74oPI0c27se3UnRdh3McycOuPDVOT9rFfwkwX7D3MxbEyhZZg88z3qCZPHGDnLJaLdqgZK0mqEuJrGuA7PiPqLGOSnCWo0Hq2o9mZVrIduW3i2e-xD0KhDrNx66KWP-32NPEtcMJQm3swOkYGlpojbj6NlFbwdJKeS4FOI_a6Gxd-hOUzDtYxPSaRJajvNj9TbayA5lWBTWsjGGPADzzMVZXs9w4g2WOfl6YIJRFgEvhZR9kiM6V6PV3UtnHSxzBX9Ert3adzfle5nNnJVG3Nm7SX00Bg40nq4lTDn0EuQ",
+    "ExpirationDateIso": "2027-02-10",
     "ValidDays": 90,
     "RejectionReason": null,
     "AdminNotes": "Aprovado online (90 dias)",
-    "RemoteSha": "533baa6db6da3eff8a0a1deb4e04de90d8e0dc2e",
-    "RemoteFileName": "8246e85f-4051-4e10-8283-d3324b4d6e40.json",
+    "RemoteSha": "6629a0f5c656511bf04033b4cf494dc71dc253c5",
+    "RemoteFileName": "c50381ba-6c76-4d7a-94b0-a5da7afc582d.json",
     "Platform": "Windows",
     "PlatformBadge": "🪟 Windows",
-    "FullName": "Gabriel Lucas",
-    "RegionInfo": "SP Interior / SP",
+    "FullName": "George Calcmann (notebook)",
+    "RegionInfo": "FNS / SC",
     "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5511913681942",
-    "_sha": "01180b84ffab5bccfaab2180e90f6f226668b859",
-    "_path": "requests/8246e85f-4051-4e10-8283-d3324b4d6e40.json"
+    "WhatsAppUrl": "https://wa.me/5548988036632"
   },
   {
     "MachineGuid": "923d6621-ffa5-48de-b7b0-ff0b9a351c22",
@@ -1831,102 +1751,123 @@
     "FullName": "Claudinei Dorow",
     "RegionInfo": "Blumenau / SC",
     "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5547991113537",
-    "_sha": "e5c3a5649c91806bf731e02b7f9f864e48fbbb82",
-    "_path": "requests/923d6621-ffa5-48de-b7b0-ff0b9a351c22.json"
+    "WhatsAppUrl": "https://wa.me/5547991113537"
   },
   {
-    "MachineGuid": "9aec2337-832f-4615-9c67-7962bc810db1",
-    "MachineFingerprint": "74AEAFF380978C9F6F6270AAE87C41860B82C6F9B43EC0EC724DAC5A6FBC8AB5",
-    "RawRequestCode": "SPBREQ.eyJnIjoiOWFlYzIzMzctODMyZi00NjE1LTljNjctNzk2MmJjODEwZGIxIiwiZiI6Ijc0QUVBRkYzODA5NzhDOUY2RjYyNzBBQUU4N0M0MTg2MEI4MkM2RjlCNDNFQzBFQzcyNERBQzVBNkZCQzhBQjUiLCJuIjoiRXZlcnNvbiIsInMiOiJGZXJyZWlyYSIsInAiOiIoNDgpIDk5OTU3LTU2OTMiLCJlIjoiZXZlcnNvbmZmYWd1bmRlc0BnbWFpbC5jb20iLCJjIjoiQ2FwaXRhbCIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguNTUtMjAyNjEwMDEiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiU2lub3MgVGVsZWNvbXVuaWNhw6fDtWVzIiwibWF0IjoiMzMiLCJ0IjoiMjAyNi0xMC0wMlQxMzoxNjowNVoifQ",
-    "FirstName": "Everson",
-    "LastName": "Ferreira",
-    "Phone": "(48) 99957-5693",
-    "Email": "eversonffagundes@gmail.com",
-    "Company": "Sinos Telecomunicações",
-    "EmployeeId": "33",
-    "Cluster": "Capital",
-    "Uf": "SC",
-    "ClientVersion": "BETA-TESTES-0.8.55-20261001",
-    "RequestedAtUtc": "2026-10-02T13:18:07.5225957Z",
-    "Status": "Approved",
-    "ApprovedToken": "SPB1.eyJnIjoiOWFlYzIzMzctODMyZi00NjE1LTljNjctNzk2MmJjODEwZGIxIiwiZiI6Ijc0QUVBRkYzODA5NzhDOUY2RjYyNzBBQUU4N0M0MTg2MEI4MkM2RjlCNDNFQzBFQzcyNERBQzVBNkZCQzhBQjUiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.JyZS0z9BVMgRY-kQx3xnnHJbXooK4laKLlvUFMVUC71Uw9Pvu79KCe2C2M03508ZPli7DFTV4tlSY5FW7-Pw0J7tfI2GYLACQNeeVpWgBae5vKIr-bx19Ep9h0brn9N9AkLx5RD7-LHxru2edYmWjH8oelVHw7Mo8kp6iKPaxOuNaibkMX1xcFIPOmGeWah2u1ULv-OpGMQ5usnlUrl-ojEz3ZtHk0CuBVcCnyN7mbC_Iilp0vt1R4Or49izvO3RCddcd5di340WbYBEQulc4x6iXmSXkN20jiLPjtgYH-kJkoqdvHNZdeeGqRA7h0aAaBmlFqQIuFD3_Ey2_Q3n0w",
-    "ExpirationDateIso": "2026-11-01",
-    "ValidDays": 30,
-    "RejectionReason": null,
-    "AdminNotes": "Aprovado online (30 dias)",
-    "RemoteSha": "4aada668794ec7a5cdec55c63f2ddfb716822891",
-    "RemoteFileName": "9aec2337-832f-4615-9c67-7962bc810db1.json",
-    "Platform": "Windows",
-    "PlatformBadge": "🪟 Windows",
-    "FullName": "Everson Ferreira",
-    "RegionInfo": "Capital / SC",
-    "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5548999575693",
-    "_sha": "524d2d01a252c5e4fc734a1bacef8a3c5fed3d2e",
-    "_path": "requests/9aec2337-832f-4615-9c67-7962bc810db1.json"
-  },
-  {
-    "MachineGuid": "9d66dbff-30e6-473d-a2e6-f6f87dac75a5",
-    "MachineFingerprint": "6384A3E8FB89D9C24128AAA179C68A0741BBBA387351FEE3BBD04BFA38B550BF",
-    "RawRequestCode": "SPBREQ.eyJnIjoiOWQ2NmRiZmYtMzBlNi00NzNkLWEyZTYtZjZmODdkYWM3NWE1IiwiZiI6IjYzODRBM0U4RkI4OUQ5QzI0MTI4QUFBMTc5QzY4QTA3NDFCQkJBMzg3MzUxRkVFM0JCRDA0QkZBMzhCNTUwQkYiLCJuIjoiU2FuZHJvIiwicyI6IkFuY2luaSIsInAiOiIoNDkpIDk4ODA3LTg2ODUiLCJlIjoic2FuZHJvLmFuY2luaUBjbGFyby5jb20uYnIiLCJjIjoiSW50ZXJpb3IiLCJ1IjoiU0MiLCJ2IjoiQkVUQS1URVNURVMtMC44LjM0LTIwMjYwOTMwIiwicGx0IjoiV2luZG93cyIsImNtcCI6IkNsYXJvIiwibWF0IjoiOTc2ODc2IiwidCI6IjIwMjYtMTAtMDJUMTc6Mjc6MTZaIn0",
-    "FirstName": "Sandro",
-    "LastName": "Ancini",
-    "Phone": "(49) 98807-8685",
-    "Email": "sandro.ancini@claro.com.br",
-    "Company": "Claro",
-    "EmployeeId": "976876",
+    "MachineGuid": "637ee96a-247f-46e7-932e-665c2b931a09",
+    "MachineFingerprint": "FA3956EA4471DF1B3FAE71816F76564258F4D9E501D7FD84F166E9B8D507E95E",
+    "RawRequestCode": "SPBREQ.eyJnIjoiNjM3ZWU5NmEtMjQ3Zi00NmU3LTkzMmUtNjY1YzJiOTMxYTA5IiwiZiI6IkZBMzk1NkVBNDQ3MURGMUIzRkFFNzE4MTZGNzY1NjQyNThGNEQ5RTUwMUQ3RkQ4NEYxNjZFOUI4RDUwN0U5NUUiLCJuIjoiRGVuaXMiLCJzIjoiQW5kcsOpIiwicCI6IjAxODk5NjkzOTcwMSIsImUiOiJkZW5pcy5hbmRyZXBwZUBnbWFpbC5vbSIsImMiOiJJbnRlcmlvciIsInUiOiJTUCIsInYiOiJCRVRBLVRFU1RFUy0wLjguNzYtMjAyNjEwMDgiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiUHJvY2lzYSIsIm1hdCI6IjE1NjYyIiwidCI6IjIwMjYtMTAtMjdUMTc6NDk6NDhaIn0",
+    "FirstName": "Denis",
+    "LastName": "André",
+    "Phone": "018996939701",
+    "Email": "denis.andreppe@gmail.om",
+    "Company": "Procisa",
+    "EmployeeId": "15662",
     "Cluster": "Interior",
-    "Uf": "SC",
-    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
-    "RequestedAtUtc": "2026-10-02T17:27:24.1888768Z",
+    "Uf": "SP",
+    "ClientVersion": "BETA-TESTES-0.8.76-20261008",
+    "RequestedAtUtc": "2026-10-27T17:50:08.6003734Z",
     "Status": "Approved",
-    "ApprovedToken": "SPB1.eyJnIjoiOWQ2NmRiZmYtMzBlNi00NzNkLWEyZTYtZjZmODdkYWM3NWE1IiwiZiI6IjYzODRBM0U4RkI4OUQ5QzI0MTI4QUFBMTc5QzY4QTA3NDFCQkJBMzg3MzUxRkVFM0JCRDA0QkZBMzhCNTUwQkYiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.lLJSBkBJ4as7asTByMun3Dp-0SOdJN5kpeFrJNJWzGd0pjmFNzAn2rNLTvepa_39aFtEiL8Hhg4dPAgmVXKcUfxJX4jnM-Wzwvzl0OYku1C8C9rc1VUGRNonv6NvPcDP-a11jIhQ0VXiRMeJDgESIgErh8hhMc2SRFziqFXdWRPp8TeXCV-BUaTa9zMnhWXBLgjMjj4GDdy3iFU6TXMR49Wbp8ERVcFqjeraOccuFyC69dhBXHWMtU4KL9djoFGhtuCpTFJDKivc4yJQI8bvctNbhNbWWW2Fa9eJWQDxkVNNAI9nU2yfzDx0_n49QLaNv8u3FHG6ECItPxxkIKEHYA",
-    "ExpirationDateIso": "2026-11-01",
-    "ValidDays": 30,
+    "ApprovedToken": "SPB1.eyJnIjoiNjM3ZWU5NmEtMjQ3Zi00NmU3LTkzMmUtNjY1YzJiOTMxYTA5IiwiZiI6IkZBMzk1NkVBNDQ3MURGMUIzRkFFNzE4MTZGNzY1NjQyNThGNEQ5RTUwMUQ3RkQ4NEYxNjZFOUI4RDUwN0U5NUUiLCJleHAiOiIyMDI3LTAxLTI1VDAwOjAwOjAwWiJ9.pVkQZfCZ52I6QACZqa5KFvtKkwPXSZrv5jHSv9_4RSvAis5YV8IIxB-w1GYPI4Ath0arQBUNvu-pBA_4py9douTowk4fSGlgv_XlMohniXQej-UjNkEGnRVo12qnn5qsZTpLozXFABzbwvNbjjmNxxE-aAWNKwlc3ZGW30JXrxqnJ0fKEZA2KrQgIDA4_K0K4_ipEoLcayfMRGfOeZRrI6BiKPb5BOP_n1EOI8BnPwzm28nWo8BXhAUtjeO_1NfjBzUPx9xpPgEjYj_kaSrIg4JgBqOOYGRookwrruKNDUy9sERRs6X845rlEIRCuTGctQ2sigzG20hKxHqtiWjudg",
+    "ExpirationDateIso": "2027-01-25",
+    "ValidDays": 90,
     "RejectionReason": null,
-    "AdminNotes": "Aprovado online (30 dias)",
-    "RemoteSha": "c2ad68db9a814780274e1b95fcdf503e0a5b87a0",
-    "RemoteFileName": "9d66dbff-30e6-473d-a2e6-f6f87dac75a5.json",
+    "AdminNotes": "Aprovado online (90 dias)",
+    "RemoteSha": "d1ac1eb7839ba6777c746f60b921daa4fa5c96da",
+    "RemoteFileName": "637ee96a-247f-46e7-932e-665c2b931a09.json",
     "Platform": "Windows",
     "PlatformBadge": "🪟 Windows",
-    "FullName": "Sandro Ancini",
-    "RegionInfo": "Interior / SC",
+    "FullName": "Denis André",
+    "RegionInfo": "Interior / SP",
     "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5549988078685",
-    "_sha": "120426048dccee8cae4d1f75f39e89065f7a73d9",
-    "_path": "requests/9d66dbff-30e6-473d-a2e6-f6f87dac75a5.json"
+    "WhatsAppUrl": "https://wa.me/018996939701"
   },
   {
-    "MachineGuid": "9e0a4a99-eb83-4e2d-b7a5-29871556c3ac",
-    "MachineFingerprint": "1587CC55D8A3100741C2B34AC870A45431BC0FC9B2D0E37E1C5D1D0DC2CE336C",
-    "RawRequestCode": "SPBREQ.eyJnIjoiOWUwYTRhOTktZWI4My00ZTJkLWI3YTUtMjk4NzE1NTZjM2FjIiwiZiI6IjE1ODdDQzU1RDhBMzEwMDc0MUMyQjM0QUM4NzBBNDU0MzFCQzBGQzlCMkQwRTM3RTFDNUQxRDBEQzJDRTMzNkMiLCJuIjoiU2FuZHJvIFZhcmxlaSIsInMiOiJCb3JnZXMgQW5jaW5pIiwicCI6Iig0OSkgOTg4MDctODY4NSIsImUiOiJzYW5kcm8uYW5jaW5pQGNsYXJvLmNvbS5iciIsImMiOiJTQyBJbnRlcmlvciIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguMzQtMjAyNjA5MzAiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiQ2xhcm8iLCJtYXQiOiI5NzY4NzYiLCJ0IjoiMjAyNi0xMC0wMVQxMzoyNDozNloifQ",
-    "FirstName": "Sandro Varlei",
-    "LastName": "Borges Ancini",
-    "Phone": "(49) 98807-8685",
-    "Email": "sandro.ancini@claro.com.br",
-    "Company": "Claro",
-    "EmployeeId": "976876",
-    "Cluster": "SC Interior",
-    "Uf": "SC",
-    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
-    "RequestedAtUtc": "2026-10-01T13:25:29.5145585Z",
+    "MachineGuid": "8246e85f-4051-4e10-8283-d3324b4d6e40",
+    "MachineFingerprint": "E637EF2AA58DF8DA7FA1F9193D8B130544067535AC1DD16D40539C9B70B3BE98",
+    "RawRequestCode": "SPBREQ.eyJnIjoiODI0NmU4NWYtNDA1MS00ZTEwLTgyODMtZDMzMjRiNGQ2ZTQwIiwiZiI6IkU2MzdFRjJBQTU4REY4REE3RkExRjkxOTNEOEIxMzA1NDQwNjc1MzVBQzFERDE2RDQwNTM5QzlCNzBCM0JFOTgiLCJuIjoiR2FicmllbCIsInMiOiJMdWNhcyIsInAiOiIoMTEpIDkxMzY4LTE5NDIiLCJlIjoiZy5tb3JhaXNAcHJvY2lzYS5jb20uYnIiLCJjIjoiU1AgSW50ZXJpb3IiLCJ1IjoiU1AiLCJ2IjoiQkVUQS1URVNURVMtMC44Ljc2LTIwMjYxMDA4IiwicGx0IjoiV2luZG93cyIsImNtcCI6IlByb2Npc2EiLCJtYXQiOiIxNTEyMDAiLCJ0IjoiMjAyNi0xMC0yN1QxMzo1MDoyNFoifQ",
+    "FirstName": "Gabriel",
+    "LastName": "Lucas",
+    "Phone": "(11) 91368-1942",
+    "Email": "g.morais@procisa.com.br",
+    "Company": "Procisa",
+    "EmployeeId": "151200",
+    "Cluster": "SP Interior",
+    "Uf": "SP",
+    "ClientVersion": "BETA-TESTES-0.8.76-20261008",
+    "RequestedAtUtc": "2026-10-27T13:50:40.8819984Z",
     "Status": "Approved",
-    "ApprovedToken": "SPB1.eyJnIjoiOWUwYTRhOTktZWI4My00ZTJkLWI3YTUtMjk4NzE1NTZjM2FjIiwiZiI6IjE1ODdDQzU1RDhBMzEwMDc0MUMyQjM0QUM4NzBBNDU0MzFCQzBGQzlCMkQwRTM3RTFDNUQxRDBEQzJDRTMzNkMiLCJleHAiOiIyMDI2LTEwLTMxVDAwOjAwOjAwWiJ9.jYifHwhDbd8X0l8lkwmQDqtkjJ6FS9Rb0Qq0hddm2hJ3sFfJNSxINeThUPsiqe1Dcm9JL6lXQ8KSEVSXs-b3Pbz-frs9tHFFDcRzzgMzN1gwD5Dr09RQhKmkU8h9J8PsUZ5CITkbxqO7eadnFb4XnuaRIO5ZrgNUv4f8dh-ceP2CgyYLbCvuujxVH_Krtl83_h0JDb6ZE-HUQtISOr44ElLNg7QcERsNTl39JbD6BAw4GUHXsxWdR5J1rYi3ATIavRkuo-e2HhrP2aeT5X-JuT0hpu7UfgruGc1AHv__9GevJU5AO6wuUb1Bix3Ct5rk8eDICXII6EtD4TCkMx3jOQ",
-    "ExpirationDateIso": "2026-10-31",
-    "ValidDays": 30,
+    "ApprovedToken": "SPB1.eyJnIjoiODI0NmU4NWYtNDA1MS00ZTEwLTgyODMtZDMzMjRiNGQ2ZTQwIiwiZiI6IkU2MzdFRjJBQTU4REY4REE3RkExRjkxOTNEOEIxMzA1NDQwNjc1MzVBQzFERDE2RDQwNTM5QzlCNzBCM0JFOTgiLCJleHAiOiIyMDI3LTAxLTI1VDAwOjAwOjAwWiJ9.SubYKu5UxcrcZXukyKJki1wTpEQOaBLCHkYRZDdoilwzTUKUa5vISU_1p1jTi61J4tFtXW7rkuHk3D3HOJkv1yMcDwcjTMh4Z5DeWoC0-3ooYlPx4NE2MYO_dvKnuBl5eR_C5Nj4Q6b8BBpVDfTPveEeMxh33684tzef9gq-KPJB4v6yt4g8lIG87WFJ7IVSaM0xhjSBVOIUhBPoGLVUqls62OoJCe8hq86d2ci7-OQ0yTx5UNYRYEvHge-iwpiS9J-sAp2oq_ztUtxcqceo73kavfEpmu5rQMSH2wANXrhzW7i_p9KChw9SD7m-6M1ABv1KkkOPrlVen0PFh7fShA",
+    "ExpirationDateIso": "2027-01-25",
+    "ValidDays": 90,
     "RejectionReason": null,
-    "AdminNotes": "Aprovado online (30 dias)",
-    "RemoteSha": "f5c7ed1f14fe7f509b8086c8c06528fca982c707",
-    "RemoteFileName": "9e0a4a99-eb83-4e2d-b7a5-29871556c3ac.json",
+    "AdminNotes": "Aprovado online (90 dias)",
+    "RemoteSha": "533baa6db6da3eff8a0a1deb4e04de90d8e0dc2e",
+    "RemoteFileName": "8246e85f-4051-4e10-8283-d3324b4d6e40.json",
     "Platform": "Windows",
     "PlatformBadge": "🪟 Windows",
-    "FullName": "Sandro Varlei Borges Ancini",
-    "RegionInfo": "SC Interior / SC",
+    "FullName": "Gabriel Lucas",
+    "RegionInfo": "SP Interior / SP",
     "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5549988078685",
-    "_sha": "b0da7f977d118f113d9f82db706e1c8f5e355c50",
-    "_path": "requests/9e0a4a99-eb83-4e2d-b7a5-29871556c3ac.json"
+    "WhatsAppUrl": "https://wa.me/5511913681942"
+  },
+  {
+    "MachineGuid": "4a5d9b04-6b99-449c-bff2-72dc252a4300",
+    "MachineFingerprint": "0FEFB84C2125EB6F9A4D52F50006017A1BBD969CD2B7A15C79CA134C026099A3",
+    "RawRequestCode": "SPBREQ.eyJnIjoiNGE1ZDliMDQtNmI5OS00NDljLWJmZjItNzJkYzI1MmE0MzAwIiwiZiI6IjBGRUZCODRDMjEyNUVCNkY5QTRENTJGNTAwMDYwMTdBMUJCRDk2OUNEMkI3QTE1Qzc5Q0ExMzRDMDI2MDk5QTMiLCJuIjoiSm9zw6kgVm9sbWlyIiwicyI6IlBhdsOjbyIsInAiOiIoNDkpIDk4ODYzLTIzODYiLCJlIjoiam9zZS5wYXZhb0BjbGFyby5jb20uYnIiLCJjIjoiU0MiLCJ1IjoiU0MiLCJ2IjoiQkVUQS1URVNURVMtMC44LjEwMC0yMDI2MTAxNCIsInBsdCI6IldpbmRvd3MiLCJjbXAiOiJDbGFybyIsIm1hdCI6IjE0Mzg3MyIsInQiOiIyMDI2LTEwLTE2VDEyOjUwOjQzWiJ9",
+    "FirstName": "José Volmir",
+    "LastName": "Pavão",
+    "Phone": "(49) 98863-2386",
+    "Email": "jose.pavao@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "143873",
+    "Cluster": "SC",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.100-20261014",
+    "RequestedAtUtc": "2026-10-16T12:52:48.2123881Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiNGE1ZDliMDQtNmI5OS00NDljLWJmZjItNzJkYzI1MmE0MzAwIiwiZiI6IjBGRUZCODRDMjEyNUVCNkY5QTRENTJGNTAwMDYwMTdBMUJCRDk2OUNEMkI3QTE1Qzc5Q0ExMzRDMDI2MDk5QTMiLCJleHAiOiIyMDI3LTAxLTE0VDAwOjAwOjAwWiJ9.o1jf21mWfF1hnvksU2gYpWqgiAiw-df5plmERjlD353iiv7m30NPlQz_M5PvvgpOi8I_W16q7wma8MQ-FiDNHOLv3MyUBaGwwF4hdJQTWcxFmTdpj2DQGaRl0jDQsj4fSe3BjEvlvdmHWAU8NNlGlhNZr6Cm3zYo-B0BEpby5vzuQf-zdXegpVWOjp-cDEct_aC81ChToyi9Id761KbYy7jRdG9iKUE2JiereWS69uHQipxeHYfNwcYC1rken9QYPpFZP4sE3Hcb0yIC1SRS9gQfjNMTvQfwpQXgKUIqBbZnSwAods31_uoLnXQ6C6S2CLb32hl-1W11WbDZTnEbkQ",
+    "ExpirationDateIso": "2027-01-14",
+    "ValidDays": 90,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (90 dias)",
+    "RemoteSha": "9d8af027426cb81d6ab8be453273cf2c022c98de",
+    "RemoteFileName": "4a5d9b04-6b99-449c-bff2-72dc252a4300.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "José Volmir Pavão",
+    "RegionInfo": "SC / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5549988632386"
+  },
+  {
+    "MachineGuid": "53af585e-cb1b-464d-95fd-f8f98a8f6663",
+    "MachineFingerprint": "1EC214D8A886A45BC68151B2538D0ADF36B7A511CEE5A511079995BA0D68C31D",
+    "RawRequestCode": "SPBREQ.eyJnIjoiNTNhZjU4NWUtY2IxYi00NjRkLTk1ZmQtZjhmOThhOGY2NjYzIiwiZiI6IjFFQzIxNEQ4QTg4NkE0NUJDNjgxNTFCMjUzOEQwQURGMzZCN0E1MTFDRUU1QTUxMTA3OTk5NUJBMEQ2OEMzMUQiLCJuIjoiQWJpbWFlbCIsInMiOiJCYXJib3NhIiwicCI6IigxOSkgOTk0NjQtNjg0MCIsImUiOiJhYmltYWpiQGVtYnJhdGVsLmNvbS5iciIsImMiOiJDYXNiYyIsInUiOiJTUCIsInYiOiJCRVRBLVRFU1RFUy0wLjguMTAwLTIwMjYxMDE0IiwicGx0IjoiV2luZG93cyIsImNtcCI6IkNsYXJvIiwibWF0IjoiOTQ3OTczNiIsInQiOiIyMDI2LTEwLTE1VDE3OjI4OjAyWiJ9",
+    "FirstName": "Abimael",
+    "LastName": "Barbosa",
+    "Phone": "(19) 99464-6840",
+    "Email": "abimajb@embratel.com.br",
+    "Company": "Claro",
+    "EmployeeId": "9479736",
+    "Cluster": "Casbc",
+    "Uf": "SP",
+    "ClientVersion": "BETA-TESTES-0.8.100-20261014",
+    "RequestedAtUtc": "2026-10-15T17:28:24.6600603Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiNTNhZjU4NWUtY2IxYi00NjRkLTk1ZmQtZjhmOThhOGY2NjYzIiwiZiI6IjFFQzIxNEQ4QTg4NkE0NUJDNjgxNTFCMjUzOEQwQURGMzZCN0E1MTFDRUU1QTUxMTA3OTk5NUJBMEQ2OEMzMUQiLCJleHAiOiIyMDI3LTAxLTEzVDAwOjAwOjAwWiJ9.jVEwAcjImp5KxlDWWwtVBnPAvk_9TmJ5KE2QTTkS-JhbZ7S05KiWzN5ubAO36iNuKYfm8VkjLA5roJ_Gy7gd_FT-HxVkiJpkW7K-a0OdS3SFlXhWRQZD8ix-0m6Z955JXtv7U49BpHTvMuAVosKV6frem3ovOmwsq8i7MY-Jmfrlwr00nBrIgJJW8U7pd9vneeSBaB2jhSfRPEYNqD0GhJz-9qXqgl2Xqm8zBHL_Zz0jYrfIPbs-sgkVHz-Akin_ab_TjcasQgUT4peNOFfKG3lroylBw3gG3njJocABqHyNpGcXvxdKFv8VrUgVBI-D2p6Iisu2-7Q5SWfKWE03dQ",
+    "ExpirationDateIso": "2027-01-13",
+    "ValidDays": 90,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (90 dias)",
+    "RemoteSha": "97cff7a793128c726d055c8ebf6ce0232cdc0dd4",
+    "RemoteFileName": "53af585e-cb1b-464d-95fd-f8f98a8f6663.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Abimael Barbosa",
+    "RegionInfo": "Casbc / SP",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5519994646840"
   },
   {
     "MachineGuid": "a4155838-321f-4019-878e-e79ed3a195f0",
@@ -1955,102 +1896,7 @@
     "FullName": "Henrique Silvino",
     "RegionInfo": "SPI / SP",
     "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5516991254729",
-    "_sha": "b171dcb97976155af45cc53ce4e9920643089e32",
-    "_path": "requests/a4155838-321f-4019-878e-e79ed3a195f0.json"
-  },
-  {
-    "MachineGuid": "b4f6dec3-7669-4f6d-b32a-1ffbb8dd596c",
-    "MachineFingerprint": "7A85A373FAF97E9B775737B439BB1553BDD8C9041D915262CF9FA6F6CE8AD117",
-    "RawRequestCode": "SPBREQ.eyJnIjoiYjRmNmRlYzMtNzY2OS00ZjZkLWIzMmEtMWZmYmI4ZGQ1OTZjIiwiZiI6IjdBODVBMzczRkFGOTdFOUI3NzU3MzdCNDM5QkIxNTUzQkREOEM5MDQxRDkxNTI2MkNGOUZBNkY2Q0U4QUQxMTciLCJuIjoiQWRyaWFubyIsInMiOiJTYWxndWVpcm8iLCJwIjoiKDQ4KSA5ODg3MC01NDM4IiwiZSI6ImFkcmlhbm8uc2FsZ3VlaXJvQGNsYXJvLmNvbS5iciIsImMiOiJFbXByZXNhcmlhbCBERSBTQyIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguMzQtMjAyNjA5MzAiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiQ2xhcm8iLCJtYXQiOiI5MTI5NDI3IiwidCI6IjIwMjYtMTAtMDFUMTc6NDg6NDhaIn0",
-    "FirstName": "Adriano",
-    "LastName": "Salgueiro",
-    "Phone": "(48) 98870-5438",
-    "Email": "adriano.salgueiro@claro.com.br",
-    "Company": "Claro",
-    "EmployeeId": "9129427",
-    "Cluster": "Empresarial DE SC",
-    "Uf": "SC",
-    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
-    "RequestedAtUtc": "2026-10-01T17:49:20.1716363Z",
-    "Status": "Approved",
-    "ApprovedToken": "SPB1.eyJnIjoiYjRmNmRlYzMtNzY2OS00ZjZkLWIzMmEtMWZmYmI4ZGQ1OTZjIiwiZiI6IjdBODVBMzczRkFGOTdFOUI3NzU3MzdCNDM5QkIxNTUzQkREOEM5MDQxRDkxNTI2MkNGOUZBNkY2Q0U4QUQxMTciLCJleHAiOiIyMDI2LTEwLTMxVDAwOjAwOjAwWiJ9.jyeR-qsduwoG4zZRKNANRqVGCFsUkuVX7CqHJvUsrmQbiWhO-mOHgYdKfdUyMgBh2T9iR7pr9egkAeliVZpmSomJpy9ZaWZxjWV7K1XEbsPF9mHTvudM4VG2p70uZwLNPKEhuSYwtFQiivNLfAWSMzXplpwtn-Ej_FYgr_UqOY4Agf0HBWqhgOK0gNbdpnzrFXFKi7a0J0s40U74pPzC8QcktOWUk39vLGgdcRiDCR_kiGn3zL3w6BE9yhikViSy4XIp_Fq3n-RWpgDVNZdUzRjc5kwOCXVWALxLK8kqxD3kw9pRyWjeOZ9ximY7FATH4MWCRXIGnNmi71yNpQcm0g",
-    "ExpirationDateIso": "2026-10-31",
-    "ValidDays": 30,
-    "RejectionReason": null,
-    "AdminNotes": "Aprovado online (30 dias)",
-    "RemoteSha": "5c4006262dcb78c8718de4bad4d2729d18d56d6a",
-    "RemoteFileName": "b4f6dec3-7669-4f6d-b32a-1ffbb8dd596c.json",
-    "Platform": "Windows",
-    "PlatformBadge": "🪟 Windows",
-    "FullName": "Adriano Salgueiro",
-    "RegionInfo": "Empresarial DE SC / SC",
-    "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5548988705438",
-    "_sha": "70128d444f9b984db5f939233cadd395d13f4893",
-    "_path": "requests/b4f6dec3-7669-4f6d-b32a-1ffbb8dd596c.json"
-  },
-  {
-    "MachineGuid": "b50aa681-5a20-4b2b-87c7-750cd1d635a5",
-    "MachineFingerprint": "6BA4802A0CBE3402935FCAAD75E83C002DE27BEAB526793FBEFACF499A445CC5",
-    "RawRequestCode": "SPBREQ.eyJnIjoiYjUwYWE2ODEtNWEyMC00YjJiLTg3YzctNzUwY2QxZDYzNWE1IiwiZiI6IjZCQTQ4MDJBMENCRTM0MDI5MzVGQ0FBRDc1RTgzQzAwMkRFMjdCRUFCNTI2NzkzRkJFRkFDRjQ5OUE0NDVDQzUiLCJuIjoiT25pZWwiLCJzIjoiU2FudGlhZ28iLCJwIjoiKDQ3KSA5ODgwNy00OTM0IiwiZSI6IiIsImMiOiJKb2ludmlsbGUiLCJ1IjoiU0MiLCJ2IjoiQkVUQS1URVNURVMtMC44LjM0LTIwMjYwOTMwIiwicGx0IjoiV2luZG93cyIsImNtcCI6IkNsYXJvIiwibWF0IjoiOTM1MDI5IiwidCI6IjIwMjYtMTAtMDJUMTM6MTI6NTZaIn0",
-    "FirstName": "Oniel",
-    "LastName": "Santiago",
-    "Phone": "(47) 98807-4934",
-    "Email": "",
-    "Company": "Claro",
-    "EmployeeId": "935029",
-    "Cluster": "Joinville",
-    "Uf": "SC",
-    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
-    "RequestedAtUtc": "2026-10-02T13:13:17.4216421Z",
-    "Status": "Approved",
-    "ApprovedToken": "SPB1.eyJnIjoiYjUwYWE2ODEtNWEyMC00YjJiLTg3YzctNzUwY2QxZDYzNWE1IiwiZiI6IjZCQTQ4MDJBMENCRTM0MDI5MzVGQ0FBRDc1RTgzQzAwMkRFMjdCRUFCNTI2NzkzRkJFRkFDRjQ5OUE0NDVDQzUiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.gfwol0IwyjskPqv1wUDA0d4ttnYjIvOLxzt0bN57kB0J7NebulZat8hSn0ueIuE85Vh0hl0_ELpJMzGY1L4BiKLSA5ODum6LyLG6n12sIrhPG87f6hHcFek6nBH0ePjV8oSW1ePQqGT0NZnMBxZULaLCcOO5v39eofsCzRK1mw8t6ptaojCr4n9OfYTgtJFW5miNMCbl1YT4zIjI9hAUaxN1qj6pYBrjeWRqMGx_qKDxOzrbJ7b8ggmTV6bhtPVj4Lzp6PYHR8PA8lJ6zTA7Yz0zHpuIKmefwSXzzSmRf-4nQ6fsU3MJCqukytPvlURtU7ty7okKUxciztcjORL9Rw",
-    "ExpirationDateIso": "2026-11-01",
-    "ValidDays": 30,
-    "RejectionReason": null,
-    "AdminNotes": "Aprovado online (30 dias)",
-    "RemoteSha": "15243904f5aced2abcea23fbc68d3872ee3ca32c",
-    "RemoteFileName": "b50aa681-5a20-4b2b-87c7-750cd1d635a5.json",
-    "Platform": "Windows",
-    "PlatformBadge": "🪟 Windows",
-    "FullName": "Oniel Santiago",
-    "RegionInfo": "Joinville / SC",
-    "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5547988074934",
-    "_sha": "f6e9d862a8a834ebb3b1789038e74224c4fc0d29",
-    "_path": "requests/b50aa681-5a20-4b2b-87c7-750cd1d635a5.json"
-  },
-  {
-    "MachineGuid": "bb4ed47f-c035-42aa-a7ff-59683fdaefbf",
-    "MachineFingerprint": "F4360A6BE4F419ADDBCAEAAC71AFC1FDC8AF18C2E0F3F1D60AAE7545A182C55C",
-    "RawRequestCode": "SPBREQ.eyJnIjoiYmI0ZWQ0N2YtYzAzNS00MmFhLWE3ZmYtNTk2ODNmZGFlZmJmIiwiZiI6IkY0MzYwQTZCRTRGNDE5QUREQkNBRUFBQzcxQUZDMUZEQzhBRjE4QzJFMEYzRjFENjBBQUU3NTQ1QTE4MkM1NUMiLCJuIjoiTHVpeiIsInMiOiJTaWx2YSIsInAiOiIoNDcpIDk5NjUwLTI4MTUiLCJlIjoibHVpemNhcmxvc2JlbnRvMTk4N0BnbWFpbC5jb20iLCJjIjoiSXRhamHDrSIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguNjMtMjAyNjEwMDIiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiQ2xhcm8iLCJtYXQiOiIwIiwidCI6IjIwMjYtMTAtMDZUMTg6MDg6MDRaIn0",
-    "FirstName": "Luiz",
-    "LastName": "Silva",
-    "Phone": "(47) 99650-2815",
-    "Email": "luizcarlosbento1987@gmail.com",
-    "Company": "Claro",
-    "EmployeeId": "0",
-    "Cluster": "Itajaí",
-    "Uf": "SC",
-    "ClientVersion": "BETA-TESTES-0.8.63-20261002",
-    "RequestedAtUtc": "2026-10-06T18:09:18.2003476Z",
-    "Status": "Approved",
-    "ApprovedToken": "SPB1.eyJnIjoiYmI0ZWQ0N2YtYzAzNS00MmFhLWE3ZmYtNTk2ODNmZGFlZmJmIiwiZiI6IkY0MzYwQTZCRTRGNDE5QUREQkNBRUFBQzcxQUZDMUZEQzhBRjE4QzJFMEYzRjFENjBBQUU3NTQ1QTE4MkM1NUMiLCJleHAiOiIyMDI2LTEyLTA1VDAwOjAwOjAwWiJ9.cV_BwkPra3FmGRi8prR_a3jGOpDpVP1DT_54Ubx3n9FBQ5riE_eRQ-hzdTP70-xY_hU9vXB4S2NJjR2Wh6x0raqhg4od3U1KwJxWocoNIAtf95Jndla8DtA4HmnnWaOZlRJ796nmCRHvEm-tCy2gmXfSOKVm9rKkm49NhwIrDxMVJLam1ggP7B0SkfL-dEcFwtuhnSO5jWe8MNVdYlwz0lF3PPYXVN21Mi97IZAXtyq6yQnFG_sY13oV5fH2iAvhCUS4xRbsVNVDyyYe-3hxMGHuE_V52KRekFotqUCGjB9LrXoTFmZzJLRbqezvmurqwjHUhkBZEvlbZLBWy_8cfw",
-    "ExpirationDateIso": "2026-12-05",
-    "ValidDays": 60,
-    "RejectionReason": null,
-    "AdminNotes": "Aprovado online (60 dias)",
-    "RemoteSha": "67ecefa7a454cb1806d33d724c0a654bf8ff88ab",
-    "RemoteFileName": "bb4ed47f-c035-42aa-a7ff-59683fdaefbf.json",
-    "Platform": "Windows",
-    "PlatformBadge": "🪟 Windows",
-    "FullName": "Luiz Silva",
-    "RegionInfo": "Itajaí / SC",
-    "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5547996502815",
-    "_sha": "9471ded7fb59e1af8531df58e19c344f21d4374d",
-    "_path": "requests/bb4ed47f-c035-42aa-a7ff-59683fdaefbf.json"
+    "WhatsAppUrl": "https://wa.me/5516991254729"
   },
   {
     "MachineGuid": "e5ce2cf7-5445-4a7f-8bda-f4164d777ab1",
@@ -2079,9 +1925,238 @@
     "FullName": "Lucas Ratier",
     "RegionInfo": "Florianopolis / SC",
     "StatusBadge": "✅ Aprovada",
-    "WhatsAppUrl": "https://wa.me/5548998125397",
-    "_sha": "7603b8ab183f5c34456f53a5389b72ef64d1d2fa",
-    "_path": "requests/e5ce2cf7-5445-4a7f-8bda-f4164d777ab1.json"
+    "WhatsAppUrl": "https://wa.me/5548998125397"
+  },
+  {
+    "MachineGuid": "bb4ed47f-c035-42aa-a7ff-59683fdaefbf",
+    "MachineFingerprint": "F4360A6BE4F419ADDBCAEAAC71AFC1FDC8AF18C2E0F3F1D60AAE7545A182C55C",
+    "RawRequestCode": "SPBREQ.eyJnIjoiYmI0ZWQ0N2YtYzAzNS00MmFhLWE3ZmYtNTk2ODNmZGFlZmJmIiwiZiI6IkY0MzYwQTZCRTRGNDE5QUREQkNBRUFBQzcxQUZDMUZEQzhBRjE4QzJFMEYzRjFENjBBQUU3NTQ1QTE4MkM1NUMiLCJuIjoiTHVpeiIsInMiOiJTaWx2YSIsInAiOiIoNDcpIDk5NjUwLTI4MTUiLCJlIjoibHVpemNhcmxvc2JlbnRvMTk4N0BnbWFpbC5jb20iLCJjIjoiSXRhamHDrSIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguNjMtMjAyNjEwMDIiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiQ2xhcm8iLCJtYXQiOiIwIiwidCI6IjIwMjYtMTAtMDZUMTg6MDg6MDRaIn0",
+    "FirstName": "Luiz",
+    "LastName": "Silva",
+    "Phone": "(47) 99650-2815",
+    "Email": "luizcarlosbento1987@gmail.com",
+    "Company": "Claro",
+    "EmployeeId": "0",
+    "Cluster": "Itajaí",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.63-20261002",
+    "RequestedAtUtc": "2026-10-06T18:09:18.2003476Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiYmI0ZWQ0N2YtYzAzNS00MmFhLWE3ZmYtNTk2ODNmZGFlZmJmIiwiZiI6IkY0MzYwQTZCRTRGNDE5QUREQkNBRUFBQzcxQUZDMUZEQzhBRjE4QzJFMEYzRjFENjBBQUU3NTQ1QTE4MkM1NUMiLCJleHAiOiIyMDI2LTEyLTA1VDAwOjAwOjAwWiJ9.cV_BwkPra3FmGRi8prR_a3jGOpDpVP1DT_54Ubx3n9FBQ5riE_eRQ-hzdTP70-xY_hU9vXB4S2NJjR2Wh6x0raqhg4od3U1KwJxWocoNIAtf95Jndla8DtA4HmnnWaOZlRJ796nmCRHvEm-tCy2gmXfSOKVm9rKkm49NhwIrDxMVJLam1ggP7B0SkfL-dEcFwtuhnSO5jWe8MNVdYlwz0lF3PPYXVN21Mi97IZAXtyq6yQnFG_sY13oV5fH2iAvhCUS4xRbsVNVDyyYe-3hxMGHuE_V52KRekFotqUCGjB9LrXoTFmZzJLRbqezvmurqwjHUhkBZEvlbZLBWy_8cfw",
+    "ExpirationDateIso": "2026-12-05",
+    "ValidDays": 60,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (60 dias)",
+    "RemoteSha": "67ecefa7a454cb1806d33d724c0a654bf8ff88ab",
+    "RemoteFileName": "bb4ed47f-c035-42aa-a7ff-59683fdaefbf.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Luiz Silva",
+    "RegionInfo": "Itajaí / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5547996502815"
+  },
+  {
+    "MachineGuid": "671f60c6-a75f-42a7-bea9-3395c7cde777",
+    "MachineFingerprint": "402E49B95564F4D6D2AED75EEC2E2C6C89BFDAB2654D509BF1642F75C50309EE",
+    "RawRequestCode": "SPBREQ.eyJnIjoiNjcxZjYwYzYtYTc1Zi00MmE3LWJlYTktMzM5NWM3Y2RlNzc3IiwiZiI6IjQwMkU0OUI5NTU2NEY0RDZEMkFFRDc1RUVDMkUyQzZDODlCRkRBQjI2NTRENTA5QkYxNjQyRjc1QzUwMzA5RUUiLCJuIjoiQW5kcmUiLCJzIjoiTHVpcyBTZXZlcm8gRGlhcyIsInAiOiIoNDkpIDk4ODAzLTAxMjMiLCJlIjoiYW5kcmUuc2V2ZXJvQGNsYXJvLmNvbS5iciIsImMiOiJTQyBJbnRlcmlvciIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguMzQtMjAyNjA5MzAiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiQ2xhcm8iLCJtYXQiOiI5NDEwNjQiLCJ0IjoiMjAyNi0xMC0wMlQxNzo0MjowMVoifQ",
+    "FirstName": "Andre",
+    "LastName": "Luis Severo Dias",
+    "Phone": "(49) 98803-0123",
+    "Email": "andre.severo@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "941064",
+    "Cluster": "SC Interior",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "RequestedAtUtc": "2026-10-02T17:42:05.0934842Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiNjcxZjYwYzYtYTc1Zi00MmE3LWJlYTktMzM5NWM3Y2RlNzc3IiwiZiI6IjQwMkU0OUI5NTU2NEY0RDZEMkFFRDc1RUVDMkUyQzZDODlCRkRBQjI2NTRENTA5QkYxNjQyRjc1QzUwMzA5RUUiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.WOcjW4JSaASBlcBH1MKdj9s8cuP5ulLpb1JhNIsED7mBxSN5pNRIEfGXhU2LlFXd6Fb3xqs0-u_2zyiXzcY1qcuCB384NfR1bjAXO0Hm92nRKUGAMAmBfYcpESmahYuvDLA_vFozycKalyshDyDmNQuVw63_q_1WOXheIfj_cypzEb_cE7EqFeGGM3XzTuytNX4tlqMRGky1e3y6gCYpQxHpmh4xL0l1VXWX_vu68LgZGhv4PsYlSiW4WKnxihSRX49D1iqbl6UL4rIOBCQwofJDYpZ37BY7HOWeA2AQdtwD2f5zVsH8f4cvb7ZGQelRKe5CQbd6oSAXBVOroyB8Kw",
+    "ExpirationDateIso": "2026-11-01",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "01c94489ddc78f71cca07aa668fa293349ae93be",
+    "RemoteFileName": "671f60c6-a75f-42a7-bea9-3395c7cde777.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Andre Luis Severo Dias",
+    "RegionInfo": "SC Interior / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5549988030123"
+  },
+  {
+    "MachineGuid": "9d66dbff-30e6-473d-a2e6-f6f87dac75a5",
+    "MachineFingerprint": "6384A3E8FB89D9C24128AAA179C68A0741BBBA387351FEE3BBD04BFA38B550BF",
+    "RawRequestCode": "SPBREQ.eyJnIjoiOWQ2NmRiZmYtMzBlNi00NzNkLWEyZTYtZjZmODdkYWM3NWE1IiwiZiI6IjYzODRBM0U4RkI4OUQ5QzI0MTI4QUFBMTc5QzY4QTA3NDFCQkJBMzg3MzUxRkVFM0JCRDA0QkZBMzhCNTUwQkYiLCJuIjoiU2FuZHJvIiwicyI6IkFuY2luaSIsInAiOiIoNDkpIDk4ODA3LTg2ODUiLCJlIjoic2FuZHJvLmFuY2luaUBjbGFyby5jb20uYnIiLCJjIjoiSW50ZXJpb3IiLCJ1IjoiU0MiLCJ2IjoiQkVUQS1URVNURVMtMC44LjM0LTIwMjYwOTMwIiwicGx0IjoiV2luZG93cyIsImNtcCI6IkNsYXJvIiwibWF0IjoiOTc2ODc2IiwidCI6IjIwMjYtMTAtMDJUMTc6Mjc6MTZaIn0",
+    "FirstName": "Sandro",
+    "LastName": "Ancini",
+    "Phone": "(49) 98807-8685",
+    "Email": "sandro.ancini@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "976876",
+    "Cluster": "Interior",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "RequestedAtUtc": "2026-10-02T17:27:24.1888768Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiOWQ2NmRiZmYtMzBlNi00NzNkLWEyZTYtZjZmODdkYWM3NWE1IiwiZiI6IjYzODRBM0U4RkI4OUQ5QzI0MTI4QUFBMTc5QzY4QTA3NDFCQkJBMzg3MzUxRkVFM0JCRDA0QkZBMzhCNTUwQkYiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.lLJSBkBJ4as7asTByMun3Dp-0SOdJN5kpeFrJNJWzGd0pjmFNzAn2rNLTvepa_39aFtEiL8Hhg4dPAgmVXKcUfxJX4jnM-Wzwvzl0OYku1C8C9rc1VUGRNonv6NvPcDP-a11jIhQ0VXiRMeJDgESIgErh8hhMc2SRFziqFXdWRPp8TeXCV-BUaTa9zMnhWXBLgjMjj4GDdy3iFU6TXMR49Wbp8ERVcFqjeraOccuFyC69dhBXHWMtU4KL9djoFGhtuCpTFJDKivc4yJQI8bvctNbhNbWWW2Fa9eJWQDxkVNNAI9nU2yfzDx0_n49QLaNv8u3FHG6ECItPxxkIKEHYA",
+    "ExpirationDateIso": "2026-11-01",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "c2ad68db9a814780274e1b95fcdf503e0a5b87a0",
+    "RemoteFileName": "9d66dbff-30e6-473d-a2e6-f6f87dac75a5.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Sandro Ancini",
+    "RegionInfo": "Interior / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5549988078685"
+  },
+  {
+    "MachineGuid": "9aec2337-832f-4615-9c67-7962bc810db1",
+    "MachineFingerprint": "74AEAFF380978C9F6F6270AAE87C41860B82C6F9B43EC0EC724DAC5A6FBC8AB5",
+    "RawRequestCode": "SPBREQ.eyJnIjoiOWFlYzIzMzctODMyZi00NjE1LTljNjctNzk2MmJjODEwZGIxIiwiZiI6Ijc0QUVBRkYzODA5NzhDOUY2RjYyNzBBQUU4N0M0MTg2MEI4MkM2RjlCNDNFQzBFQzcyNERBQzVBNkZCQzhBQjUiLCJuIjoiRXZlcnNvbiIsInMiOiJGZXJyZWlyYSIsInAiOiIoNDgpIDk5OTU3LTU2OTMiLCJlIjoiZXZlcnNvbmZmYWd1bmRlc0BnbWFpbC5jb20iLCJjIjoiQ2FwaXRhbCIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguNTUtMjAyNjEwMDEiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiU2lub3MgVGVsZWNvbXVuaWNhw6fDtWVzIiwibWF0IjoiMzMiLCJ0IjoiMjAyNi0xMC0wMlQxMzoxNjowNVoifQ",
+    "FirstName": "Everson",
+    "LastName": "Ferreira",
+    "Phone": "(48) 99957-5693",
+    "Email": "eversonffagundes@gmail.com",
+    "Company": "Sinos Telecomunicações",
+    "EmployeeId": "33",
+    "Cluster": "Capital",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.55-20261001",
+    "RequestedAtUtc": "2026-10-02T13:18:07.5225957Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiOWFlYzIzMzctODMyZi00NjE1LTljNjctNzk2MmJjODEwZGIxIiwiZiI6Ijc0QUVBRkYzODA5NzhDOUY2RjYyNzBBQUU4N0M0MTg2MEI4MkM2RjlCNDNFQzBFQzcyNERBQzVBNkZCQzhBQjUiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.JyZS0z9BVMgRY-kQx3xnnHJbXooK4laKLlvUFMVUC71Uw9Pvu79KCe2C2M03508ZPli7DFTV4tlSY5FW7-Pw0J7tfI2GYLACQNeeVpWgBae5vKIr-bx19Ep9h0brn9N9AkLx5RD7-LHxru2edYmWjH8oelVHw7Mo8kp6iKPaxOuNaibkMX1xcFIPOmGeWah2u1ULv-OpGMQ5usnlUrl-ojEz3ZtHk0CuBVcCnyN7mbC_Iilp0vt1R4Or49izvO3RCddcd5di340WbYBEQulc4x6iXmSXkN20jiLPjtgYH-kJkoqdvHNZdeeGqRA7h0aAaBmlFqQIuFD3_Ey2_Q3n0w",
+    "ExpirationDateIso": "2026-11-01",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "4aada668794ec7a5cdec55c63f2ddfb716822891",
+    "RemoteFileName": "9aec2337-832f-4615-9c67-7962bc810db1.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Everson Ferreira",
+    "RegionInfo": "Capital / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5548999575693"
+  },
+  {
+    "MachineGuid": "b50aa681-5a20-4b2b-87c7-750cd1d635a5",
+    "MachineFingerprint": "6BA4802A0CBE3402935FCAAD75E83C002DE27BEAB526793FBEFACF499A445CC5",
+    "RawRequestCode": "SPBREQ.eyJnIjoiYjUwYWE2ODEtNWEyMC00YjJiLTg3YzctNzUwY2QxZDYzNWE1IiwiZiI6IjZCQTQ4MDJBMENCRTM0MDI5MzVGQ0FBRDc1RTgzQzAwMkRFMjdCRUFCNTI2NzkzRkJFRkFDRjQ5OUE0NDVDQzUiLCJuIjoiT25pZWwiLCJzIjoiU2FudGlhZ28iLCJwIjoiKDQ3KSA5ODgwNy00OTM0IiwiZSI6IiIsImMiOiJKb2ludmlsbGUiLCJ1IjoiU0MiLCJ2IjoiQkVUQS1URVNURVMtMC44LjM0LTIwMjYwOTMwIiwicGx0IjoiV2luZG93cyIsImNtcCI6IkNsYXJvIiwibWF0IjoiOTM1MDI5IiwidCI6IjIwMjYtMTAtMDJUMTM6MTI6NTZaIn0",
+    "FirstName": "Oniel",
+    "LastName": "Santiago",
+    "Phone": "(47) 98807-4934",
+    "Email": "",
+    "Company": "Claro",
+    "EmployeeId": "935029",
+    "Cluster": "Joinville",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "RequestedAtUtc": "2026-10-02T13:13:17.4216421Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiYjUwYWE2ODEtNWEyMC00YjJiLTg3YzctNzUwY2QxZDYzNWE1IiwiZiI6IjZCQTQ4MDJBMENCRTM0MDI5MzVGQ0FBRDc1RTgzQzAwMkRFMjdCRUFCNTI2NzkzRkJFRkFDRjQ5OUE0NDVDQzUiLCJleHAiOiIyMDI2LTExLTAxVDAwOjAwOjAwWiJ9.gfwol0IwyjskPqv1wUDA0d4ttnYjIvOLxzt0bN57kB0J7NebulZat8hSn0ueIuE85Vh0hl0_ELpJMzGY1L4BiKLSA5ODum6LyLG6n12sIrhPG87f6hHcFek6nBH0ePjV8oSW1ePQqGT0NZnMBxZULaLCcOO5v39eofsCzRK1mw8t6ptaojCr4n9OfYTgtJFW5miNMCbl1YT4zIjI9hAUaxN1qj6pYBrjeWRqMGx_qKDxOzrbJ7b8ggmTV6bhtPVj4Lzp6PYHR8PA8lJ6zTA7Yz0zHpuIKmefwSXzzSmRf-4nQ6fsU3MJCqukytPvlURtU7ty7okKUxciztcjORL9Rw",
+    "ExpirationDateIso": "2026-11-01",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "15243904f5aced2abcea23fbc68d3872ee3ca32c",
+    "RemoteFileName": "b50aa681-5a20-4b2b-87c7-750cd1d635a5.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Oniel Santiago",
+    "RegionInfo": "Joinville / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5547988074934"
+  },
+  {
+    "MachineGuid": "b4f6dec3-7669-4f6d-b32a-1ffbb8dd596c",
+    "MachineFingerprint": "7A85A373FAF97E9B775737B439BB1553BDD8C9041D915262CF9FA6F6CE8AD117",
+    "RawRequestCode": "SPBREQ.eyJnIjoiYjRmNmRlYzMtNzY2OS00ZjZkLWIzMmEtMWZmYmI4ZGQ1OTZjIiwiZiI6IjdBODVBMzczRkFGOTdFOUI3NzU3MzdCNDM5QkIxNTUzQkREOEM5MDQxRDkxNTI2MkNGOUZBNkY2Q0U4QUQxMTciLCJuIjoiQWRyaWFubyIsInMiOiJTYWxndWVpcm8iLCJwIjoiKDQ4KSA5ODg3MC01NDM4IiwiZSI6ImFkcmlhbm8uc2FsZ3VlaXJvQGNsYXJvLmNvbS5iciIsImMiOiJFbXByZXNhcmlhbCBERSBTQyIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguMzQtMjAyNjA5MzAiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiQ2xhcm8iLCJtYXQiOiI5MTI5NDI3IiwidCI6IjIwMjYtMTAtMDFUMTc6NDg6NDhaIn0",
+    "FirstName": "Adriano",
+    "LastName": "Salgueiro",
+    "Phone": "(48) 98870-5438",
+    "Email": "adriano.salgueiro@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "9129427",
+    "Cluster": "Empresarial DE SC",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "RequestedAtUtc": "2026-10-01T17:49:20.1716363Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiYjRmNmRlYzMtNzY2OS00ZjZkLWIzMmEtMWZmYmI4ZGQ1OTZjIiwiZiI6IjdBODVBMzczRkFGOTdFOUI3NzU3MzdCNDM5QkIxNTUzQkREOEM5MDQxRDkxNTI2MkNGOUZBNkY2Q0U4QUQxMTciLCJleHAiOiIyMDI2LTEwLTMxVDAwOjAwOjAwWiJ9.jyeR-qsduwoG4zZRKNANRqVGCFsUkuVX7CqHJvUsrmQbiWhO-mOHgYdKfdUyMgBh2T9iR7pr9egkAeliVZpmSomJpy9ZaWZxjWV7K1XEbsPF9mHTvudM4VG2p70uZwLNPKEhuSYwtFQiivNLfAWSMzXplpwtn-Ej_FYgr_UqOY4Agf0HBWqhgOK0gNbdpnzrFXFKi7a0J0s40U74pPzC8QcktOWUk39vLGgdcRiDCR_kiGn3zL3w6BE9yhikViSy4XIp_Fq3n-RWpgDVNZdUzRjc5kwOCXVWALxLK8kqxD3kw9pRyWjeOZ9ximY7FATH4MWCRXIGnNmi71yNpQcm0g",
+    "ExpirationDateIso": "2026-10-31",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "5c4006262dcb78c8718de4bad4d2729d18d56d6a",
+    "RemoteFileName": "b4f6dec3-7669-4f6d-b32a-1ffbb8dd596c.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Adriano Salgueiro",
+    "RegionInfo": "Empresarial DE SC / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5548988705438"
+  },
+  {
+    "MachineGuid": "9e0a4a99-eb83-4e2d-b7a5-29871556c3ac",
+    "MachineFingerprint": "1587CC55D8A3100741C2B34AC870A45431BC0FC9B2D0E37E1C5D1D0DC2CE336C",
+    "RawRequestCode": "SPBREQ.eyJnIjoiOWUwYTRhOTktZWI4My00ZTJkLWI3YTUtMjk4NzE1NTZjM2FjIiwiZiI6IjE1ODdDQzU1RDhBMzEwMDc0MUMyQjM0QUM4NzBBNDU0MzFCQzBGQzlCMkQwRTM3RTFDNUQxRDBEQzJDRTMzNkMiLCJuIjoiU2FuZHJvIFZhcmxlaSIsInMiOiJCb3JnZXMgQW5jaW5pIiwicCI6Iig0OSkgOTg4MDctODY4NSIsImUiOiJzYW5kcm8uYW5jaW5pQGNsYXJvLmNvbS5iciIsImMiOiJTQyBJbnRlcmlvciIsInUiOiJTQyIsInYiOiJCRVRBLVRFU1RFUy0wLjguMzQtMjAyNjA5MzAiLCJwbHQiOiJXaW5kb3dzIiwiY21wIjoiQ2xhcm8iLCJtYXQiOiI5NzY4NzYiLCJ0IjoiMjAyNi0xMC0wMVQxMzoyNDozNloifQ",
+    "FirstName": "Sandro Varlei",
+    "LastName": "Borges Ancini",
+    "Phone": "(49) 98807-8685",
+    "Email": "sandro.ancini@claro.com.br",
+    "Company": "Claro",
+    "EmployeeId": "976876",
+    "Cluster": "SC Interior",
+    "Uf": "SC",
+    "ClientVersion": "BETA-TESTES-0.8.34-20260930",
+    "RequestedAtUtc": "2026-10-01T13:25:29.5145585Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiOWUwYTRhOTktZWI4My00ZTJkLWI3YTUtMjk4NzE1NTZjM2FjIiwiZiI6IjE1ODdDQzU1RDhBMzEwMDc0MUMyQjM0QUM4NzBBNDU0MzFCQzBGQzlCMkQwRTM3RTFDNUQxRDBEQzJDRTMzNkMiLCJleHAiOiIyMDI2LTEwLTMxVDAwOjAwOjAwWiJ9.jYifHwhDbd8X0l8lkwmQDqtkjJ6FS9Rb0Qq0hddm2hJ3sFfJNSxINeThUPsiqe1Dcm9JL6lXQ8KSEVSXs-b3Pbz-frs9tHFFDcRzzgMzN1gwD5Dr09RQhKmkU8h9J8PsUZ5CITkbxqO7eadnFb4XnuaRIO5ZrgNUv4f8dh-ceP2CgyYLbCvuujxVH_Krtl83_h0JDb6ZE-HUQtISOr44ElLNg7QcERsNTl39JbD6BAw4GUHXsxWdR5J1rYi3ATIavRkuo-e2HhrP2aeT5X-JuT0hpu7UfgruGc1AHv__9GevJU5AO6wuUb1Bix3Ct5rk8eDICXII6EtD4TCkMx3jOQ",
+    "ExpirationDateIso": "2026-10-31",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "f5c7ed1f14fe7f509b8086c8c06528fca982c707",
+    "RemoteFileName": "9e0a4a99-eb83-4e2d-b7a5-29871556c3ac.json",
+    "Platform": "Windows",
+    "PlatformBadge": "🪟 Windows",
+    "FullName": "Sandro Varlei Borges Ancini",
+    "RegionInfo": "SC Interior / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5549988078685"
+  },
+  {
+    "MachineGuid": "729651b2-b5c1-42e7-97b0-b0f9048ce5a0",
+    "MachineFingerprint": "fa975fcc7ea211120133ff6278f2ad07b1192887317daae7299a977faaf16025",
+    "RawRequestCode": "SPBREQ.eyJnIjoiNzI5NjUxYjItYjVjMS00MmU3LTk3YjAtYjBmOTA0OGNlNWEwIiwiZiI6ImZhOTc1ZmNjN2VhMjExMTIwMTMzZmY2Mjc4ZjJhZDA3YjExOTI4ODczMTdkYWFlNzI5OWE5NzdmYWFmMTYwMjUiLCJuIjoiR2VvcmdlIEx1w61zIiwicyI6IkNhbGNtYW5uIiwicCI6Iig0OCkgOTg4MDMtNjYzMiIsImUiOiIiLCJjIjoiRmxvcmlhbsOzcG9saXMiLCJ1IjoiU0MiLCJ2IjoiMC44LjQxIiwicGx0IjoiQW5kcm9pZCIsImNtcCI6IkNsYXJvIiwibWF0IjoiOTExMTQ0MDYiLCJ0IjoiMjAyNi0wOS0zMFQyMjowMjo1OFoifQ",
+    "FirstName": "George Luís",
+    "LastName": "Calcmann",
+    "Phone": "(48) 98803-6632",
+    "Email": "",
+    "Company": "Claro",
+    "EmployeeId": "91114406",
+    "Cluster": "Florianópolis",
+    "Uf": "SC",
+    "ClientVersion": "0.8.41",
+    "RequestedAtUtc": "2026-09-30T22:02:58.4347897Z",
+    "Status": "Approved",
+    "ApprovedToken": "SPB1.eyJnIjoiNzI5NjUxYjItYjVjMS00MmU3LTk3YjAtYjBmOTA0OGNlNWEwIiwiZiI6ImZhOTc1ZmNjN2VhMjExMTIwMTMzZmY2Mjc4ZjJhZDA3YjExOTI4ODczMTdkYWFlNzI5OWE5NzdmYWFmMTYwMjUiLCJleHAiOiIyMDI2LTEwLTMwVDAwOjAwOjAwWiJ9.T8DYNDFZvZOgtDA2fDetdzMt_3Omonz1yKbEvVaGOcFwqRaOvgA8WGUtbYH-OoDLHmXLcOSgfgsSd_xLqKoHirtHco2RPq4r4MBc4HFRYqYZ_F5_cm_EHjWytIPWdSmroTkY28bKVISs6EljyEarnLz-VUfi6I5Z3cocTErMAJ3L-cpUPxJLqTXC0LUElZzfAM1l3bvd4QQrMawHRb1AQfUGuce9mHhLdSvZurmPasZFxfumcusxKpqEk39wZXGCCBPJZSkY_w2VZyHmyFpI8z0zjM7sR9uoa0mX4CnG3jBiN5ePJKBasGv90VJqHRnHxD2MmcACHvuDXtZMwLzE8Q",
+    "ExpirationDateIso": "2026-10-30",
+    "ValidDays": 30,
+    "RejectionReason": null,
+    "AdminNotes": "Aprovado online (30 dias)",
+    "RemoteSha": "4125b840ed6dc2dcfdd95d78d62eed2bad9c6267",
+    "Platform": "Android",
+    "PlatformBadge": "📱 Android",
+    "FullName": "George Luís Calcmann",
+    "RegionInfo": "Florianópolis / SC",
+    "StatusBadge": "✅ Aprovada",
+    "WhatsAppUrl": "https://wa.me/5548988036632"
   }
 ];
     let RAW_SPEEDTESTS = [];
@@ -2139,6 +2214,8 @@
         initTechniciansView();
         initRequestsView();
         initSpeedtestView();
+        // Sincroniza dados da nuvem em segundo plano automaticamente
+        setTimeout(() => syncCloudData(false), 200);
       } else {
         document.getElementById('loginView').style.display = 'flex';
         document.getElementById('appShell').style.display = 'none';
@@ -2183,6 +2260,9 @@
 
       if (tabId === 'telemetry') {
         setTimeout(initCharts, 50);
+      } else if (tabId === 'requests') {
+        renderRequestsTable();
+        fetchCloudRequests(false);
       }
     }
 
@@ -2764,53 +2844,188 @@
     // ==========================================
     function initRequestsView() {
       renderRequestsTable();
+      fetchCloudRequests(false);
     }
 
     function updateRequestsBadge() {
-      const count = RAW_REQUESTS.filter(r => r.Status === 'Pending').length;
+      const pendingCount = RAW_REQUESTS.filter(r => (r.Status || 'Pending') === 'Pending').length;
       const b = document.getElementById('badgeRequestsCount');
-      if (b) b.innerText = count;
+      if (b) {
+        b.innerText = pendingCount;
+        if (pendingCount > 0) {
+          b.style.background = 'var(--amber)';
+          b.style.color = '#000';
+          b.style.fontWeight = 'bold';
+        } else {
+          b.style.background = 'var(--border)';
+          b.style.color = 'var(--text-muted)';
+        }
+      }
+    }
+
+    async function fetchCloudRequests(interactive = false) {
+      const token = getActiveGitHubToken();
+      if (!token) {
+        if (interactive) showToast('Token GitHub não configurado.');
+        return;
+      }
+      if (interactive) showToast('Buscando solicitações na nuvem...');
+
+      try {
+        const res = await fetch('https://api.github.com/repos/Calcmann/repo/contents/requests', {
+          headers: {
+            'Authorization': 'token ' + token,
+            'User-Agent': 'SPARC-Admin-Web'
+          }
+        });
+        if (!res.ok) {
+          if (interactive) showToast('Não foi possível listar solicitações da nuvem (HTTP ' + res.status + ')');
+          return;
+        }
+        const files = await res.json();
+        if (!Array.isArray(files)) return;
+
+        let rejected = [];
+        try {
+          rejected = JSON.parse(localStorage.getItem('sparc_admin_rejected_guids') || '[]');
+        } catch (e) { rejected = []; }
+
+        const jsonFiles = files.filter(f => f.name && f.name.endsWith('.json') && !f.name.includes('deleted'));
+
+        const fetchPromises = jsonFiles.map(async f => {
+          try {
+            const fileRes = await fetch('https://api.github.com/repos/Calcmann/repo/contents/requests/' + f.name, {
+              headers: {
+                'Authorization': 'token ' + token,
+                'Accept': 'application/vnd.github.v3.raw',
+                'User-Agent': 'SPARC-Admin-Web'
+              }
+            });
+            if (fileRes.ok) {
+              const reqData = await fileRes.json();
+              if (reqData && reqData.MachineGuid) {
+                reqData._sha = f.sha;
+                reqData.RemoteFileName = f.name;
+                return reqData;
+              }
+            }
+          } catch (e) {}
+          return null;
+        });
+
+        const fetchedReqs = (await Promise.all(fetchPromises)).filter(Boolean);
+
+        fetchedReqs.forEach(newR => {
+          if (rejected.includes(newR.MachineGuid)) return;
+          const idx = RAW_REQUESTS.findIndex(r => r.MachineGuid && r.MachineGuid.toLowerCase() === newR.MachineGuid.toLowerCase());
+          if (idx >= 0) {
+            RAW_REQUESTS[idx] = Object.assign({}, RAW_REQUESTS[idx], newR);
+          } else {
+            RAW_REQUESTS.unshift(newR);
+          }
+        });
+
+        RAW_REQUESTS.sort((a, b) => {
+          const dtA = new Date(a.RequestedAtUtc || a.RequestDateUtc || 0).getTime();
+          const dtB = new Date(b.RequestedAtUtc || b.RequestDateUtc || 0).getTime();
+          return dtB - dtA;
+        });
+
+        purgeRejectedRequests();
+        updateRequestsBadge();
+        renderRequestsTable();
+
+        if (interactive) {
+          const pendingCount = RAW_REQUESTS.filter(r => (r.Status || 'Pending') === 'Pending').length;
+          showToast(`Sincronização concluída! (${pendingCount} pendente(s), ${RAW_REQUESTS.length} no total)`);
+        }
+      } catch (err) {
+        console.warn('Erro ao buscar solicitações da nuvem:', err);
+        if (interactive) showToast('Falha de rede ao buscar solicitações.');
+      }
     }
 
     function renderRequestsTable() {
       const tbody = document.getElementById('reqTableBody');
       const countEl = document.getElementById('reqTableCount');
-      const pending = RAW_REQUESTS.filter(r => r.Status === 'Pending');
-      if (countEl) countEl.innerText = `${pending.length} solicitações aguardando aprovação`;
+      const filterStatus = document.getElementById('selFilterRequestsStatus')?.value || 'Pending';
+
+      const pending = RAW_REQUESTS.filter(r => (r.Status || 'Pending') === 'Pending');
+      const approved = RAW_REQUESTS.filter(r => (r.Status || '') === 'Approved');
+
+      if (countEl) {
+        countEl.innerText = `${pending.length} pendente(s) | ${approved.length} aprovada(s) | ${RAW_REQUESTS.length} total`;
+      }
 
       if (!tbody) return;
       tbody.innerHTML = '';
 
-      if (pending.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 24px; color: var(--text-muted);">Nenhuma solicitação pendente no momento.</td></tr>';
+      let list = RAW_REQUESTS;
+      if (filterStatus !== 'ALL') {
+        list = RAW_REQUESTS.filter(r => (r.Status || 'Pending') === filterStatus);
+      }
+
+      if (list.length === 0) {
+        const msg = filterStatus === 'Pending' 
+          ? 'Nenhuma solicitação pendente no momento.' 
+          : `Nenhuma solicitação encontrada no filtro (${filterStatus}).`;
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 24px; color: var(--text-muted);">${msg}</td></tr>`;
         return;
       }
 
-      pending.forEach(r => {
-        const dt = new Date(r.RequestDateUtc).toLocaleString('pt-BR');
+      list.forEach(r => {
+        const rawDate = r.RequestedAtUtc || r.RequestDateUtc;
+        const dt = rawDate ? new Date(rawDate).toLocaleString('pt-BR') : '-';
         const plat = r.Platform === 'Android' ? '🤖 Android' : '🪟 Windows';
+        const fullName = r.FullName || ((r.FirstName || '') + ' ' + (r.LastName || '')).trim() || 'Técnico';
+        const phone = r.Phone || '-';
+        const isPending = (r.Status || 'Pending') === 'Pending';
+        const isApproved = (r.Status || '') === 'Approved';
+
+        let statusBadge = '';
+        if (isPending) {
+          statusBadge = '<span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;">⏳ Pendente</span>';
+        } else if (isApproved) {
+          statusBadge = `<span style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;">✅ Aprovada (${r.ValidDays || 90}d)</span>`;
+        } else {
+          statusBadge = `<span style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;">❌ ${r.Status || 'Recusada'}</span>`;
+        }
+
+        const phoneDigits = (phone || '').replace(/\D/g, '');
+        const waLink = phoneDigits.length >= 10 
+          ? `<a href="https://wa.me/55${phoneDigits}" target="_blank" class="btn btn-dark" style="padding: 4px 8px; font-size: 11px;" title="Chamar no WhatsApp">💬 WhatsApp</a>` 
+          : '';
+
+        let actionsHtml = '<div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">';
+        if (isPending) {
+          actionsHtml += `
+            <button class="btn btn-success" style="padding: 4px 8px; font-size: 11px;" onclick="approveRequest('${r.MachineGuid}')">✓ Aprovar (90d)</button>
+            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="rejectRequest('${r.MachineGuid}')">✕ Recusar</button>
+          `;
+        }
+        if (waLink) {
+          actionsHtml += waLink;
+        }
+        actionsHtml += '</div>';
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${dt}</td>
-          <td><strong>${r.FullName}</strong></td>
-          <td>${r.Company}</td>
-          <td>${r.EmployeeId}</td>
-          <td>${r.Phone}</td>
+          <td style="font-size: 11.5px; white-space: nowrap;">${dt}</td>
+          <td><strong>${fullName}</strong></td>
+          <td>${r.Company || '-'}</td>
+          <td>${r.EmployeeId || '-'}</td>
+          <td>${phone}</td>
           <td>${plat}</td>
-          <td><code title="${r.MachineGuid}">${(r.MachineGuid || '').slice(0, 13)}...</code></td>
+          <td>${r.Cluster || '-'} / ${r.Uf || '-'}</td>
           <td>${r.ClientVersion || 'Beta'}</td>
-          <td>
-            <div style="display: flex; gap: 6px;">
-              <button class="btn btn-success" style="padding: 5px 10px; font-size: 11px;" onclick="approveRequest('${r.MachineGuid}')">✓ Aprovar (90d)</button>
-              <button class="btn btn-danger" style="padding: 5px 10px; font-size: 11px;" onclick="rejectRequest('${r.MachineGuid}')">✕ Recusar</button>
-            </div>
-          </td>
+          <td>${statusBadge}</td>
+          <td>${actionsHtml}</td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    function approveRequest(guid) {
+    async function approveRequest(guid) {
       const req = RAW_REQUESTS.find(r => r.MachineGuid === guid);
       if (!req) return;
 
@@ -2818,34 +3033,81 @@
       now.setDate(now.getDate() + 90);
       const expIso = now.toISOString().slice(0, 10);
 
-      const parts = req.FullName.split(' ');
+      const fullName = req.FullName || ((req.FirstName || '') + ' ' + (req.LastName || '')).trim() || 'Técnico';
+      const parts = fullName.split(' ');
       const newDev = {
         MachineGuid: req.MachineGuid,
-        MachineFingerprint: req.MachineGuid,
-        FirstName: parts[0] || req.FullName,
+        MachineFingerprint: req.MachineFingerprint || req.MachineGuid,
+        FirstName: parts[0] || fullName,
         LastName: parts.slice(1).join(' ') || '',
-        FullName: req.FullName,
-        Company: req.Company,
-        EmployeeId: req.EmployeeId,
-        Phone: req.Phone,
-        Email: req.Email,
-        Cluster: req.Cluster,
-        Uf: req.Uf,
-        Platform: req.Platform,
+        FullName: fullName,
+        Company: req.Company || 'Claro',
+        EmployeeId: req.EmployeeId || '0',
+        Phone: req.Phone || '',
+        Email: req.Email || '',
+        Cluster: req.Cluster || '',
+        Uf: req.Uf || '',
+        Platform: req.Platform || 'Windows',
         Status: 'Active',
         ValidDays: 90,
         ExpirationDateIso: expIso,
-        ClientVersion: req.ClientVersion,
-        Notes: 'Aprovado online via SPARC Admin Web'
+        ClientVersion: req.ClientVersion || 'Beta',
+        Notes: 'Aprovado online via SPARC Admin Web',
+        FirstRegisteredUtc: new Date().toISOString(),
+        LastSeenUtc: new Date().toISOString()
       };
 
-      RAW_DEVICES.unshift(newDev);
+      const existingIdx = RAW_DEVICES.findIndex(d => d.MachineGuid && d.MachineGuid.toLowerCase() === guid.toLowerCase());
+      if (existingIdx >= 0) {
+        RAW_DEVICES[existingIdx] = Object.assign({}, RAW_DEVICES[existingIdx], newDev);
+      } else {
+        RAW_DEVICES.unshift(newDev);
+      }
+
       req.Status = 'Approved';
+      req.AdminNotes = 'Aprovado online via SPARC Admin Web (90 dias)';
+      req.ExpirationDateIso = expIso;
+      req.ValidDays = 90;
 
       updateRequestsBadge();
       renderRequestsTable();
       applyTechnicianFilters();
-      showToast(`Solicitação de ${req.FullName} aprovada com sucesso! Licença liberada.`);
+      showToast(`Solicitação de ${fullName} aprovada com sucesso! Salvando na nuvem...`);
+
+      await commitDevicesToCloud(true);
+
+      const token = getActiveGitHubToken();
+      if (token) {
+        try {
+          const reqUrl = `https://api.github.com/repos/Calcmann/repo/contents/requests/${guid}.json`;
+          const getRes = await fetch(reqUrl, {
+            headers: { 'Authorization': 'token ' + token, 'User-Agent': 'SPARC-Admin-Web' }
+          });
+          let sha = '';
+          if (getRes.ok) {
+            const getObj = await getRes.json();
+            sha = getObj.sha;
+          }
+          const payloadStr = JSON.stringify(req, null, 2);
+          const b64 = btoa(unescape(encodeURIComponent(payloadStr)));
+          await fetch(reqUrl, {
+            method: 'PUT',
+            headers: {
+              'Authorization': 'token ' + token,
+              'User-Agent': 'SPARC-Admin-Web',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `admin(web): approve request for ${fullName} [${guid}]`,
+              content: b64,
+              sha: sha || undefined
+            })
+          });
+          showToast(`✓ Aprovação de ${fullName} salva na Nuvem!`);
+        } catch (saveErr) {
+          console.warn('Erro ao atualizar arquivo da solicitação no GitHub:', saveErr);
+        }
+      }
     }
 
     async function rejectRequest(guid) {
@@ -3123,6 +3385,11 @@
             }
           }
         } catch (eTel) { }
+
+        // 3. Tenta buscar requests/ atualizado do repositório
+        try {
+          await fetchCloudRequests(false);
+        } catch (eReq) { }
 
         if (interactive) showToast('Sincronização concluída com sucesso!');
       } catch (e) {
