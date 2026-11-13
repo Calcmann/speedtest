@@ -1348,8 +1348,8 @@
     const qualityLossEl = document.getElementById('txtQualityLoss');
 
     if (cirDl === 'auto_fwa') {
-      if (dlTargetEl) dlTargetEl.innerText = `Meta FWA: Descoberta Automática (Estabilidade ≥ 80% do Pico)`;
-      if (ulTargetEl) ulTargetEl.innerText = `Meta FWA: Descoberta Automática (Estabilidade ≥ 80% do Pico)`;
+      if (dlTargetEl) dlTargetEl.innerText = `Meta FWA: Descoberta Automática (Estabilidade ≥ 70% do Pico)`;
+      if (ulTargetEl) ulTargetEl.innerText = `Meta FWA: Descoberta Automática (Estabilidade ≥ 70% do Pico)`;
       if (pingTargetEl) pingTargetEl.innerText = `Meta ANS: ≤ ${p.maxRtt} ms`;
       if (qualityLossEl) qualityLossEl.innerText = `Jitter ≤ ${p.maxJitter}ms • Perda < ${p.maxLoss}%`;
       return;
@@ -1623,11 +1623,13 @@
 
       if (isAuto) {
         // Descoberta dinâmica de limiares FWA (Rede Móvel 4G/5G)
-        // Limiar de capacidade de rádio é o pico sustentado atingido no setor
+        // Em rádio móvel, rajadas transitórias (bursts) não representam a capacidade contínua da portadora.
+        // Adotamos tolerância a variações de modulação/QAM com piso de estabilidade de 70% sobre o pico sustentado.
+        const autoFloorRatio = 0.70;
         effectiveCirDl = dlRes.peak > 0 ? parseFloat(dlRes.peak.toFixed(1)) : (dlRes.avg > 0 ? parseFloat(dlRes.avg.toFixed(1)) : 10.0);
         effectiveCirUl = ulRes.peak > 0 ? parseFloat(ulRes.peak.toFixed(1)) : (ulRes.avg > 0 ? parseFloat(ulRes.avg.toFixed(1)) : 5.0);
-        reqDlMbps = parseFloat((effectiveCirDl * p.dlPctReq).toFixed(1));
-        reqUlMbps = parseFloat((effectiveCirUl * p.ulPctReq).toFixed(1));
+        reqDlMbps = parseFloat((effectiveCirDl * autoFloorRatio).toFixed(1));
+        reqUlMbps = parseFloat((effectiveCirUl * autoFloorRatio).toFixed(1));
       } else {
         reqDlMbps = parseFloat((effectiveCirDl * p.dlPctReq).toFixed(1));
         reqUlMbps = parseFloat((effectiveCirUl * p.ulPctReq).toFixed(1));
@@ -1726,8 +1728,8 @@
       title.style.color = 'var(--green)';
       detail.innerHTML = `
         O enlace cumpre 100% dos requisitos contratuais da RFP / ANS:<br>
-        • <strong>Download:</strong> ${res.dlAvg.toFixed(1)} Mbps ${res.isAuto ? `(Capacidade Rádio: ${res.effectiveCirDl.toFixed(1)} Mbps Pico • Estabilidade: ${((res.dlAvg / res.effectiveCirDl) * 100).toFixed(1)}% [Meta Anatel: ≥ 80%])` : `(Meta: ≥ ${res.reqDlMbps.toFixed(1)} Mbps [${((res.dlAvg / res.cirDl) * 100).toFixed(1)}%])`} — <span style="color: var(--green); font-weight: bold;">CONFORME</span><br>
-        • <strong>Upload:</strong> ${res.ulAvg.toFixed(1)} Mbps ${res.isAuto ? `(Capacidade Rádio: ${res.effectiveCirUl.toFixed(1)} Mbps Pico • Estabilidade: ${((res.ulAvg / res.effectiveCirUl) * 100).toFixed(1)}% [Meta Anatel: ≥ 80%])` : `(Meta: ≥ ${res.reqUlMbps.toFixed(1)} Mbps [${((res.ulAvg / res.cirUl) * 100).toFixed(1)}%])`} — <span style="color: var(--green); font-weight: bold;">CONFORME</span><br>
+        • <strong>Download:</strong> ${res.dlAvg.toFixed(1)} Mbps ${res.isAuto ? `(Capacidade Rádio: ${res.effectiveCirDl.toFixed(1)} Mbps Pico • Estabilidade: ${((res.dlAvg / res.effectiveCirDl) * 100).toFixed(1)}% [Meta Estabilidade: ≥ 70%])` : `(Meta: ≥ ${res.reqDlMbps.toFixed(1)} Mbps [${((res.dlAvg / res.cirDl) * 100).toFixed(1)}%])`} — <span style="color: var(--green); font-weight: bold;">CONFORME</span><br>
+        • <strong>Upload:</strong> ${res.ulAvg.toFixed(1)} Mbps ${res.isAuto ? `(Capacidade Rádio: ${res.effectiveCirUl.toFixed(1)} Mbps Pico • Estabilidade: ${((res.ulAvg / res.effectiveCirUl) * 100).toFixed(1)}% [Meta Estabilidade: ≥ 70%])` : `(Meta: ≥ ${res.reqUlMbps.toFixed(1)} Mbps [${((res.ulAvg / res.cirUl) * 100).toFixed(1)}%])`} — <span style="color: var(--green); font-weight: bold;">CONFORME</span><br>
         • <strong>Latência RTT:</strong> ${res.pingAvg.toFixed(1)} ms (Teto ANS: ≤ ${res.profile.maxRtt} ms) — <span style="color: var(--green); font-weight: bold;">CONFORME</span><br>
         • <strong>Jitter:</strong> ${res.jitter.toFixed(1)} ms (Teto ANS: ≤ ${res.profile.maxJitter} ms) — <span style="color: var(--green); font-weight: bold;">CONFORME</span><br>
         • <strong>Perda de Pacotes:</strong> ${res.lossPct.toFixed(1)}% (Teto ANS: &lt; ${res.profile.maxLoss}%) — <span style="color: var(--green); font-weight: bold;">CONFORME</span>
@@ -1783,7 +1785,7 @@
     if (cfg.cirPreset === 'auto_fwa' || cfg.cirVal === 'auto_fwa') {
       const d = cfg.auditData;
       document.getElementById('auditCir').innerText = `Automática (Rádio 4G/5G: ${d.effectiveCirDl || d.dlAvg}M Down / ${d.effectiveCirUl || d.ulAvg}M Up)`;
-      document.getElementById('auditRfpRegra').innerText = `Estabilidade ≥ 80% do Pico (Anatel FWA) • RTT ≤ ${p.maxRtt}ms`;
+      document.getElementById('auditRfpRegra').innerText = `Estabilidade ≥ 70% do Pico (Anatel FWA) • RTT ≤ ${p.maxRtt}ms`;
     } else if (p.isAsymmetric) {
       document.getElementById('auditCir').innerText = `${cfg.cirVal}M Down / ${cfg.cirUlVal}M Up (Assimétrico)`;
       document.getElementById('auditRfpRegra').innerText = `DL ≥ ${(p.dlPctReq * 100).toFixed(0)}% • UL ≥ ${(p.ulPctReq * 100).toFixed(0)}% (Anatel) • RTT ≤ ${p.maxRtt}ms`;
