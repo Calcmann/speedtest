@@ -1898,7 +1898,7 @@
     return Math.max(0, p75 - basePing);
   }
 
-  // DOWNLOAD WORKER COM LEITURA CONTÍNUA
+  // DOWNLOAD WORKER COM PRÉ-AQUECIMENTO (WARMUP) E REGIME PERMANENTE (ZERO-DELAY CORPORATIVO)
   async function runDownloadTest(signal, durationSec) {
     const durationMs = durationSec * 1000;
     const numStreams = 6;
@@ -1906,16 +1906,41 @@
     let currentSmooth = 0;
     let peakSpeed = 0;
 
-    const tStart = performance.now();
-    const tDeadline = tStart + durationMs;
     const localAbort = new AbortController();
     signal.addEventListener('abort', () => localAbort.abort());
+
+    // 1. FASE DE PRÉ-AQUECIMENTO DE SOCKETS E PROXY CORPORATIVO (~600-800ms)
+    // Aquece DNS, TLS 1.3 handshake e libera regras de inspeção SSL do firewall antes de cronometrar
+    try {
+      const warmResp = await fetch(`https://speed.cloudflare.com/__down?bytes=500000&r=${Math.random()}`, {
+        signal: localAbort.signal,
+        cache: 'no-store'
+      });
+      if (warmResp.body) {
+        const wReader = warmResp.body.getReader();
+        await wReader.read();
+        try { wReader.cancel(); } catch (_) {}
+      }
+    } catch (_) {}
+    signal.throwIfAborted();
+
+    const tStart = performance.now();
+    const tDeadline = tStart + durationMs;
 
     let lastTime = tStart;
     let lastBytes = 0;
     let lastGraphTime = tStart;
 
-    async function worker() {
+    let hasStartedData = false;
+    let tFirstData = tStart;
+    let bytesAtFirstData = 0;
+    const instantSamples = [];
+
+    async function worker(streamIdx) {
+      // Escalonamento suave de conexões (50ms entre streams para evitar enfileiramento em firewalls)
+      if (streamIdx > 0) {
+        await new Promise(r => setTimeout(r, streamIdx * 50));
+      }
       while (performance.now() < tDeadline && !localAbort.signal.aborted) {
         try {
           const resp = await fetch(`https://speed.cloudflare.com/__down?bytes=50000000&r=${Math.random()}`, {
@@ -1927,7 +1952,14 @@
           while (performance.now() < tDeadline && !localAbort.signal.aborted) {
             const { done, value } = await reader.read();
             if (done) break;
-            if (value) totalBytes += value.length;
+            if (value) {
+              totalBytes += value.length;
+              if (!hasStartedData && totalBytes > 0) {
+                hasStartedData = true;
+                tFirstData = performance.now();
+                bytesAtFirstData = totalBytes;
+              }
+            }
           }
           try { reader.cancel(); } catch (_) {}
         } catch (_) {
@@ -1944,13 +1976,23 @@
         const delta = totalBytes - lastBytes;
         if (delta >= 0) {
           const inst = (delta * 8) / (dt * 1e6);
-          currentSmooth = (currentSmooth === 0) ? inst : (currentSmooth * 0.85 + inst * 0.15);
+          // Amortecimento adaptativo para curva ágil e estável
+          currentSmooth = (currentSmooth === 0) ? inst : (currentSmooth * 0.75 + inst * 0.25);
           peakSpeed = Math.max(peakSpeed, currentSmooth);
           document.getElementById('txtDl').innerText = currentSmooth.toFixed(1);
 
-          if (now - lastGraphTime >= 240) {
-            addGraphPoint(currentSmooth, true);
-            lastGraphTime = now;
+          // Coleta amostras instantâneas quando o tráfego efetivo estiver fluindo
+          if (hasStartedData && currentSmooth > 1.0) {
+            instantSamples.push(currentSmooth);
+          }
+
+          // Só adiciona pontos no gráfico a partir do momento em que a vazão começa a fluir,
+          // eliminando a linha plana de zeros no chão causada por latência de conexão corporativa
+          if (hasStartedData && currentSmooth > 0) {
+            if (now - lastGraphTime >= 200) {
+              addGraphPoint(currentSmooth, true);
+              lastGraphTime = now;
+            }
           }
           lastTime = now;
           lastBytes = totalBytes;
@@ -1961,7 +2003,7 @@
     }, 100);
 
     const workers = [];
-    for (let i = 0; i < numStreams; i++) workers.push(worker());
+    for (let i = 0; i < numStreams; i++) workers.push(worker(i));
 
     await Promise.race([
       Promise.all(workers),
@@ -1972,16 +2014,29 @@
     clearInterval(ticker);
     signal.throwIfAborted();
 
+    // CÁLCULO DE VAZÃO EM REGIME PERMANENTE (EXCLUINDO TRANSITÓRIO / SLOW-START INICIAL)
     const totalDurSec = Math.max(0.1, (performance.now() - tStart) / 1000);
-    const avgMbps = (totalBytes * 8) / (totalDurSec * 1e6);
-    const finalDl = currentSmooth > 0 ? Math.max(avgMbps, currentSmooth * 0.96) : avgMbps;
+    const effectiveDurSec = hasStartedData ? Math.max(0.5, (performance.now() - tFirstData) / 1000) : totalDurSec;
+    const effectiveBytes = Math.max(0, totalBytes - bytesAtFirstData);
+    const flowAvgMbps = (effectiveBytes * 8) / (effectiveDurSec * 1e6);
+
+    // Média de regime permanente (exclui primeiros 20% das amostras de rampa de subida)
+    let steadyAvg = flowAvgMbps;
+    if (instantSamples.length >= 6) {
+      const steadySamples = instantSamples.slice(Math.floor(instantSamples.length * 0.20));
+      if (steadySamples.length > 0) {
+        steadyAvg = steadySamples.reduce((a, b) => a + b, 0) / steadySamples.length;
+      }
+    }
+
+    const finalDl = Math.max(flowAvgMbps, steadyAvg, currentSmooth * 0.95);
     document.getElementById('txtDl').innerText = finalDl.toFixed(1);
     document.getElementById('pbDl').style.width = '100%';
 
     return { avg: finalDl, peak: Math.max(peakSpeed, finalDl) };
   }
 
-  // UPLOAD WORKER COM RESOLUÇÃO CONTÍNUA ZERO-LAG (XHR.UPLOAD.ONLOAD)
+  // UPLOAD WORKER COM PRÉ-AQUECIMENTO E RESOLUÇÃO CONTÍNUA ZERO-LAG (XHR.UPLOAD.ONLOAD)
   async function runUploadTest(signal, durationSec) {
     const durationMs = durationSec * 1000;
     const numStreams = 6;
@@ -1990,14 +2045,32 @@
     let peakSpeed = 0;
 
     const payloadBuffer = new Uint8Array(8000000); // 8 MB pré-alocado
-    const tStart = performance.now();
-    const tDeadline = tStart + durationMs;
     const localAbort = new AbortController();
     signal.addEventListener('abort', () => localAbort.abort());
+
+    // Pré-aquecimento rápido de upload (1 chunk leve de 250k para abrir canal)
+    try {
+      await new Promise(res => {
+        const warmXhr = new XMLHttpRequest();
+        warmXhr.open('POST', `https://speed.cloudflare.com/__up?r=${Math.random()}`, true);
+        warmXhr.onload = warmXhr.onerror = warmXhr.onabort = () => res();
+        setTimeout(res, 500);
+        warmXhr.send(payloadBuffer.subarray(0, 250000));
+      });
+    } catch (_) {}
+    signal.throwIfAborted();
+
+    const tStart = performance.now();
+    const tDeadline = tStart + durationMs;
 
     let lastTime = tStart;
     let lastBytes = 0;
     let lastGraphTime = tStart;
+
+    let hasStartedData = false;
+    let tFirstData = tStart;
+    let bytesAtFirstData = 0;
+    const instantSamples = [];
 
     function sendChunk() {
       return new Promise(resolve => {
@@ -2005,7 +2078,6 @@
           resolve();
           return;
         }
-        // Fatias otimizadas entre 1.0 MB e 1.6 MB para manter fluxo contínuo e escalonado sem retenção de socket
         let chunkSize = 1000000;
         if (currentSmooth > 80) chunkSize = 1600000;
         else if (currentSmooth > 30) chunkSize = 1300000;
@@ -2023,6 +2095,11 @@
             totalBytes += (chunkSize - lastLoaded);
             lastLoaded = chunkSize;
           }
+          if (!hasStartedData && totalBytes > 0) {
+            hasStartedData = true;
+            tFirstData = performance.now();
+            bytesAtFirstData = totalBytes;
+          }
           resolve();
         };
 
@@ -2030,10 +2107,14 @@
           if (e.loaded > lastLoaded) {
             totalBytes += (e.loaded - lastLoaded);
             lastLoaded = e.loaded;
+            if (!hasStartedData && totalBytes > 0) {
+              hasStartedData = true;
+              tFirstData = performance.now();
+              bytesAtFirstData = totalBytes;
+            }
           }
         };
 
-        // Resolução instantânea no momento em que os bytes saem para o socket (Zero-Lag)
         xhr.upload.onload = complete;
         xhr.upload.onerror = complete;
         xhr.upload.onabort = complete;
@@ -2048,7 +2129,10 @@
       });
     }
 
-    async function worker() {
+    async function worker(streamIdx) {
+      if (streamIdx > 0) {
+        await new Promise(r => setTimeout(r, streamIdx * 50));
+      }
       while (performance.now() < tDeadline && !localAbort.signal.aborted) {
         await sendChunk();
       }
@@ -2061,14 +2145,19 @@
         const delta = totalBytes - lastBytes;
         if (delta >= 0) {
           const inst = (delta * 8) / (dt * 1e6);
-          // Amortecimento adaptativo para absorver jitter do loop de eventos do navegador
-          currentSmooth = (currentSmooth === 0) ? inst : (currentSmooth * 0.90 + inst * 0.10);
+          currentSmooth = (currentSmooth === 0) ? inst : (currentSmooth * 0.85 + inst * 0.15);
           peakSpeed = Math.max(peakSpeed, currentSmooth);
           document.getElementById('txtUl').innerText = currentSmooth.toFixed(1);
 
-          if (now - lastGraphTime >= 240) {
-            addGraphPoint(currentSmooth, false);
-            lastGraphTime = now;
+          if (hasStartedData && currentSmooth > 1.0) {
+            instantSamples.push(currentSmooth);
+          }
+
+          if (hasStartedData && currentSmooth > 0) {
+            if (now - lastGraphTime >= 200) {
+              addGraphPoint(currentSmooth, false);
+              lastGraphTime = now;
+            }
           }
           lastTime = now;
           lastBytes = totalBytes;
@@ -2079,7 +2168,7 @@
     }, 100);
 
     const workers = [];
-    for (let i = 0; i < numStreams; i++) workers.push(worker());
+    for (let i = 0; i < numStreams; i++) workers.push(worker(i));
 
     await Promise.race([
       Promise.all(workers),
@@ -2091,8 +2180,19 @@
     signal.throwIfAborted();
 
     const totalDurSec = Math.max(0.1, (performance.now() - tStart) / 1000);
-    const avgMbps = (totalBytes * 8) / (totalDurSec * 1e6);
-    const finalUl = currentSmooth > 0 ? Math.max(avgMbps, currentSmooth * 0.96) : avgMbps;
+    const effectiveDurSec = hasStartedData ? Math.max(0.5, (performance.now() - tFirstData) / 1000) : totalDurSec;
+    const effectiveBytes = Math.max(0, totalBytes - bytesAtFirstData);
+    const flowAvgMbps = (effectiveBytes * 8) / (effectiveDurSec * 1e6);
+
+    let steadyAvg = flowAvgMbps;
+    if (instantSamples.length >= 6) {
+      const steadySamples = instantSamples.slice(Math.floor(instantSamples.length * 0.20));
+      if (steadySamples.length > 0) {
+        steadyAvg = steadySamples.reduce((a, b) => a + b, 0) / steadySamples.length;
+      }
+    }
+
+    const finalUl = Math.max(flowAvgMbps, steadyAvg, currentSmooth * 0.95);
     document.getElementById('txtUl').innerText = finalUl.toFixed(1);
     document.getElementById('pbUl').style.width = '100%';
 
