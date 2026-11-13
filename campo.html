@@ -655,7 +655,7 @@
       <div class="badge-tag">⚡ SPARC WEB</div>
       <div>
         <div class="brand-title">Validação de Enlaces &amp; Aceite de Projetos</div>
-        <div class="brand-sub">Perfis de RFP Automatizados (Bradesco, Banda Larga Padrão, O Boticário) • Teste One-Click</div>
+        <div class="brand-sub">Perfis de RFP Automatizados (Banda Larga Padrão, FWA 4G/5G, Bradesco, O Boticário, RFC 6349) • Teste One-Click</div>
       </div>
     </div>
     
@@ -741,6 +741,7 @@
         <label class="select-label" for="cbProjetoPerfil">🏢 Perfil do Projeto / Cliente (RFP):</label>
         <select id="cbProjetoPerfil" class="select-control" onchange="onPerfilChange()">
           <option value="bandalarga_padrao" selected>🌐 Banda Larga Padrão</option>
+          <option value="fwa_anatel">📡 FWA (4G/5G) — Regulatório Anatel</option>
           <option value="bradesco_dedicado">🏦 Banco Bradesco — Internet Dedicada</option>
           <option value="bradesco_bandalarga">🏦 Banco Bradesco — Banda Larga Assimétrica</option>
           <option value="boticario">🌸 O Boticário</option>
@@ -1004,6 +1005,20 @@
 
   // PERFIS DE PROJETO OFICIAIS COM CRITÉRIOS DE RFP / ANS
   const PROJECT_PROFILES = {
+    fwa_anatel: {
+      name: 'FWA (4G/5G)',
+      fullName: 'FWA (4G/5G) — Regulatório Anatel',
+      icon: '📡',
+      isAsymmetric: true,  // Assimétrico (Redes móveis 4G/5G)
+      dlPctReq: 0.80,      // 80% do Download contratado na OS (Piso Regulatório Anatel RGC/RQUAL)
+      ulPctReq: 0.80,      // 80% do Upload contratado na OS (Piso Regulatório Anatel RGC/RQUAL)
+      defaultUlRatio: 0.35,// Padrão 35% do Download (típico FWA 4G/5G)
+      maxRtt: 80,          // Latência RTT ≤ 80 ms (Padrão de referência Anatel para banda larga/FWA)
+      maxJitter: 50,       // Jitter ≤ 50 ms (Estabilidade de rádio)
+      maxLoss: 2.0,        // Perda de Pacotes < 2,0% (Teto regulatório Anatel)
+      title: 'Critério Oficial — FWA 4G/5G (Regulatório Anatel):',
+      desc: 'Validação de acesso fixo sem fio <strong>FWA (4G/5G)</strong> em conformidade com as metas da Anatel (RQUAL/RGC): entrega de <strong>no mínimo 80% da velocidade contratada da OS em Download e Upload</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
+    },
     bandalarga_padrao: {
       name: 'Banda Larga Padrão',
       fullName: 'Banda Larga Padrão',
@@ -1159,7 +1174,7 @@
     if (val === 'custom' && txt) txt.focus();
 
     const profKey = document.getElementById('cbProjetoPerfil').value;
-    if (profKey === 'bradesco_bandalarga' || profKey === 'bandalarga_padrao') {
+    if (profKey === 'bradesco_bandalarga' || profKey === 'bandalarga_padrao' || profKey === 'fwa_anatel') {
       populateAsymmetricUploadOptions();
     }
 
@@ -1169,7 +1184,7 @@
 
   function onCustomCirInput() {
     const profKey = document.getElementById('cbProjetoPerfil').value;
-    if (profKey === 'bradesco_bandalarga' || profKey === 'bandalarga_padrao') {
+    if (profKey === 'bradesco_bandalarga' || profKey === 'bandalarga_padrao' || profKey === 'fwa_anatel') {
       populateAsymmetricUploadOptions();
     }
     updateTargetsDisplay();
@@ -1228,7 +1243,7 @@
 
   function toggleAsymmetricControls() {
     const profKey = document.getElementById('cbProjetoPerfil').value;
-    const isAsym = (profKey === 'bradesco_bandalarga' || profKey === 'bandalarga_padrao');
+    const isAsym = (profKey === 'bradesco_bandalarga' || profKey === 'bandalarga_padrao' || profKey === 'fwa_anatel');
     const boxAsym = document.getElementById('boxAsymmetricUpload');
     const boxAsymInfo = document.getElementById('boxAsymmetricInfo');
     const lblCir = document.getElementById('lblCirBanda');
@@ -1344,7 +1359,7 @@
     if (!lastCompletedConfig) return false;
     const cur = getCurrentConfig();
     const isBrad = cur.profileKey && cur.profileKey.startsWith('bradesco');
-    const isAsym = (cur.profileKey === 'bradesco_bandalarga' || cur.profileKey === 'bandalarga_padrao');
+    const isAsym = (cur.profileKey === 'bradesco_bandalarga' || cur.profileKey === 'bandalarga_padrao' || cur.profileKey === 'fwa_anatel');
     return (
       cur.cirPreset !== lastCompletedConfig.cirPreset ||
       (cur.cirPreset === 'custom' && cur.customCir !== lastCompletedConfig.customCir) ||
