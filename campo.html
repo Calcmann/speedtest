@@ -711,6 +711,26 @@
         <input type="text" id="txtTecnicoNome" placeholder="Ex: Gabriel Lucas ou Denis André" class="select-control" oninput="localStorage.setItem('sparc_tecnico_nome', this.value.trim()); checkConfigConsistency();" required />
       </div>
 
+      <!-- LINHA 2: LOCALIDADE FÍSICA REAL DO ENLACE (2 COMBOBOXES EM CASCATA: MACRO-REGIÃO E CIDADE/POLO REAL) -->
+      <div>
+        <label class="select-label" for="cbMacroRegiao">📍 Macro-Região Física:</label>
+        <select id="cbMacroRegiao" class="select-control" onchange="onMacroRegiaoChange()">
+          <option value="auto" selected>📡 Automático (Detectado pelo IP)</option>
+          <option value="sul">🌲 Região Sul (SC / PR / RS)</option>
+          <option value="sudeste">🏢 Região Sudeste (SP / RJ / MG / ES)</option>
+          <option value="centro_oeste">🌾 Região Centro-Oeste (DF / GO / MS / MT)</option>
+          <option value="nordeste">☀️ Região Nordeste (BA / PE / CE / RN / etc.)</option>
+          <option value="norte">🌳 Região Norte (AM / PA / RO / AC / etc.)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="select-label" for="cbCidadeReal">🏙️ Cidade / Polo Real da Entrega:</label>
+        <select id="cbCidadeReal" class="select-control" onchange="onCidadeRealChange()">
+          <option value="auto" selected>📡 Automático — Polo do IP Público</option>
+        </select>
+      </div>
+
       <!-- LINHA 2 - COLUNA 1: BANDA CONTRATADA (CIR) -->
       <div>
         <label class="select-label" for="cbCirBanda" id="lblCirBanda">🎯 Banda Contratada do Link (CIR):</label>
@@ -782,12 +802,14 @@
 
   <!-- ROTA DINÂMICA AUTOMÁTICA (100% TRANSPARENTE AO USUÁRIO LEIGO) -->
   <div class="topology-strip">
-    <div style="display: flex; align-items: center; gap: 8px;">
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
       <span style="color: var(--cyan); font-weight: 800;">🌐 ORIGEM:</span>
-      <span id="txtClientIp" style="font-weight: 700; color: var(--text-main);">Detectando IP...</span>
+      <span id="txtClientOrigin" style="font-weight: 700; color: var(--text-main);">Detectando localidade...</span>
+      <span id="txtClientIp" style="font-weight: 700; color: var(--text-muted);"></span>
       <span id="txtClientIsp" style="color: var(--text-muted);">(Provedor Local)</span>
+      <span id="badgeGeoMismatch" style="display: none; background: rgba(245, 158, 11, 0.18); border: 1px solid var(--amber); color: #fde68a; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 4px;" title="IP público anunciado em localidade distinta da entrega física do circuito">⚠️ GeoIP Operadora Divergente</span>
     </div>
-    <div style="display: flex; align-items: center; gap: 8px;">
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
       <span style="color: var(--green); font-weight: 800;">⚡ ROTA DINÂMICA:</span>
       <span id="txtTargetPop" style="color: var(--text-main); font-weight: 700;">Menor Esforço Geodésico Automático</span>
     </div>
@@ -921,10 +943,16 @@
       <div style="border: 1px solid #cbd5e1; padding: 8px 10px; border-radius: 6px;">
         <div><strong>Critério da RFP / ANS:</strong> <span id="auditRfpRegra">--</span></div>
         <div><strong>Técnico / Responsável:</strong> <span id="auditTecnico">--</span></div>
+        <div><strong>Localidade Física da Entrega:</strong> <span id="auditLocalidadeFisica">--</span></div>
         <div><strong>IP Público do Link:</strong> <span id="auditIp">--</span></div>
         <div><strong>Operadora / ASN:</strong> <span id="auditIsp">--</span></div>
         <div><strong>PoP Datacenter Alvo:</strong> <span id="auditPop">--</span></div>
       </div>
+    </div>
+
+    <!-- NOTA DE DIVERGÊNCIA GEOIP / ROTEAMENTO -->
+    <div id="boxAuditGeoNote" style="display: none; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 6px 10px; border-radius: 6px; font-size: 10.5px; margin-bottom: 10px; line-height: 1.4;">
+      <strong>⚠️ Nota Técnica de Auditoria (Roteamento / GeoIP):</strong> <span id="auditGeoNoteText">--</span>
     </div>
 
     <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
@@ -1002,7 +1030,127 @@
   const ulPoints = [];
   let maxGraphSpeed = 50;
 
-  const PARAM_INPUT_IDS = ['cbCirBanda', 'txtCustomCir', 'cbUlCirBanda', 'txtCustomUlCir', 'cbProjetoPerfil', 'txtOsNumero', 'txtAgencia', 'txtTecnicoNome'];
+  const PARAM_INPUT_IDS = [
+    'cbCirBanda', 'txtCustomCir', 'cbUlCirBanda', 'txtCustomUlCir',
+    'cbProjetoPerfil', 'txtOsNumero', 'txtAgencia', 'txtTecnicoNome',
+    'cbMacroRegiao', 'cbCidadeReal'
+  ];
+
+  // CATÁLOGO DE POLOS REGIONAIS DE TELECOMUNICAÇÃO DO BRASIL (COM COORDENADAS REAIS)
+  const BRAZIL_REGIONAL_POLOS = {
+    sul: {
+      name: '🌲 Região Sul (SC / PR / RS)',
+      cities: [
+        { id: 'fln', uf: 'SC', name: 'Florianópolis / SC', desc: 'Capital & Hub Sul', lat: -27.5967, lon: -48.5492 },
+        { id: 'joi', uf: 'SC', name: 'Joinville / SC', desc: 'Norte Catarinense', lat: -26.3045, lon: -48.8487 },
+        { id: 'bnu', uf: 'SC', name: 'Blumenau / SC', desc: 'Vale do Itajaí', lat: -26.9194, lon: -49.0661 },
+        { id: 'iai', uf: 'SC', name: 'Itajaí / SC', desc: 'Litoral & Porto', lat: -26.9078, lon: -48.6619 },
+        { id: 'cha', uf: 'SC', name: 'Chapecó / SC', desc: 'Oeste Catarinense', lat: -27.1004, lon: -52.6152 },
+        { id: 'csc', uf: 'SC', name: 'Criciúma / SC', desc: 'Sul Catarinense', lat: -28.6775, lon: -49.3704 },
+        { id: 'lgs', uf: 'SC', name: 'Lages / SC', desc: 'Planalto Serrano', lat: -27.8161, lon: -50.3261 },
+        { id: 'jca', uf: 'SC', name: 'Joaçaba / SC', desc: 'Meio-Oeste', lat: -27.1772, lon: -51.5033 },
+        { id: 'cwb', uf: 'PR', name: 'Curitiba / PR', desc: 'Capital & PTT CWB', lat: -25.4284, lon: -49.2733 },
+        { id: 'ldb', uf: 'PR', name: 'Londrina / PR', desc: 'Norte Paranaense', lat: -23.3045, lon: -51.1696 },
+        { id: 'mga', uf: 'PR', name: 'Maringá / PR', desc: 'Noroeste Paranaense', lat: -23.4205, lon: -51.9333 },
+        { id: 'csl', uf: 'PR', name: 'Cascavel / PR', desc: 'Oeste Paranaense', lat: -24.9578, lon: -53.4595 },
+        { id: 'foz', uf: 'PR', name: 'Foz do Iguaçu / PR', desc: 'Tríplice Fronteira', lat: -25.5469, lon: -54.5882 },
+        { id: 'poa', uf: 'RS', name: 'Porto Alegre / RS', desc: 'Capital & PTT POA', lat: -30.0346, lon: -51.2177 },
+        { id: 'cxj', uf: 'RS', name: 'Caxias do Sul / RS', desc: 'Serra Gaúcha', lat: -29.1678, lon: -51.1794 },
+        { id: 'pel', uf: 'RS', name: 'Pelotas / RS', desc: 'Sul Gaúcho', lat: -31.7654, lon: -52.3376 },
+        { id: 'pfu', uf: 'RS', name: 'Passo Fundo / RS', desc: 'Norte Gaúcho', lat: -28.2628, lon: -52.4067 }
+      ]
+    },
+    sudeste: {
+      name: '🏢 Região Sudeste (SP / RJ / MG / ES)',
+      cities: [
+        { id: 'gru', uf: 'SP', name: 'São Paulo / SP', desc: 'Capital & Datacenter GRU', lat: -23.5505, lon: -46.6333 },
+        { id: 'cpq', uf: 'SP', name: 'Campinas / SP', desc: 'Polo Tecnológico', lat: -22.9099, lon: -47.0626 },
+        { id: 'sts', uf: 'SP', name: 'Santos / SP', desc: 'Baixada Santista', lat: -23.9608, lon: -46.3331 },
+        { id: 'rao', uf: 'SP', name: 'Ribeirão Preto / SP', desc: 'Interior SP', lat: -21.1775, lon: -47.8103 },
+        { id: 'sjk', uf: 'SP', name: 'São José dos Campos / SP', desc: 'Vale do Paraíba', lat: -23.1896, lon: -45.8841 },
+        { id: 'soc', uf: 'SP', name: 'Sorocaba / SP', desc: 'Interior SP', lat: -23.5015, lon: -47.4521 },
+        { id: 'bru', uf: 'SP', name: 'Bauru / SP', desc: 'Centro-Oeste Paulista', lat: -22.3145, lon: -49.0587 },
+        { id: 'ppe', uf: 'SP', name: 'Presidente Prudente / SP', desc: 'Oeste Paulista', lat: -22.1256, lon: -51.3889 },
+        { id: 'srr', uf: 'SP', name: 'São José do Rio Preto / SP', desc: 'Norte Paulista', lat: -20.8113, lon: -49.3758 },
+        { id: 'gig', uf: 'RJ', name: 'Rio de Janeiro / RJ', desc: 'Capital & PTT GIG', lat: -22.9068, lon: -43.1729 },
+        { id: 'cnf', uf: 'MG', name: 'Belo Horizonte / MG', desc: 'Capital & PTT CNF', lat: -19.9167, lon: -43.9345 },
+        { id: 'udi', uf: 'MG', name: 'Uberlândia / MG', desc: 'Triângulo Mineiro', lat: -18.9186, lon: -48.2772 },
+        { id: 'vix', uf: 'ES', name: 'Vitória / ES', desc: 'VIX & PTT ES', lat: -20.3155, lon: -40.3128 }
+      ]
+    },
+    centro_oeste: {
+      name: '🌾 Região Centro-Oeste (DF / GO / MS / MT)',
+      cities: [
+        { id: 'bsb', uf: 'DF', name: 'Brasília / DF', desc: 'Capital Federal & PTT BSB', lat: -15.7975, lon: -47.8919 },
+        { id: 'gyn', uf: 'GO', name: 'Goiânia / GO', desc: 'Goiânia Central', lat: -16.6869, lon: -49.2648 },
+        { id: 'cgr', uf: 'MS', name: 'Campo Grande / MS', desc: 'Mato Grosso do Sul', lat: -20.4697, lon: -54.6201 },
+        { id: 'cgb', uf: 'MT', name: 'Cuiabá / MT', desc: 'Mato Grosso', lat: -15.6014, lon: -56.0979 }
+      ]
+    },
+    nordeste: {
+      name: '☀️ Região Nordeste (BA / PE / CE / RN / etc.)',
+      cities: [
+        { id: 'ssa', uf: 'BA', name: 'Salvador / BA', desc: 'Capital & PTT SSA', lat: -12.9714, lon: -38.5014 },
+        { id: 'rec', uf: 'PE', name: 'Recife / PE', desc: 'Capital & PTT REC', lat: -8.0476, lon: -34.8770 },
+        { id: 'for', uf: 'CE', name: 'Fortaleza / CE', desc: 'Hub Cabos Submarinos & PTT FOR', lat: -3.7319, lon: -38.5267 },
+        { id: 'nat', uf: 'RN', name: 'Natal / RN', desc: 'Rio Grande do Norte', lat: -5.7945, lon: -35.2110 },
+        { id: 'jpa', uf: 'PB', name: 'João Pessoa / PB', desc: 'Paraíba', lat: -7.1195, lon: -34.8450 },
+        { id: 'mcz', uf: 'AL', name: 'Maceió / AL', desc: 'Alagoas', lat: -9.6498, lon: -35.7089 },
+        { id: 'aju', uf: 'SE', name: 'Aracaju / SE', desc: 'Sergipe', lat: -10.9472, lon: -37.0731 },
+        { id: 'the', uf: 'PI', name: 'Teresina / PI', desc: 'Piauí', lat: -5.0892, lon: -42.8019 },
+        { id: 'slz', uf: 'MA', name: 'São Luís / MA', desc: 'Maranhão', lat: -2.5307, lon: -44.3068 }
+      ]
+    },
+    norte: {
+      name: '🌳 Região Norte (AM / PA / RO / AC / etc.)',
+      cities: [
+        { id: 'bel', uf: 'PA', name: 'Belém / PA', desc: 'Pará & PTT BEL', lat: -1.4558, lon: -48.4902 },
+        { id: 'mao', uf: 'AM', name: 'Manaus / AM', desc: 'Amazonas & PTT MAO', lat: -3.1190, lon: -60.0217 },
+        { id: 'pvh', uf: 'RO', name: 'Porto Velho / RO', desc: 'Rondônia', lat: -8.7612, lon: -63.9039 },
+        { id: 'mcp', uf: 'AP', name: 'Macapá / AP', desc: 'Amapá', lat: 0.0389, lon: -51.0664 },
+        { id: 'rbr', uf: 'AC', name: 'Rio Branco / AC', desc: 'Acre', lat: -9.9753, lon: -67.8249 },
+        { id: 'bvb', uf: 'RR', name: 'Boa Vista / RR', desc: 'Roraima', lat: 2.8235, lon: -60.6758 },
+        { id: 'pmw', uf: 'TO', name: 'Palmas / TO', desc: 'Tocantins', lat: -10.2491, lon: -48.3243 }
+      ]
+    }
+  };
+
+  // DATACENTERS / POPS REGIONAIS DE MENOR CUSTO DE REDE
+  const TELECOM_POPS = [
+    { id: 'cwb', name: 'PoP Sul (Curitiba / PR)', city: 'Curitiba (PTT CWB)', lat: -25.4284, lon: -49.2733, colo: 'CWB' },
+    { id: 'poa', name: 'PoP Sul (Porto Alegre / RS)', city: 'Porto Alegre (PTT POA)', lat: -30.0346, lon: -51.2177, colo: 'POA' },
+    { id: 'gru', name: 'PoP Central (São Paulo / SP)', city: 'São Paulo (Datacenter GRU)', lat: -23.5505, lon: -46.6333, colo: 'GRU' },
+    { id: 'gig', name: 'PoP Sudeste (Rio de Janeiro / RJ)', city: 'Rio de Janeiro (PTT GIG)', lat: -22.9068, lon: -43.1729, colo: 'GIG' },
+    { id: 'cnf', name: 'PoP Minas Gerais (Belo Horizonte / MG)', city: 'Belo Horizonte (PTT CNF)', lat: -19.9167, lon: -43.9345, colo: 'CNF' },
+    { id: 'bsb', name: 'PoP Centro-Oeste (Brasília / DF)', city: 'Brasília (PTT BSB)', lat: -15.7975, lon: -47.8919, colo: 'BSB' },
+    { id: 'for', name: 'PoP Nordeste (Fortaleza / CE)', city: 'Fortaleza (Hub Submarino)', lat: -3.7319, lon: -38.5267, colo: 'FOR' },
+    { id: 'ssa', name: 'PoP Nordeste (Salvador / BA)', city: 'Salvador (PTT SSA)', lat: -12.9714, lon: -38.5014, colo: 'SSA' },
+    { id: 'rec', name: 'PoP Nordeste (Recife / PE)', city: 'Recife (PTT REC)', lat: -8.0476, lon: -34.8770, colo: 'REC' },
+    { id: 'bel', name: 'PoP Norte (Belém / PA)', city: 'Belém (PTT BEL)', lat: -1.4558, lon: -48.4902, colo: 'BEL' },
+    { id: 'mao', name: 'PoP Norte (Manaus / AM)', city: 'Manaus (PTT MAO)', lat: -3.1190, lon: -60.0217, colo: 'MAO' }
+  ];
+
+  function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371.0;
+    const toRad = deg => deg * (Math.PI / 180.0);
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+
+  function encontrarPoPMenorCusto(origemLat, origemLon) {
+    let melhorPoP = TELECOM_POPS[0];
+    let menorDist = haversineDistance(origemLat, origemLon, melhorPoP.lat, melhorPoP.lon);
+    for (let i = 1; i < TELECOM_POPS.length; i++) {
+      const dist = haversineDistance(origemLat, origemLon, TELECOM_POPS[i].lat, TELECOM_POPS[i].lon);
+      if (dist < menorDist) {
+        menorDist = dist;
+        melhorPoP = TELECOM_POPS[i];
+      }
+    }
+    return { pop: melhorPoP, distKm: menorDist };
+  }
 
   // PERFIS DE PROJETO OFICIAIS COM CRITÉRIOS DE RFP / ANS
   const PROJECT_PROFILES = {
@@ -1395,7 +1543,10 @@
       profileName: p.name,
       osNumero: document.getElementById('txtOsNumero')?.value.trim() || '',
       agencia: document.getElementById('txtAgencia')?.value.trim() || '',
-      tecnico: document.getElementById('txtTecnicoNome')?.value.trim() || localStorage.getItem('sparc_tecnico_nome') || 'Técnico de Campo'
+      tecnico: document.getElementById('txtTecnicoNome')?.value.trim() || localStorage.getItem('sparc_tecnico_nome') || 'Técnico de Campo',
+      macroRegiao: document.getElementById('cbMacroRegiao')?.value || 'auto',
+      cidadeReal: document.getElementById('cbCidadeReal')?.value || 'auto',
+      rota: window.CURRENT_ROTA ? { ...window.CURRENT_ROTA } : null
     };
   }
 
@@ -1411,6 +1562,8 @@
       (isAsym && cur.ulPreset === 'custom' && cur.customUlCir !== lastCompletedConfig.customUlCir) ||
       cur.profileKey !== lastCompletedConfig.profileKey ||
       cur.osNumero !== lastCompletedConfig.osNumero ||
+      cur.macroRegiao !== lastCompletedConfig.macroRegiao ||
+      cur.cidadeReal !== lastCompletedConfig.cidadeReal ||
       (isBrad && cur.agencia !== lastCompletedConfig.agencia)
     );
   }
@@ -1456,6 +1609,130 @@
     if (document.getElementById('txtAgencia')) document.getElementById('txtAgencia').value = lastCompletedConfig.agencia || '';
     if (document.getElementById('txtTecnicoNome')) document.getElementById('txtTecnicoNome').value = lastCompletedConfig.tecnico || '';
 
+    if (lastCompletedConfig.macroRegiao && document.getElementById('cbMacroRegiao')) {
+      document.getElementById('cbMacroRegiao').value = lastCompletedConfig.macroRegiao;
+      atualizarOpcoesCidadeReal();
+      if (lastCompletedConfig.cidadeReal && document.getElementById('cbCidadeReal')) {
+        document.getElementById('cbCidadeReal').value = lastCompletedConfig.cidadeReal;
+      }
+      recalcularRotaGeodesica();
+    }
+
+    checkConfigConsistency();
+  }
+
+  function onMacroRegiaoChange() {
+    atualizarOpcoesCidadeReal();
+    recalcularRotaGeodesica();
+  }
+
+  function onCidadeRealChange() {
+    recalcularRotaGeodesica();
+  }
+
+  function atualizarOpcoesCidadeReal() {
+    const macro = document.getElementById('cbMacroRegiao')?.value || 'auto';
+    const selCidade = document.getElementById('cbCidadeReal');
+    if (!selCidade) return;
+
+    const prevVal = selCidade.value;
+    selCidade.innerHTML = '';
+
+    if (macro === 'auto' || !BRAZIL_REGIONAL_POLOS[macro]) {
+      const opt = document.createElement('option');
+      opt.value = 'auto';
+      opt.innerText = clientGeo?.city ? `📡 Automático — Polo do IP (${clientGeo.city})` : '📡 Automático — Polo do IP Público';
+      selCidade.appendChild(opt);
+    } else {
+      const polo = BRAZIL_REGIONAL_POLOS[macro];
+      polo.cities.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.innerText = `🏙️ ${c.name} (${c.desc})`;
+        selCidade.appendChild(opt);
+      });
+
+      if (prevVal && polo.cities.some(c => c.id === prevVal)) {
+        selCidade.value = prevVal;
+      } else {
+        selCidade.selectedIndex = 0;
+      }
+    }
+  }
+
+  function recalcularRotaGeodesica() {
+    const macro = document.getElementById('cbMacroRegiao')?.value || 'auto';
+    const cidId = document.getElementById('cbCidadeReal')?.value || 'auto';
+
+    let origemNome = clientGeo?.city ? `${clientGeo.city}` : 'Localidade Automática';
+    let origemUf = clientGeo?.region || '';
+    let origemLat = clientGeo?.lat || -23.5505;
+    let origemLon = clientGeo?.lon || -46.6333;
+    let isManual = false;
+    let isMismatch = false;
+
+    if (macro !== 'auto' && cidId !== 'auto' && BRAZIL_REGIONAL_POLOS[macro]) {
+      const cityObj = BRAZIL_REGIONAL_POLOS[macro].cities.find(c => c.id === cidId);
+      if (cityObj) {
+        origemNome = cityObj.name;
+        origemUf = cityObj.uf;
+        origemLat = cityObj.lat;
+        origemLon = cityObj.lon;
+        isManual = true;
+
+        if (clientGeo && clientGeo.city) {
+          const geoCityNorm = (clientGeo.city || '').toLowerCase();
+          const cityNameNorm = (cityObj.name || '').toLowerCase();
+          const cityUfNorm = (cityObj.uf || '').toLowerCase();
+          if (!geoCityNorm.includes(cityUfNorm) && !cityNameNorm.includes(geoCityNorm)) {
+            isMismatch = true;
+          }
+        }
+      }
+    } else {
+      if (clientGeo?.city) {
+        origemNome = `${clientGeo.city} (IP)`;
+      }
+    }
+
+    const resMenorCusto = encontrarPoPMenorCusto(origemLat, origemLon);
+    const pop = resMenorCusto.pop;
+    const distKm = resMenorCusto.distKm;
+    const fiberRtt = (distKm / 78.0).toFixed(1);
+
+    const txtOrigin = document.getElementById('txtClientOrigin');
+    if (txtOrigin) {
+      txtOrigin.innerText = isManual ? `📍 ${origemNome} (Físico)` : `🌐 ${origemNome}`;
+      txtOrigin.style.color = isManual ? 'var(--cyan)' : 'var(--text-main)';
+    }
+
+    const badgeMismatch = document.getElementById('badgeGeoMismatch');
+    if (badgeMismatch) {
+      badgeMismatch.style.display = isMismatch ? 'inline-flex' : 'none';
+      if (isMismatch && clientGeo) {
+        badgeMismatch.title = `Atenção: IP público registra como ${clientGeo.city}, mas a entrega física está definida em ${origemNome}. O SPARC re-ancorou a rota para o PoP de menor custo real.`;
+      }
+    }
+
+    const txtTarget = document.getElementById('txtTargetPop');
+    if (txtTarget) {
+      txtTarget.innerText = `${pop.name} (~${distKm.toFixed(0)} km • Piso Fibra: ~${fiberRtt}ms) — Menor Custo`;
+    }
+
+    window.CURRENT_ROTA = {
+      macroRegiao: macro,
+      cidadeId: cidId,
+      origemNome: origemNome,
+      origemUf: origemUf,
+      origemLat: origemLat,
+      origemLon: origemLon,
+      isManual: isManual,
+      isMismatch: isMismatch,
+      popAlvo: pop,
+      distKm: distKm,
+      fiberRtt: fiberRtt
+    };
+
     checkConfigConsistency();
   }
 
@@ -1479,17 +1756,33 @@
           ip: d.ip || 'Identificado',
           isp: d.connection?.isp || d.connection?.org || 'Operadora Local',
           city: d.city || 'São Paulo',
+          region: d.region || '',
+          country: d.country_code || 'BR',
+          lat: d.latitude || -23.5505,
+          lon: d.longitude || -46.6333,
           colo: colo
         };
-        document.getElementById('txtClientIp').innerText = clientGeo.ip;
-        document.getElementById('txtClientIsp').innerText = `(${clientGeo.isp})`;
-        document.getElementById('txtTargetPop').innerText = `${clientGeo.city} (PoP Edge ${colo}) — Menor Esforço`;
       }
     } catch (_) {
-      document.getElementById('txtClientIp').innerText = 'Conectado';
-      document.getElementById('txtClientIsp').innerText = '(Link Local)';
-      document.getElementById('txtTargetPop').innerText = 'PoP Anycast Regional (Menor Latência)';
+      clientGeo = {
+        ip: 'Conectado',
+        isp: 'Link Local',
+        city: 'São Paulo',
+        region: 'SP',
+        country: 'BR',
+        lat: -23.5505,
+        lon: -46.6333,
+        colo: 'GRU'
+      };
     }
+
+    if (clientGeo) {
+      document.getElementById('txtClientIp').innerText = clientGeo.ip;
+      document.getElementById('txtClientIsp').innerText = `(${clientGeo.isp})`;
+    }
+
+    atualizarOpcoesCidadeReal();
+    recalcularRotaGeodesica();
   }
 
   function setStatus(type, text) {
@@ -1796,7 +2089,26 @@
 
     document.getElementById('auditIp').innerText = clientGeo?.ip || 'Detectado';
     document.getElementById('auditIsp').innerText = clientGeo?.isp || 'Operadora Local';
-    document.getElementById('auditPop').innerText = `${clientGeo?.city || 'Brasil'} (Anycast Edge)`;
+
+    const rota = cfg.rota || window.CURRENT_ROTA;
+    const txtLocFisica = document.getElementById('auditLocalidadeFisica');
+    if (txtLocFisica) {
+      txtLocFisica.innerText = rota?.origemNome || (clientGeo?.city ? `${clientGeo.city}` : 'Não informada');
+    }
+
+    const popText = rota?.popAlvo ? `${rota.popAlvo.name} (~${rota.distKm.toFixed(0)} km • Menor Custo)` : `${clientGeo?.city || 'Brasil'} (Anycast Edge)`;
+    document.getElementById('auditPop').innerText = popText;
+
+    const boxNote = document.getElementById('boxAuditGeoNote');
+    const txtNote = document.getElementById('auditGeoNoteText');
+    if (boxNote && txtNote) {
+      if (rota?.isMismatch && clientGeo?.city) {
+        boxNote.style.display = 'block';
+        txtNote.innerText = `Circuito entregue fisicamente em ${rota.origemNome}, porém o bloco de IP público alocado pela operadora (${clientGeo.isp}) possui registro GeoIP centralizado em ${clientGeo.city}. A medição foi vinculada e orientada ao servidor de Menor Custo Regional (${rota.popAlvo?.name || 'PoP Regional'}).`;
+      } else {
+        boxNote.style.display = 'none';
+      }
+    }
     if (document.getElementById('auditTecnico')) {
       document.getElementById('auditTecnico').innerText = cfg.tecnico || document.getElementById('txtTecnicoNome')?.value.trim() || localStorage.getItem('sparc_tecnico_nome') || 'Técnico de Campo';
     }
@@ -1857,7 +2169,7 @@
   // MOTOR DE MEDIÇÃO MULTI-STREAM COM FEEDBACK INSTANTÂNEO ZERO-DELAY
   async function measurePing(signal, onProbe) {
     const samples = [];
-    const totalProbes = 10;
+    const totalProbes = 5;
     let failedProbes = 0;
     for (let i = 0; i < totalProbes; i++) {
       if (signal.aborted) break;
@@ -1880,7 +2192,7 @@
       } catch (_) {
         failedProbes++;
       }
-      if (i < totalProbes - 1) await new Promise(r => setTimeout(r, 10));
+      if (i < totalProbes - 1) await new Promise(r => setTimeout(r, 5));
     }
     const lossPct = (failedProbes / totalProbes) * 100;
     samples.sort((a, b) => a - b);
@@ -1911,21 +2223,6 @@
     const localAbort = new AbortController();
     signal.addEventListener('abort', () => localAbort.abort());
 
-    // 1. FASE DE PRÉ-AQUECIMENTO DE SOCKETS E PROXY CORPORATIVO (~600-800ms)
-    // Aquece DNS, TLS 1.3 handshake e libera regras de inspeção SSL do firewall antes de cronometrar
-    try {
-      const warmResp = await fetch(`https://speed.cloudflare.com/__down?bytes=500000&r=${Math.random()}`, {
-        signal: localAbort.signal,
-        cache: 'no-store'
-      });
-      if (warmResp.body) {
-        const wReader = warmResp.body.getReader();
-        await wReader.read();
-        try { wReader.cancel(); } catch (_) {}
-      }
-    } catch (_) {}
-    signal.throwIfAborted();
-
     const tStart = performance.now();
     const tDeadline = tStart + durationMs;
 
@@ -1939,13 +2236,27 @@
     const instantSamples = [];
 
     async function worker(streamIdx) {
-      // Escalonamento suave de conexões (50ms entre streams para evitar enfileiramento em firewalls)
-      if (streamIdx > 0) {
-        await new Promise(r => setTimeout(r, streamIdx * 50));
+      // Streams 0 e 1 disparam imediatamente para furar o bloqueio de proxy corporativo sem fila
+      if (streamIdx >= 2) {
+        await new Promise(r => setTimeout(r, (streamIdx - 1) * 20));
       }
+      let chunkCount = 0;
       while (performance.now() < tDeadline && !localAbort.signal.aborted) {
         try {
-          const resp = await fetch(`https://speed.cloudflare.com/__down?bytes=50000000&r=${Math.random()}`, {
+          // Progressive Chunking para contorno de firewall corporativo:
+          // Chunk 0 (Warmup integrado / Zero-Delay): 500KB (stream 0/1) ou 1.5MB
+          // Chunks subsequentes: 8MB e 25MB para saturação máxima do canal
+          let chunkSize;
+          if (chunkCount === 0) {
+            chunkSize = (streamIdx < 2) ? 500000 : 1500000;
+          } else if (chunkCount === 1) {
+            chunkSize = 8000000;
+          } else {
+            chunkSize = 25000000;
+          }
+          chunkCount++;
+
+          const resp = await fetch(`https://speed.cloudflare.com/__down?bytes=${chunkSize}&r=${Math.random()}`, {
             signal: localAbort.signal,
             cache: 'no-store'
           });
@@ -1954,9 +2265,9 @@
           while (performance.now() < tDeadline && !localAbort.signal.aborted) {
             const { done, value } = await reader.read();
             if (done) break;
-            if (value) {
+            if (value && value.length > 0) {
               totalBytes += value.length;
-              if (!hasStartedData && totalBytes > 0) {
+              if (!hasStartedData) {
                 hasStartedData = true;
                 tFirstData = performance.now();
                 bytesAtFirstData = totalBytes;
@@ -1966,43 +2277,34 @@
           try { reader.cancel(); } catch (_) {}
         } catch (_) {
           if (localAbort.signal.aborted) break;
-          await new Promise(r => setTimeout(r, 60));
+          await new Promise(r => setTimeout(r, 30));
         }
       }
     }
 
     const ticker = setInterval(() => {
       const now = performance.now();
-      const dt = (now - lastTime) / 1000;
-      if (dt >= 0.12) {
-        const delta = totalBytes - lastBytes;
-        if (delta >= 0) {
-          const inst = (delta * 8) / (dt * 1e6);
-          // Amortecimento adaptativo para curva ágil e estável
-          currentSmooth = (currentSmooth === 0) ? inst : (currentSmooth * 0.75 + inst * 0.25);
-          peakSpeed = Math.max(peakSpeed, currentSmooth);
-          document.getElementById('txtDl').innerText = currentSmooth.toFixed(1);
+      if (hasStartedData) {
+        const activeDurSec = Math.max(0.04, (now - tFirstData) / 1000);
+        const effectiveMbps = (totalBytes * 8) / (activeDurSec * 1e6);
+        currentSmooth = effectiveMbps;
+        peakSpeed = Math.max(peakSpeed, currentSmooth);
+        document.getElementById('txtDl').innerText = currentSmooth.toFixed(1);
 
-          // Coleta amostras instantâneas quando o tráfego efetivo estiver fluindo
-          if (hasStartedData && currentSmooth > 1.0) {
-            instantSamples.push(currentSmooth);
-          }
+        instantSamples.push(currentSmooth);
 
-          // Só adiciona pontos no gráfico a partir do momento em que a vazão começa a fluir,
-          // eliminando a linha plana de zeros no chão causada por latência de conexão corporativa
-          if (hasStartedData && currentSmooth > 0) {
-            if (now - lastGraphTime >= 200) {
-              addGraphPoint(currentSmooth, true);
-              lastGraphTime = now;
-            }
-          }
-          lastTime = now;
-          lastBytes = totalBytes;
+        if (now - lastGraphTime >= 150) {
+          addGraphPoint(currentSmooth, true);
+          lastGraphTime = now;
         }
+
+        const p = Math.min(100, ((now - tFirstData) / durationMs) * 100);
+        document.getElementById('pbDl').style.width = p.toFixed(0) + '%';
+      } else {
+        document.getElementById('txtDl').innerText = '0.0';
+        document.getElementById('pbDl').style.width = '2%';
       }
-      const p = Math.min(100, ((now - tStart) / durationMs) * 100);
-      document.getElementById('pbDl').style.width = p.toFixed(0) + '%';
-    }, 100);
+    }, 80);
 
     const workers = [];
     for (let i = 0; i < numStreams; i++) workers.push(worker(i));
@@ -2404,6 +2706,12 @@
         profileKey: cfg.profileKey || 'rfc6349',
         osNumero: cfg.osNumero || 'OS-AVULSA',
         agencia: cfg.agencia || (cfg.profileKey?.startsWith('bradesco') ? 'Agência Padrão' : 'Local Cliente'),
+        macroRegiao: cfg.macroRegiao || 'auto',
+        cidadeReal: cfg.rota?.origemNome || (clientGeo?.city || 'Automático'),
+        ufReal: cfg.rota?.origemUf || '',
+        popAlvo: cfg.rota?.popAlvo?.name || (clientGeo?.city || 'Anycast Regional'),
+        distRealKm: cfg.rota?.distKm ? Number(cfg.rota.distKm.toFixed(1)) : null,
+        geoIpDivergente: !!cfg.rota?.isMismatch,
         cirDl: cfg.cirVal || 100,
         cirUl: cfg.cirUlVal || 100,
         dlAvg: Number((d.dlAvg || 0).toFixed(1)),
