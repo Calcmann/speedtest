@@ -678,6 +678,25 @@
       </div>
 
       <div>
+        <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">📍 Macro-Região Física:</label>
+        <select id="cbMacroRegiao" onchange="onMacroRegiaoChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+          <option value="auto" selected>📡 Automático (Detectado pelo IP)</option>
+          <option value="sul">🌲 Região Sul (SC / PR / RS)</option>
+          <option value="sudeste">🏢 Região Sudeste (SP / RJ / MG / ES)</option>
+          <option value="centro_oeste">🌾 Região Centro-Oeste (DF / GO / MS / MT)</option>
+          <option value="nordeste">☀️ Região Nordeste (BA / PE / CE / RN / etc.)</option>
+          <option value="norte">🌳 Região Norte (AM / PA / RO / AC / etc.)</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">🏙️ Cidade / Polo Real da Entrega:</label>
+        <select id="cbCidadeReal" onchange="onCidadeRealChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
+          <option value="auto" selected>📡 Automático — Polo do IP Público</option>
+        </select>
+      </div>
+
+      <div>
         <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 3px;">Servidor Alvo (Georreferenciado ao Link):</label>
         <select id="cbServers" onchange="onServerSelectChange()" style="background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 11.5px; font-weight: bold; width: 100%; cursor: pointer;">
           <option value="auto" selected>⭐ [AUTOMÁTICO] Menor Esforço (Descobrindo servidores locais...)</option>
@@ -1041,8 +1060,138 @@
     logBox.scrollTop = logBox.scrollHeight;
   }
 
-  const PARAM_INPUT_IDS = ['cbProvider', 'cbServers', 'cbStreams', 'cbTestDuration', 'cbBloatMetric', 'chkAsymmetricCir', 'cbCirPreset', 'txtCustomCir', 'cbCirDlPreset', 'txtCustomCirDl', 'cbCirUlPreset', 'txtCustomCirUl'];
+  const PARAM_INPUT_IDS = ['cbProvider', 'cbMacroRegiao', 'cbCidadeReal', 'cbServers', 'cbStreams', 'cbTestDuration', 'cbBloatMetric', 'chkAsymmetricCir', 'cbCirPreset', 'txtCustomCir', 'cbCirDlPreset', 'txtCustomCirDl', 'cbCirUlPreset', 'txtCustomCirUl'];
   let lastCompletedConfig = null;
+
+  // Catálogo de Polos Regionais de Telecomunicação do Brasil
+  const BRAZIL_REGIONAL_POLOS = {
+    sul: {
+      name: '🌲 Região Sul (SC / PR / RS)',
+      cities: [
+        { id: 'fln', uf: 'SC', name: 'Florianópolis / SC', desc: 'Capital & Hub Sul', lat: -27.5967, lon: -48.5492 },
+        { id: 'joi', uf: 'SC', name: 'Joinville / SC', desc: 'Norte Catarinense', lat: -26.3045, lon: -48.8487 },
+        { id: 'bnu', uf: 'SC', name: 'Blumenau / SC', desc: 'Vale do Itajaí', lat: -26.9194, lon: -49.0661 },
+        { id: 'cha', uf: 'SC', name: 'Chapecó / SC', desc: 'Oeste Catarinense', lat: -27.1004, lon: -52.6152 },
+        { id: 'cwb', uf: 'PR', name: 'Curitiba / PR', desc: 'Capital & PTT CWB', lat: -25.4284, lon: -49.2733 },
+        { id: 'ldb', uf: 'PR', name: 'Londrina / PR', desc: 'Norte Paranaense', lat: -23.3045, lon: -51.1696 },
+        { id: 'mga', uf: 'PR', name: 'Maringá / PR', desc: 'Noroeste Paranaense', lat: -23.4205, lon: -51.9333 },
+        { id: 'poa', uf: 'RS', name: 'Porto Alegre / RS', desc: 'Capital & PTT POA', lat: -30.0346, lon: -51.2177 },
+        { id: 'cxj', uf: 'RS', name: 'Caxias do Sul / RS', desc: 'Serra Gaúcha', lat: -29.1678, lon: -51.1794 },
+        { id: 'pel', uf: 'RS', name: 'Pelotas / RS', desc: 'Sul Gaúcho', lat: -31.7654, lon: -52.3376 }
+      ]
+    },
+    sudeste: {
+      name: '🏢 Região Sudeste (SP / RJ / MG / ES)',
+      cities: [
+        { id: 'gru', uf: 'SP', name: 'São Paulo / SP', desc: 'Capital & Datacenter GRU', lat: -23.5505, lon: -46.6333 },
+        { id: 'cpq', uf: 'SP', name: 'Campinas / SP', desc: 'Polo Tecnológico', lat: -22.9099, lon: -47.0626 },
+        { id: 'sts', uf: 'SP', name: 'Santos / SP', desc: 'Baixada Santista', lat: -23.9608, lon: -46.3331 },
+        { id: 'rao', uf: 'SP', name: 'Ribeirão Preto / SP', desc: 'Interior SP', lat: -21.1775, lon: -47.8103 },
+        { id: 'sjk', uf: 'SP', name: 'São José dos Campos / SP', desc: 'Vale do Paraíba', lat: -23.1896, lon: -45.8841 },
+        { id: 'gig', uf: 'RJ', name: 'Rio de Janeiro / RJ', desc: 'Capital & PTT GIG', lat: -22.9068, lon: -43.1729 },
+        { id: 'cnf', uf: 'MG', name: 'Belo Horizonte / MG', desc: 'Capital & PTT CNF', lat: -19.9167, lon: -43.9345 },
+        { id: 'udi', uf: 'MG', name: 'Uberlândia / MG', desc: 'Triângulo Mineiro', lat: -18.9186, lon: -48.2772 },
+        { id: 'vix', uf: 'ES', name: 'Vitória / ES', desc: 'VIX & PTT ES', lat: -20.3155, lon: -40.3128 }
+      ]
+    },
+    centro_oeste: {
+      name: '🌾 Região Centro-Oeste (DF / GO / MS / MT)',
+      cities: [
+        { id: 'bsb', uf: 'DF', name: 'Brasília / DF', desc: 'Capital Federal & PTT BSB', lat: -15.7975, lon: -47.8919 },
+        { id: 'gyn', uf: 'GO', name: 'Goiânia / GO', desc: 'Goiânia Central', lat: -16.6869, lon: -49.2648 },
+        { id: 'cgr', uf: 'MS', name: 'Campo Grande / MS', desc: 'Mato Grosso do Sul', lat: -20.4697, lon: -54.6201 },
+        { id: 'cgb', uf: 'MT', name: 'Cuiabá / MT', desc: 'Mato Grosso', lat: -15.6014, lon: -56.0979 }
+      ]
+    },
+    nordeste: {
+      name: '☀️ Região Nordeste (BA / PE / CE / RN / etc.)',
+      cities: [
+        { id: 'ssa', uf: 'BA', name: 'Salvador / BA', desc: 'Capital & PTT SSA', lat: -12.9714, lon: -38.5014 },
+        { id: 'rec', uf: 'PE', name: 'Recife / PE', desc: 'Capital & PTT REC', lat: -8.0476, lon: -34.8770 },
+        { id: 'for', uf: 'CE', name: 'Fortaleza / CE', desc: 'Hub Cabos Submarinos', lat: -3.7319, lon: -38.5267 },
+        { id: 'nat', uf: 'RN', name: 'Natal / RN', desc: 'Rio Grande do Norte', lat: -5.7945, lon: -35.2110 },
+        { id: 'jpa', uf: 'PB', name: 'João Pessoa / PB', desc: 'Paraíba', lat: -7.1195, lon: -34.8450 },
+        { id: 'mcz', uf: 'AL', name: 'Maceió / AL', desc: 'Alagoas', lat: -9.6498, lon: -35.7089 },
+        { id: 'the', uf: 'PI', name: 'Teresina / PI', desc: 'Piauí', lat: -5.0892, lon: -42.8019 },
+        { id: 'slz', uf: 'MA', name: 'São Luís / MA', desc: 'Maranhão', lat: -2.5307, lon: -44.3068 }
+      ]
+    },
+    norte: {
+      name: '🌳 Região Norte (AM / PA / RO / AC / etc.)',
+      cities: [
+        { id: 'bel', uf: 'PA', name: 'Belém / PA', desc: 'Pará & PTT BEL', lat: -1.4558, lon: -48.4902 },
+        { id: 'mao', uf: 'AM', name: 'Manaus / AM', desc: 'Amazonas & PTT MAO', lat: -3.1190, lon: -60.0217 },
+        { id: 'pvh', uf: 'RO', name: 'Porto Velho / RO', desc: 'Rondônia', lat: -8.7612, lon: -63.9039 },
+        { id: 'mcp', uf: 'AP', name: 'Macapá / AP', desc: 'Amapá', lat: 0.0389, lon: -51.0664 },
+        { id: 'rbr', uf: 'AC', name: 'Rio Branco / AC', desc: 'Acre', lat: -9.9753, lon: -67.8249 },
+        { id: 'pmw', uf: 'TO', name: 'Palmas / TO', desc: 'Tocantins', lat: -10.2491, lon: -48.3243 }
+      ]
+    }
+  };
+
+  function onMacroRegiaoChange() {
+    atualizarOpcoesCidadeReal();
+    aplicarCoordenadasFisicasReais();
+    checkConfigConsistency();
+  }
+
+  function onCidadeRealChange() {
+    aplicarCoordenadasFisicasReais();
+    checkConfigConsistency();
+  }
+
+  function atualizarOpcoesCidadeReal() {
+    const macro = document.getElementById('cbMacroRegiao')?.value || 'auto';
+    const selCidade = document.getElementById('cbCidadeReal');
+    if (!selCidade) return;
+
+    const prevVal = selCidade.value;
+    selCidade.innerHTML = '';
+
+    if (macro === 'auto' || !BRAZIL_REGIONAL_POLOS[macro]) {
+      const opt = document.createElement('option');
+      opt.value = 'auto';
+      opt.innerText = clientGeo?.city ? `📡 Automático — Polo do IP (${clientGeo.city})` : '📡 Automático — Polo do IP Público';
+      selCidade.appendChild(opt);
+    } else {
+      const polo = BRAZIL_REGIONAL_POLOS[macro];
+      polo.cities.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.innerText = `🏙️ ${c.name} (${c.desc})`;
+        selCidade.appendChild(opt);
+      });
+
+      if (prevVal && polo.cities.some(c => c.id === prevVal)) {
+        selCidade.value = prevVal;
+      } else {
+        selCidade.selectedIndex = 0;
+      }
+    }
+  }
+
+  function aplicarCoordenadasFisicasReais() {
+    const macro = document.getElementById('cbMacroRegiao')?.value || 'auto';
+    const cidId = document.getElementById('cbCidadeReal')?.value || 'auto';
+
+    let effLat = clientGeo?.lat || -23.5505;
+    let effLon = clientGeo?.lon || -46.6333;
+    let effCity = clientGeo?.city || 'Brasil';
+
+    if (macro !== 'auto' && cidId !== 'auto' && BRAZIL_REGIONAL_POLOS[macro]) {
+      const cityObj = BRAZIL_REGIONAL_POLOS[macro].cities.find(c => c.id === cidId);
+      if (cityObj) {
+        effLat = cityObj.lat;
+        effLon = cityObj.lon;
+        effCity = cityObj.name;
+        log(`[GEO-OVERRIDE] Origem física ancorada manualmente em: ${cityObj.name} (${cityObj.desc}) [Lat: ${effLat}, Lon: ${effLon}]`);
+      }
+    }
+
+    if (window.BRAZIL_TELECOM_HUBS) {
+      popularServidoresDinamicos(effLat, effLon, clientGeo?.colo || 'GRU', clientGeo?.country || 'BR');
+    }
+  }
 
   // Inicialização e Descoberta Geodésica
   window.addEventListener('DOMContentLoaded', async () => {
@@ -1198,7 +1347,8 @@
       ];
 
       // Popula dinamicamente os servidores ordenados por proximidade geodésica ao link
-      popularServidoresDinamicos(lat, lon, colo, country);
+      atualizarOpcoesCidadeReal();
+      aplicarCoordenadasFisicasReais();
     } catch (e) {
       log(`[AVISO] Falha ao ler metadados geográficos: ${e.message}`);
     }
@@ -1422,6 +1572,8 @@
 
     return {
       provider: document.getElementById('cbProvider')?.value || '',
+      macroRegiao: document.getElementById('cbMacroRegiao')?.value || 'auto',
+      cidadeReal: document.getElementById('cbCidadeReal')?.value || 'auto',
       server: document.getElementById('cbServers')?.value || '',
       streams: document.getElementById('cbStreams')?.value || '',
       duration: document.getElementById('cbTestDuration')?.value || '',
@@ -1438,6 +1590,8 @@
       cirNominal: Math.max(cirDlNominal, cirUlNominal),
       cirLabel: cirLabel,
       providerText: document.getElementById('cbProvider')?.selectedOptions[0]?.text || '',
+      macroRegiaoText: document.getElementById('cbMacroRegiao')?.selectedOptions[0]?.text || '',
+      cidadeRealText: document.getElementById('cbCidadeReal')?.selectedOptions[0]?.text || '',
       serverText: document.getElementById('cbServers')?.selectedOptions[0]?.text || '',
       streamsText: document.getElementById('cbStreams')?.selectedOptions[0]?.text || '',
       durationText: document.getElementById('cbTestDuration')?.selectedOptions[0]?.text || '',
@@ -1449,6 +1603,8 @@
     if (!lastCompletedConfig) return false;
     const cur = getCurrentConfig();
     if (cur.provider !== lastCompletedConfig.provider ||
+        cur.macroRegiao !== lastCompletedConfig.macroRegiao ||
+        cur.cidadeReal !== lastCompletedConfig.cidadeReal ||
         cur.server !== lastCompletedConfig.server ||
         cur.streams !== lastCompletedConfig.streams ||
         cur.duration !== lastCompletedConfig.duration ||
@@ -1511,6 +1667,15 @@
     const st = document.getElementById('cbStreams');
     const d = document.getElementById('cbTestDuration');
     const b = document.getElementById('cbBloatMetric');
+
+    if (lastCompletedConfig.macroRegiao && document.getElementById('cbMacroRegiao')) {
+      document.getElementById('cbMacroRegiao').value = lastCompletedConfig.macroRegiao;
+      atualizarOpcoesCidadeReal();
+      if (lastCompletedConfig.cidadeReal && document.getElementById('cbCidadeReal')) {
+        document.getElementById('cbCidadeReal').value = lastCompletedConfig.cidadeReal;
+      }
+      aplicarCoordenadasFisicasReais();
+    }
 
     if (p) p.value = lastCompletedConfig.provider;
     if (s) s.value = lastCompletedConfig.server;
@@ -1951,9 +2116,9 @@
         aplicarServidorSelecionado(clientGeo.lat, clientGeo.lon, clientGeo.colo, clientGeo.country);
       }
 
-      // 1. LATÊNCIA E JITTER EM REPOUSO (IDLE) COM WARM-UP E 10 AMOSTRAS
-      log('[1/4] Medindo Latência Idle e Jitter (Warm-up + 10 amostras robustas)...');
-      const idlePing = await measurePing(abortController.signal, 10);
+      // 1. LATÊNCIA E JITTER EM REPOUSO (IDLE) COM WARM-UP E 5 AMOSTRAS RÁPIDAS
+      log('[1/4] Medindo Latência Idle e Jitter (5 amostras rápidas)...');
+      const idlePing = await measurePing(abortController.signal, 5);
       document.getElementById('txtLatency').innerText = idlePing.avg.toFixed(0);
       document.getElementById('txtJitter').innerText = `Jitter: ${idlePing.jitter.toFixed(1)} ms • Perda: 0%`;
 
@@ -2092,21 +2257,21 @@
     }
   }
 
-  async function measurePing(signal, count = 10) {
+  async function measurePing(signal, count = 5) {
     const endpoint = getPingEndpoint();
     const sep = endpoint.includes('?') ? '&r=' : '?r=';
     const pingEndpoint = endpoint + sep;
 
-    // 1. Pacote de Aquecimento (Warm-up): abre socket e handshake TLS sem poluir a média
+    // 1. Pacote de Aquecimento (Warm-up rápido)
     try {
       const warmup = await fetch(pingEndpoint + Math.random(), { signal, cache: 'no-store' });
       await warmup.text();
-      await new Promise(r => setTimeout(r, 60));
+      await new Promise(r => setTimeout(r, 10));
     } catch (e) {
       if (signal.aborted) throw e;
     }
 
-    // 2. Coleta de 10 amostras de RTT puro com reuso de socket keep-alive
+    // 2. Coleta de 5 amostras de RTT com reuso de socket keep-alive
     const latencies = [];
     for (let i = 0; i < count; i++) {
       signal.throwIfAborted();
@@ -2115,7 +2280,7 @@
       await res.text();
       const rtt = performance.now() - t0;
       latencies.push(rtt);
-      await new Promise(r => setTimeout(r, 35));
+      if (i < count - 1) await new Promise(r => setTimeout(r, 10));
     }
 
     if (latencies.length === 0) return { avg: 15, jitter: 1.0, min: 14, max: 16 };
@@ -2150,13 +2315,16 @@
 
     log(`[DOWNLOAD] Multi-Stream RFC 6349 (${isSparc ? 'SPARC Vinhedo OCI' : 'Cloudflare Edge Multi-Anycast'}): ${numStreams} streams simultâneos | Duração: ${durationSec}s contínuos...`);
 
-    const getNextChunkUrl = () => {
+    const getNextChunkUrl = (chunkCount, streamId) => {
       if (isSparc) {
         const files = ['test-50mb.bin', 'test-100mb.bin'];
         const chosen = files[Math.floor(Math.random() * files.length)];
         return `https://204.216.133.98.nip.io/${chosen}?r=${Math.random()}`;
       } else {
-        return `https://speed.cloudflare.com/__down?bytes=50000000&r=${Math.random()}`;
+        let size = 25000000;
+        if (chunkCount === 0) size = (streamId < 2) ? 500000 : 1500000;
+        else if (chunkCount === 1) size = 8000000;
+        return `https://speed.cloudflare.com/__down?bytes=${size}&r=${Math.random()}`;
       }
     };
 
@@ -2171,6 +2339,9 @@
     let stableStartBytes = 0;
     const slowStartDurationMs = Math.min(2000, durationMs * 0.20);
 
+    let hasStartedDownload = false;
+    let tFirstDownload = tStart;
+
     const localAbort = new AbortController();
     const onParentAbort = () => localAbort.abort();
     signal.addEventListener('abort', onParentAbort);
@@ -2180,9 +2351,13 @@
     let lastGraphTime = tStart;
 
     async function downloadWorker(id) {
+      if (id >= 2) {
+        await new Promise(r => setTimeout(r, (id - 1) * 20));
+      }
+      let chunkCount = 0;
       while (performance.now() < tDeadline && !localAbort.signal.aborted) {
         try {
-          const url = getNextChunkUrl();
+          const url = getNextChunkUrl(chunkCount++, id);
           const resp = await fetch(url, { signal: localAbort.signal, cache: 'no-store' });
           if (!resp.body) break;
           const reader = resp.body.getReader();
@@ -2192,56 +2367,43 @@
             if (done) break;
             if (value && value.length > 0) {
               totalBytesReceived += value.length;
+              if (!hasStartedDownload) {
+                hasStartedDownload = true;
+                tFirstDownload = performance.now();
+              }
             }
           }
           try { reader.cancel(); } catch (_) {}
         } catch (e) {
           if (localAbort.signal.aborted) break;
-          await new Promise(r => setTimeout(r, 80));
+          await new Promise(r => setTimeout(r, 40));
         }
       }
     }
 
     const ticker = setInterval(() => {
       const now = performance.now();
-      const elapsed = now - tStart;
-      const dt = (now - lastSampleTime) / 1000;
+      if (hasStartedDownload) {
+        const activeSec = Math.max(0.04, (now - tFirstDownload) / 1000);
+        const effectiveMbps = (totalBytesReceived * 8) / (activeSec * 1000000);
+        currentSmoothSpeed = effectiveMbps;
+        peakSpeed = Math.max(peakSpeed, currentSmoothSpeed);
 
-      if (dt >= 0.12) {
-        const deltaBytes = totalBytesReceived - lastSampleBytes;
-        if (deltaBytes >= 0) {
-          const instMbps = (deltaBytes * 8) / (dt * 1000000);
+        document.getElementById('txtDownload').innerText = currentSmoothSpeed.toFixed(1);
+        document.getElementById('txtDownloadPico').innerText = `Pico: ${peakSpeed.toFixed(1)} Mbps`;
 
-          if (currentSmoothSpeed === 0) {
-            currentSmoothSpeed = instMbps;
-          } else {
-            // Suavização EMA proporcional à duração do teste para curva estável e linear
-            currentSmoothSpeed = currentSmoothSpeed * emaDecay + instMbps * emaWeight;
-          }
-
-          peakSpeed = Math.max(peakSpeed, currentSmoothSpeed);
-
-          document.getElementById('txtDownload').innerText = currentSmoothSpeed.toFixed(1);
-          document.getElementById('txtDownloadPico').innerText = `Pico: ${peakSpeed.toFixed(1)} Mbps`;
-
-          if (now - lastGraphTime >= graphSampleIntervalMs) {
-            addGraphPoint(currentSmoothSpeed, true);
-            lastGraphTime = now;
-          }
-
-          lastSampleTime = now;
-          lastSampleBytes = totalBytesReceived;
+        if (now - lastGraphTime >= graphSampleIntervalMs) {
+          addGraphPoint(currentSmoothSpeed, true);
+          lastGraphTime = now;
         }
-      }
 
-      if (elapsed >= slowStartDurationMs && stableStartTime === 0) {
-        stableStartTime = now;
-        stableStartBytes = totalBytesReceived;
+        const progressPct = Math.min(100, ((now - tFirstDownload) / durationMs) * 100);
+        document.getElementById('pbDownload').style.width = progressPct.toFixed(1) + '%';
+      } else {
+        document.getElementById('txtDownload').innerText = '0.0';
+        document.getElementById('pbDownload').style.width = '2%';
       }
-
-      const progressPct = Math.min(100, (elapsed / durationMs) * 100);
-      document.getElementById('pbDownload').style.width = progressPct.toFixed(1) + '%';
-    }, 100);
+    }, 80);
 
     const workers = [];
     for (let i = 0; i < numStreams; i++) {
