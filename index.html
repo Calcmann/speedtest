@@ -1,38 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SPARC — Teste Avançado de Banda Larga & Qualidade de Link</title>
   <style>
-    :root, [data-theme="slate"] {
-      --bg: #131722;
-      --card-bg: #1e2433;
-      --card-border: #2e384b;
-      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --input-bg: #161b26;
-      --input-border: #38445a;
-      --canvas-bg: #10141e;
-      --canvas-grid: #242c3d;
-      --hero-bg: linear-gradient(135deg, #1c2331 0%, #151a24 100%);
-      
-      --wine-primary: #881337;
-      --wine-light: #be123c;
-      --wine-accent: #f43f5e;
-      --wine-label: #fda4af;
-      --wine-border: #881337;
-      
-      --green: #10b981;
-      --blue: #f43f5e;
-      --cyan: #38bdf8;
-      --purple: #be123c;
-      --red: #ef4444;
-      --amber: #f59e0b;
-    }
-
-    [data-theme="light"] {
+    :root, [data-theme="light"] {
       --bg: #f8fafc;
       --card-bg: #ffffff;
       --card-border: #cbd5e1;
@@ -57,6 +30,33 @@
       --purple: #9f1239;
       --red: #dc2626;
       --amber: #d97706;
+    }
+
+    [data-theme="slate"] {
+      --bg: #131722;
+      --card-bg: #1e2433;
+      --card-border: #2e384b;
+      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --input-bg: #161b26;
+      --input-border: #38445a;
+      --canvas-bg: #10141e;
+      --canvas-grid: #242c3d;
+      --hero-bg: linear-gradient(135deg, #1c2331 0%, #151a24 100%);
+      
+      --wine-primary: #881337;
+      --wine-light: #be123c;
+      --wine-accent: #f43f5e;
+      --wine-label: #fda4af;
+      --wine-border: #881337;
+      
+      --green: #10b981;
+      --blue: #f43f5e;
+      --cyan: #38bdf8;
+      --purple: #be123c;
+      --red: #ef4444;
+      --amber: #f59e0b;
     }
 
     [data-theme="ocean"] {
@@ -638,9 +638,9 @@
     </div>
     <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
       <div class="theme-switcher">
+        <button type="button" class="theme-btn active" id="btnTheme_light" onclick="setTheme('light')" title="Tema Claro Neutro Institucional">☀️ Claro Neutro</button>
         <button type="button" class="theme-btn" id="btnTheme_slate" onclick="setTheme('slate')" title="Tema Ardósia Neutro (Menos Escuro)">🌓 Slate Neutro</button>
         <button type="button" class="theme-btn" id="btnTheme_ocean" onclick="setTheme('ocean')" title="Tema Oceano Safira (Harmonioso &amp; Descanso Visual)">🌊 Oceano Safira</button>
-        <button type="button" class="theme-btn" id="btnTheme_light" onclick="setTheme('light')" title="Tema Claro Neutro Institucional">☀️ Claro Neutro</button>
         <button type="button" class="theme-btn" id="btnTheme_wine-dark" onclick="setTheme('wine-dark')" title="Tema Vinho Noturno">🍷 Vinho</button>
         <button type="button" class="theme-btn" id="btnTheme_original" onclick="setTheme('original')" title="Tema Original Cyber/Navy">⚡ Original</button>
       </div>
@@ -2853,8 +2853,8 @@
     if (typeof redrawCanvas === 'function') redrawCanvas();
   }
 
-  // Inicializa tema salvo ou padrão 'slate' (menos escuro e neutro)
-  const initialTheme = localStorage.getItem('sparc_theme') || 'slate';
+  // Inicializa tema salvo ou padrão 'light' (Claro Neutro)
+  const initialTheme = localStorage.getItem('sparc_theme') || 'light';
   setTheme(initialTheme);
 </script>
 
