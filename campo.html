@@ -2183,16 +2183,26 @@
     }
 
     // 1. Download
+    const baseDl = (d.effectiveCirDl && !isNaN(d.effectiveCirDl) && d.effectiveCirDl > 0) 
+      ? d.effectiveCirDl 
+      : (parseFloat(cfg.cirVal) || d.dlAvg || 1);
+    const dlPctVal = ((d.dlAvg / baseDl) * 100).toFixed(1);
+
     document.getElementById('auditDlMeta').innerText = `≥ ${d.reqDlMbps.toFixed(1)} Mbps`;
     document.getElementById('auditDlMedido').innerText = `${d.dlAvg.toFixed(1)} Mbps`;
-    document.getElementById('auditDlPct').innerText = `${((d.dlAvg / cfg.cirVal) * 100).toFixed(1)}%`;
+    document.getElementById('auditDlPct').innerText = `${dlPctVal}%`;
     document.getElementById('auditDlStatus').innerText = d.dlPassed ? 'CONFORME' : 'REPROVADO';
     document.getElementById('auditDlStatus').style.color = d.dlPassed ? '#16a34a' : '#dc2626';
 
     // 2. Upload
+    const baseUl = (d.effectiveCirUl && !isNaN(d.effectiveCirUl) && d.effectiveCirUl > 0) 
+      ? d.effectiveCirUl 
+      : (parseFloat(cfg.cirUlVal) || d.ulAvg || 1);
+    const ulPctVal = ((d.ulAvg / baseUl) * 100).toFixed(1);
+
     document.getElementById('auditUlMeta').innerText = `≥ ${d.reqUlMbps.toFixed(1)} Mbps`;
     document.getElementById('auditUlMedido').innerText = `${d.ulAvg.toFixed(1)} Mbps`;
-    document.getElementById('auditUlPct').innerText = `${((d.ulAvg / cfg.cirUlVal) * 100).toFixed(1)}%`;
+    document.getElementById('auditUlPct').innerText = `${ulPctVal}%`;
     document.getElementById('auditUlStatus').innerText = d.ulPassed ? 'CONFORME' : 'REPROVADO';
     document.getElementById('auditUlStatus').style.color = d.ulPassed ? '#16a34a' : '#dc2626';
 
@@ -2235,23 +2245,24 @@
     window.print();
   }
 
-  // MOTOR DE MEDIÇÃO MULTI-STREAM COM SELEÇÃO DE MENOR ESFORÇO MULTI-ENDPOINT
+  // MOTOR DE MEDIÇÃO MULTI-STREAM COM SELEÇÃO DE MENOR ESFORÇO MULTI-ENDPOINT (CORS NATIVO)
   async function measurePing(signal, onProbe, isFwa = false) {
     const warmupProbes = isFwa ? 2 : 1;
     const totalProbes = isFwa ? 12 : 6;
     const probeIntervalMs = isFwa ? 28 : 8;
 
-    // Candidatos a menor esforço nacional para evitar desvios de BGP/peering internacional de operadoras
+    // Candidatos a menor esforço nacional com CORS garantido (Access-Control-Allow-Origin: *)
+    // Permite que navegadores realizem telemetria legítima sem bloqueios de opaqueredirect / CORB
     const CANDIDATES = [
-      { id: 'google', name: 'Google Edge Brasil', url: 'https://www.google.com/generate_204', mode: 'no-cors' },
-      { id: 'aws', name: 'AWS Brasil (São Paulo)', url: 'https://s3.sa-east-1.amazonaws.com/', mode: 'no-cors' },
-      { id: 'cloudflare', name: 'Cloudflare Speed', url: 'https://speed.cloudflare.com/__down?bytes=0', mode: 'cors' }
+      { id: 'google_edge', name: 'Google Edge Brasil', url: 'https://dns.google/resolve?name=speed.test&type=A', mode: 'cors' },
+      { id: 'cf_speed', name: 'Cloudflare Speed', url: 'https://speed.cloudflare.com/__down?bytes=0', mode: 'cors' },
+      { id: 'cf_edge', name: 'Cloudflare Edge (1.1.1.1)', url: 'https://1.1.1.1/dns-query?name=speed.test&type=A', headers: { 'Accept': 'application/dns-json' }, mode: 'cors' }
     ];
 
     let chosenCandidate = CANDIDATES[0];
 
     // 1. Fase de Descoberta do Endpoint de Menor Custo (Pre-flight Selection)
-    // Sonda rapidamente os hubs nacionais para eleger a rota com menor latência real da operadora
+    // Sonda rapidamente os hubs nacionais com CORS aberto para eleger a rota com menor latência real da operadora
     try {
       if (typeof onProbe === 'function') {
         onProbe(0, 0, 0, 0, warmupProbes, 'discovery');
@@ -2261,11 +2272,12 @@
         const sep = cand.url.includes('?') ? '&r=' : '?r=';
         const t0 = performance.now();
         const ctrl = new AbortController();
-        const timeoutId = setTimeout(() => ctrl.abort(), 1800);
+        const timeoutId = setTimeout(() => ctrl.abort(), 2000);
         try {
           await fetch(cand.url + sep + Math.random(), {
             signal: ctrl.signal,
-            mode: cand.mode,
+            mode: cand.mode || 'cors',
+            headers: cand.headers || {},
             cache: 'no-store'
           });
           clearTimeout(timeoutId);
@@ -2287,7 +2299,8 @@
 
     const sep = chosenCandidate.url.includes('?') ? '&r=' : '?r=';
     const baseUrl = chosenCandidate.url + sep;
-    const reqMode = chosenCandidate.mode;
+    const reqMode = chosenCandidate.mode || 'cors';
+    const reqHeaders = chosenCandidate.headers || {};
 
     // 2. Pré-aquecimento de Canal / Rádio (Warm-up)
     // Acorda o rádio celular do modem FWA (RRC Idle -> Connected) e aloca blocos na torre
@@ -2297,7 +2310,7 @@
         if (typeof onProbe === 'function') {
           onProbe(0, 0, 0, w + 1, warmupProbes, 'warmup');
         }
-        await fetch(baseUrl + Math.random(), { signal, mode: reqMode, cache: 'no-store' });
+        await fetch(baseUrl + Math.random(), { signal, mode: reqMode, headers: reqHeaders, cache: 'no-store' });
       } catch (e) {
         if (signal.aborted) throw e;
       }
@@ -2311,7 +2324,7 @@
       if (signal.aborted) break;
       const t0 = performance.now();
       try {
-        await fetch(baseUrl + Math.random(), { signal, mode: reqMode, cache: 'no-store' });
+        await fetch(baseUrl + Math.random(), { signal, mode: reqMode, headers: reqHeaders, cache: 'no-store' });
         const dt = performance.now() - t0;
         if (dt > 0 && dt < 2500) {
           samples.push(dt);
