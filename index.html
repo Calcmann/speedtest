@@ -2262,16 +2262,19 @@
     const sep = endpoint.includes('?') ? '&r=' : '?r=';
     const pingEndpoint = endpoint + sep;
 
-    // 1. Pacote de Aquecimento (Warm-up rápido)
-    try {
-      const warmup = await fetch(pingEndpoint + Math.random(), { signal, cache: 'no-store' });
-      await warmup.text();
-      await new Promise(r => setTimeout(r, 10));
-    } catch (e) {
-      if (signal.aborted) throw e;
+    // 1. Pacote de Aquecimento (Warm-up rápido) para estabilizar socket e canal
+    const warmupCount = count > 8 ? 2 : 1;
+    for (let w = 0; w < warmupCount; w++) {
+      try {
+        const warmup = await fetch(pingEndpoint + Math.random(), { signal, cache: 'no-store' });
+        await warmup.text();
+        await new Promise(r => setTimeout(r, 12));
+      } catch (e) {
+        if (signal.aborted) throw e;
+      }
     }
 
-    // 2. Coleta de 5 amostras de RTT com reuso de socket keep-alive
+    // 2. Coleta de amostras de RTT com reuso de socket keep-alive e preservação temporal
     const latencies = [];
     for (let i = 0; i < count; i++) {
       signal.throwIfAborted();
@@ -2285,19 +2288,24 @@
 
     if (latencies.length === 0) return { avg: 15, jitter: 1.0, min: 14, max: 16 };
 
-    // 3. Tratamento estatístico profissional (Mediana e corte de outliers extremos)
-    const sorted = [...latencies].sort((a, b) => a - b);
-    const cleanSamples = sorted.length > 4 ? sorted.slice(1, sorted.length - 1) : sorted;
-    const median = sorted[Math.floor(sorted.length / 2)];
-
-    // Jitter RFC 3550
+    // 3. Jitter RFC 3550 calculado estritamente na ordem sequencial temporal de chegada
     let jitterSum = 0;
-    for (let i = 1; i < cleanSamples.length; i++) {
-      jitterSum += Math.abs(cleanSamples[i] - cleanSamples[i - 1]);
+    for (let i = 1; i < latencies.length; i++) {
+      jitterSum += Math.abs(latencies[i] - latencies[i - 1]);
     }
-    const jitter = cleanSamples.length > 1 ? jitterSum / (cleanSamples.length - 1) : 1.0;
+    const jitter = latencies.length > 1 ? jitterSum / (latencies.length - 1) : 1.0;
 
-    return { avg: Math.round(median), jitter: Math.round(jitter * 10) / 10, min: sorted[0], max: sorted[sorted.length - 1] };
+    // 4. Tratamento estatístico profissional (Média Podada ITU-T Y.1540 / Mediana)
+    const sorted = [...latencies].sort((a, b) => a - b);
+    let targetSamples = sorted;
+    if (sorted.length >= 8) {
+      targetSamples = sorted.slice(1, sorted.length - 2);
+    } else if (sorted.length > 4) {
+      targetSamples = sorted.slice(1, sorted.length - 1);
+    }
+    const avgTrimmed = targetSamples.reduce((a, b) => a + b, 0) / targetSamples.length;
+
+    return { avg: Math.round(avgTrimmed), jitter: Math.round(jitter * 10) / 10, min: sorted[0], max: sorted[sorted.length - 1] };
   }
 
   async function runDownloadTest(signal) {
