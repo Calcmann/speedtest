@@ -2269,16 +2269,51 @@
   }
 
   async function measurePing(signal, count = 5) {
-    const endpoint = getPingEndpoint();
-    const sep = endpoint.includes('?') ? '&r=' : '?r=';
-    const pingEndpoint = endpoint + sep;
+    const CANDIDATES = [
+      { id: 'google', name: 'Google Edge Brasil', url: 'https://www.google.com/generate_204', mode: 'no-cors' },
+      { id: 'aws', name: 'AWS Brasil (São Paulo)', url: 'https://s3.sa-east-1.amazonaws.com/', mode: 'no-cors' },
+      { id: 'custom', name: 'PoP Endpoint', url: getPingEndpoint(), mode: 'cors' }
+    ];
+
+    let chosenCandidate = CANDIDATES[0];
+    try {
+      const probeCandidate = async (cand) => {
+        const sep = cand.url.includes('?') ? '&r=' : '?r=';
+        const t0 = performance.now();
+        const ctrl = new AbortController();
+        const timeoutId = setTimeout(() => ctrl.abort(), 1800);
+        try {
+          await fetch(cand.url + sep + Math.random(), {
+            signal: ctrl.signal,
+            mode: cand.mode,
+            cache: 'no-store'
+          });
+          clearTimeout(timeoutId);
+          return { cand, rtt: performance.now() - t0 };
+        } catch (_) {
+          clearTimeout(timeoutId);
+          return { cand, rtt: 99999 };
+        }
+      };
+
+      const discoveryResults = await Promise.all(CANDIDATES.map(c => probeCandidate(c)));
+      discoveryResults.sort((a, b) => a.rtt - b.rtt);
+      if (discoveryResults[0] && discoveryResults[0].rtt < 3000) {
+        chosenCandidate = discoveryResults[0].cand;
+      }
+    } catch (_) {
+      chosenCandidate = CANDIDATES[0];
+    }
+
+    const sep = chosenCandidate.url.includes('?') ? '&r=' : '?r=';
+    const pingEndpoint = chosenCandidate.url + sep;
+    const reqMode = chosenCandidate.mode;
 
     // 1. Pacote de Aquecimento (Warm-up rápido) para estabilizar socket e canal
     const warmupCount = count > 8 ? 2 : 1;
     for (let w = 0; w < warmupCount; w++) {
       try {
-        const warmup = await fetch(pingEndpoint + Math.random(), { signal, cache: 'no-store' });
-        await warmup.text();
+        await fetch(pingEndpoint + Math.random(), { signal, mode: reqMode, cache: 'no-store' });
         await new Promise(r => setTimeout(r, 12));
       } catch (e) {
         if (signal.aborted) throw e;
@@ -2290,14 +2325,13 @@
     for (let i = 0; i < count; i++) {
       signal.throwIfAborted();
       const t0 = performance.now();
-      const res = await fetch(pingEndpoint + Math.random(), { signal, cache: 'no-store' });
-      await res.text();
+      await fetch(pingEndpoint + Math.random(), { signal, mode: reqMode, cache: 'no-store' });
       const rtt = performance.now() - t0;
       latencies.push(rtt);
       if (i < count - 1) await new Promise(r => setTimeout(r, 10));
     }
 
-    if (latencies.length === 0) return { avg: 15, jitter: 1.0, min: 14, max: 16 };
+    if (latencies.length === 0) return { avg: 15, jitter: 1.0, min: 14, max: 16, endpointName: chosenCandidate.name };
 
     // 3. Jitter RFC 3550 calculado estritamente na ordem sequencial temporal de chegada
     let jitterSum = 0;
@@ -2316,7 +2350,7 @@
     }
     const avgTrimmed = targetSamples.reduce((a, b) => a + b, 0) / targetSamples.length;
 
-    return { avg: Math.round(avgTrimmed), jitter: Math.round(jitter * 10) / 10, min: sorted[0], max: sorted[sorted.length - 1] };
+    return { avg: Math.round(avgTrimmed), jitter: Math.round(jitter * 10) / 10, min: sorted[0], max: sorted[sorted.length - 1], endpointName: chosenCandidate.name };
   }
 
   async function runDownloadTest(signal) {
