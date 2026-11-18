@@ -2270,9 +2270,9 @@
 
   async function measurePing(signal, count = 5) {
     const CANDIDATES = [
-      { id: 'google', name: 'Google Edge Brasil', url: 'https://www.google.com/generate_204', mode: 'no-cors' },
-      { id: 'aws', name: 'AWS Brasil (São Paulo)', url: 'https://s3.sa-east-1.amazonaws.com/', mode: 'no-cors' },
-      { id: 'custom', name: 'PoP Endpoint', url: getPingEndpoint(), mode: 'cors' }
+      { id: 'google_edge', name: 'Google Edge Brasil', url: 'https://dns.google/resolve?name=speed.test&type=A', mode: 'cors' },
+      { id: 'cf_speed', name: 'Cloudflare Speed', url: 'https://speed.cloudflare.com/__down?bytes=0', mode: 'cors' },
+      { id: 'cf_edge', name: 'Cloudflare Edge (1.1.1.1)', url: 'https://1.1.1.1/dns-query?name=speed.test&type=A', headers: { 'Accept': 'application/dns-json' }, mode: 'cors' }
     ];
 
     let chosenCandidate = CANDIDATES[0];
@@ -2281,11 +2281,12 @@
         const sep = cand.url.includes('?') ? '&r=' : '?r=';
         const t0 = performance.now();
         const ctrl = new AbortController();
-        const timeoutId = setTimeout(() => ctrl.abort(), 1800);
+        const timeoutId = setTimeout(() => ctrl.abort(), 2000);
         try {
           await fetch(cand.url + sep + Math.random(), {
             signal: ctrl.signal,
-            mode: cand.mode,
+            mode: cand.mode || 'cors',
+            headers: cand.headers || {},
             cache: 'no-store'
           });
           clearTimeout(timeoutId);
@@ -2307,13 +2308,14 @@
 
     const sep = chosenCandidate.url.includes('?') ? '&r=' : '?r=';
     const pingEndpoint = chosenCandidate.url + sep;
-    const reqMode = chosenCandidate.mode;
+    const reqMode = chosenCandidate.mode || 'cors';
+    const reqHeaders = chosenCandidate.headers || {};
 
     // 1. Pacote de Aquecimento (Warm-up rápido) para estabilizar socket e canal
     const warmupCount = count > 8 ? 2 : 1;
     for (let w = 0; w < warmupCount; w++) {
       try {
-        await fetch(pingEndpoint + Math.random(), { signal, mode: reqMode, cache: 'no-store' });
+        await fetch(pingEndpoint + Math.random(), { signal, mode: reqMode, headers: reqHeaders, cache: 'no-store' });
         await new Promise(r => setTimeout(r, 12));
       } catch (e) {
         if (signal.aborted) throw e;
@@ -2325,7 +2327,7 @@
     for (let i = 0; i < count; i++) {
       signal.throwIfAborted();
       const t0 = performance.now();
-      await fetch(pingEndpoint + Math.random(), { signal, mode: reqMode, cache: 'no-store' });
+      await fetch(pingEndpoint + Math.random(), { signal, mode: reqMode, headers: reqHeaders, cache: 'no-store' });
       const rtt = performance.now() - t0;
       latencies.push(rtt);
       if (i < count - 1) await new Promise(r => setTimeout(r, 10));
