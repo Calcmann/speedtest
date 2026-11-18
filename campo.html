@@ -1941,10 +1941,14 @@
 
     try {
       // 1. LATÊNCIA, JITTER E PERDA DE PACOTES (ANS) COM FEEDBACK DINÂMICO
-      setStatus('running', isFwa ? '📡 ESTABILIZANDO CANAL DE RÁDIO FWA...' : 'ANALISANDO LATÊNCIA E JITTER...');
+      setStatus('running', isFwa ? '📡 IDENTIFICANDO ROTA DE MENOR ESFORÇO...' : 'ANALISANDO LATÊNCIA E JITTER...');
       const pingRes = await measurePing(signal, (curAvg, curJitter, curLoss, curIdx, total, phase) => {
+        if (phase === 'discovery') {
+          setStatus('running', isFwa ? '📡 SONDANDO ROTA DE MENOR ESFORÇO NACIONAL...' : 'IDENTIFICANDO ROTA DE MENOR CUSTO...');
+          return;
+        }
         if (phase === 'warmup') {
-          setStatus('running', `📡 SINCRONIZANDO RÁDIO FWA (WARM-UP ${curIdx}/${total})...`);
+          setStatus('running', isFwa ? `📡 SINCRONIZANDO RÁDIO FWA (WARM-UP ${curIdx}/${total})...` : `SINCRONIZANDO CANAL (${curIdx}/${total})...`);
           return;
         }
         document.getElementById('txtPing').innerText = curAvg.toFixed(1);
@@ -2019,7 +2023,8 @@
         lossPassed,
         pingAvg: pingRes.avg,
         jitter: pingRes.jitter,
-        lossPct: pingRes.lossPct
+        lossPct: pingRes.lossPct,
+        pingEndpoint: pingRes.endpointName
       });
 
       lastCompletedConfig = getCurrentConfig();
@@ -2032,6 +2037,7 @@
         pingAvg: pingRes.avg,
         jitter: pingRes.jitter,
         lossPct: pingRes.lossPct,
+        pingEndpoint: pingRes.endpointName,
         isApproved,
         reqDlMbps,
         reqUlMbps,
@@ -2192,7 +2198,7 @@
 
     // 3. Latência RTT
     document.getElementById('auditRttMeta').innerText = `≤ ${p.maxRtt} ms`;
-    document.getElementById('auditPing').innerText = `${d.pingAvg.toFixed(1)} ms`;
+    document.getElementById('auditPing').innerText = d.pingEndpoint ? `${d.pingAvg.toFixed(1)} ms (${d.pingEndpoint})` : `${d.pingAvg.toFixed(1)} ms`;
     document.getElementById('auditRttPct').innerText = d.rttPassed ? 'OK' : 'VIOLADO';
     document.getElementById('auditRttStatus').innerText = d.rttPassed ? 'CONFORME' : 'REPROVADO';
     document.getElementById('auditRttStatus').style.color = d.rttPassed ? '#16a34a' : '#dc2626';
@@ -2229,36 +2235,83 @@
     window.print();
   }
 
-  // MOTOR DE MEDIÇÃO MULTI-STREAM COM FEEDBACK INSTANTÂNEO ZERO-DELAY
+  // MOTOR DE MEDIÇÃO MULTI-STREAM COM SELEÇÃO DE MENOR ESFORÇO MULTI-ENDPOINT
   async function measurePing(signal, onProbe, isFwa = false) {
     const warmupProbes = isFwa ? 2 : 1;
     const totalProbes = isFwa ? 12 : 6;
     const probeIntervalMs = isFwa ? 28 : 8;
-    const samples = [];
-    let failedProbes = 0;
 
-    // 1. Pré-aquecimento de Canal / Rádio (Warm-up)
-    // Acorda o rádio celular do modem FWA (RRC Idle -> Connected) e reusa socket keep-alive,
-    // eliminando a distorção inicial de RACH / handshake sem poluir as métricas de ANS.
+    // Candidatos a menor esforço nacional para evitar desvios de BGP/peering internacional de operadoras
+    const CANDIDATES = [
+      { id: 'google', name: 'Google Edge Brasil', url: 'https://www.google.com/generate_204', mode: 'no-cors' },
+      { id: 'aws', name: 'AWS Brasil (São Paulo)', url: 'https://s3.sa-east-1.amazonaws.com/', mode: 'no-cors' },
+      { id: 'cloudflare', name: 'Cloudflare Speed', url: 'https://speed.cloudflare.com/__down?bytes=0', mode: 'cors' }
+    ];
+
+    let chosenCandidate = CANDIDATES[0];
+
+    // 1. Fase de Descoberta do Endpoint de Menor Custo (Pre-flight Selection)
+    // Sonda rapidamente os hubs nacionais para eleger a rota com menor latência real da operadora
+    try {
+      if (typeof onProbe === 'function') {
+        onProbe(0, 0, 0, 0, warmupProbes, 'discovery');
+      }
+
+      const probeCandidate = async (cand) => {
+        const sep = cand.url.includes('?') ? '&r=' : '?r=';
+        const t0 = performance.now();
+        const ctrl = new AbortController();
+        const timeoutId = setTimeout(() => ctrl.abort(), 1800);
+        try {
+          await fetch(cand.url + sep + Math.random(), {
+            signal: ctrl.signal,
+            mode: cand.mode,
+            cache: 'no-store'
+          });
+          clearTimeout(timeoutId);
+          return { cand, rtt: performance.now() - t0 };
+        } catch (_) {
+          clearTimeout(timeoutId);
+          return { cand, rtt: 99999 };
+        }
+      };
+
+      const discoveryResults = await Promise.all(CANDIDATES.map(c => probeCandidate(c)));
+      discoveryResults.sort((a, b) => a.rtt - b.rtt);
+      if (discoveryResults[0] && discoveryResults[0].rtt < 3000) {
+        chosenCandidate = discoveryResults[0].cand;
+      }
+    } catch (_) {
+      chosenCandidate = CANDIDATES[0];
+    }
+
+    const sep = chosenCandidate.url.includes('?') ? '&r=' : '?r=';
+    const baseUrl = chosenCandidate.url + sep;
+    const reqMode = chosenCandidate.mode;
+
+    // 2. Pré-aquecimento de Canal / Rádio (Warm-up)
+    // Acorda o rádio celular do modem FWA (RRC Idle -> Connected) e aloca blocos na torre
     for (let w = 0; w < warmupProbes; w++) {
       if (signal.aborted) break;
       try {
         if (typeof onProbe === 'function') {
           onProbe(0, 0, 0, w + 1, warmupProbes, 'warmup');
         }
-        await fetch(`https://speed.cloudflare.com/__down?bytes=0&r=${Math.random()}`, { signal, cache: 'no-store' });
+        await fetch(baseUrl + Math.random(), { signal, mode: reqMode, cache: 'no-store' });
       } catch (e) {
         if (signal.aborted) throw e;
       }
       await new Promise(r => setTimeout(r, probeIntervalMs));
     }
 
-    // 2. Coleta de Amostras de RTT com Pacing e Preservação da Ordem Temporal
+    // 3. Coleta de Amostras de RTT com Pacing e Preservação da Ordem Temporal
+    const samples = [];
+    let failedProbes = 0;
     for (let i = 0; i < totalProbes; i++) {
       if (signal.aborted) break;
       const t0 = performance.now();
       try {
-        await fetch(`https://speed.cloudflare.com/__down?bytes=0&r=${Math.random()}`, { signal, cache: 'no-store' });
+        await fetch(baseUrl + Math.random(), { signal, mode: reqMode, cache: 'no-store' });
         const dt = performance.now() - t0;
         if (dt > 0 && dt < 2500) {
           samples.push(dt);
@@ -2281,14 +2334,14 @@
 
     const lossPct = (failedProbes / totalProbes) * 100;
 
-    // 3. Jitter RFC 3550 calculado estritamente na ordem temporal sequencial de chegada
+    // 4. Jitter RFC 3550 calculado estritamente na ordem temporal sequencial de chegada
     let jitter = 0;
     for (let j = 1; j < samples.length; j++) {
       jitter += Math.abs(samples[j] - samples[j - 1]);
     }
     jitter = samples.length > 1 ? jitter / (samples.length - 1) : 1.2;
 
-    // 4. Média Aparada / Trimmed Mean (ITU-T Y.1540 / Regulatório Anatel RQUAL)
+    // 5. Média Aparada / Trimmed Mean (ITU-T Y.1540 / Regulatório Anatel RQUAL)
     // Para FWA, descarta picos isolados de retransmissão de rádio HARQ para refletir a latência do canal estabilizado
     let avg = 25;
     if (samples.length > 0) {
@@ -2304,7 +2357,7 @@
       avg = targetSamples.reduce((a, b) => a + b, 0) / targetSamples.length;
     }
 
-    return { avg, jitter, lossPct };
+    return { avg, jitter, lossPct, endpointName: chosenCandidate.name };
   }
 
   
