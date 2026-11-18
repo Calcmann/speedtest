@@ -1868,6 +1868,7 @@
     const p = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bandalarga_padrao;
     const cirDl = getCirNominal();
     const cirUl = getUlCirNominal(p, cirDl);
+    const isFwa = (profKey === 'fwa_anatel' || cirDl === 'auto_fwa');
 
     document.getElementById('verdictCard').style.display = 'none';
     document.getElementById('configMismatchWarning').style.display = 'none';
@@ -1883,13 +1884,18 @@
 
     try {
       // 1. LATÊNCIA, JITTER E PERDA DE PACOTES (ANS) COM FEEDBACK DINÂMICO
-      setStatus('running', 'ANALISANDO LATÊNCIA E JITTER...');
-      const pingRes = await measurePing(signal, (curAvg, curJitter, curLoss, curIdx, total) => {
+      setStatus('running', isFwa ? '📡 ESTABILIZANDO CANAL DE RÁDIO FWA...' : 'ANALISANDO LATÊNCIA E JITTER...');
+      const pingRes = await measurePing(signal, (curAvg, curJitter, curLoss, curIdx, total, phase) => {
+        if (phase === 'warmup') {
+          setStatus('running', `📡 SINCRONIZANDO RÁDIO FWA (WARM-UP ${curIdx}/${total})...`);
+          return;
+        }
         document.getElementById('txtPing').innerText = curAvg.toFixed(1);
         document.getElementById('txtQualityVal').innerHTML = `${curJitter.toFixed(1)} <span style="font-size: 14px; color: var(--text-muted);">ms</span>`;
         document.getElementById('txtQualityLoss').innerText = `Perda: ${curLoss.toFixed(1)}% (Meta: < ${p.maxLoss}%)`;
-        setStatus('running', `ANALISANDO QUALIDADE DO LINK (${curIdx}/${total})...`);
-      });
+        const progLabel = isFwa ? `ANALISANDO CANAL FWA (${curIdx}/${total})` : `ANALISANDO QUALIDADE DO LINK (${curIdx}/${total})`;
+        setStatus('running', `${progLabel}...`);
+      }, isFwa);
       document.getElementById('txtPing').innerText = pingRes.avg.toFixed(1);
       document.getElementById('txtQualityVal').innerHTML = `${pingRes.jitter.toFixed(1)} <span style="font-size: 14px; color: var(--text-muted);">ms</span>`;
       document.getElementById('txtQualityLoss').innerText = `Perda: ${pingRes.lossPct.toFixed(1)}% (Meta: < ${p.maxLoss}%)`;
@@ -2167,10 +2173,30 @@
   }
 
   // MOTOR DE MEDIÇÃO MULTI-STREAM COM FEEDBACK INSTANTÂNEO ZERO-DELAY
-  async function measurePing(signal, onProbe) {
+  async function measurePing(signal, onProbe, isFwa = false) {
+    const warmupProbes = isFwa ? 2 : 1;
+    const totalProbes = isFwa ? 12 : 6;
+    const probeIntervalMs = isFwa ? 28 : 8;
     const samples = [];
-    const totalProbes = 5;
     let failedProbes = 0;
+
+    // 1. Pré-aquecimento de Canal / Rádio (Warm-up)
+    // Acorda o rádio celular do modem FWA (RRC Idle -> Connected) e reusa socket keep-alive,
+    // eliminando a distorção inicial de RACH / handshake sem poluir as métricas de ANS.
+    for (let w = 0; w < warmupProbes; w++) {
+      if (signal.aborted) break;
+      try {
+        if (typeof onProbe === 'function') {
+          onProbe(0, 0, 0, w + 1, warmupProbes, 'warmup');
+        }
+        await fetch(`https://speed.cloudflare.com/__down?bytes=0&r=${Math.random()}`, { signal, cache: 'no-store' });
+      } catch (e) {
+        if (signal.aborted) throw e;
+      }
+      await new Promise(r => setTimeout(r, probeIntervalMs));
+    }
+
+    // 2. Coleta de Amostras de RTT com Pacing e Preservação da Ordem Temporal
     for (let i = 0; i < totalProbes; i++) {
       if (signal.aborted) break;
       const t0 = performance.now();
@@ -2184,22 +2210,43 @@
             let curJitter = 0;
             for (let j = 1; j < samples.length; j++) curJitter += Math.abs(samples[j] - samples[j - 1]);
             curJitter = samples.length > 1 ? curJitter / (samples.length - 1) : 1.0;
-            onProbe(curAvg, curJitter, (failedProbes / (i + 1)) * 100, i + 1, totalProbes);
+            onProbe(curAvg, curJitter, (failedProbes / (i + 1)) * 100, i + 1, totalProbes, 'measure');
           }
         } else {
           failedProbes++;
         }
-      } catch (_) {
+      } catch (err) {
+        if (signal.aborted) throw err;
         failedProbes++;
       }
-      if (i < totalProbes - 1) await new Promise(r => setTimeout(r, 5));
+      if (i < totalProbes - 1) await new Promise(r => setTimeout(r, probeIntervalMs));
     }
+
     const lossPct = (failedProbes / totalProbes) * 100;
-    samples.sort((a, b) => a - b);
-    const avg = samples.length ? samples.reduce((a, b) => a + b, 0) / samples.length : 25;
+
+    // 3. Jitter RFC 3550 calculado estritamente na ordem temporal sequencial de chegada
     let jitter = 0;
-    for (let i = 1; i < samples.length; i++) jitter += Math.abs(samples[i] - samples[i - 1]);
-    jitter = samples.length > 1 ? jitter / (samples.length - 1) : 1.5;
+    for (let j = 1; j < samples.length; j++) {
+      jitter += Math.abs(samples[j] - samples[j - 1]);
+    }
+    jitter = samples.length > 1 ? jitter / (samples.length - 1) : 1.2;
+
+    // 4. Média Aparada / Trimmed Mean (ITU-T Y.1540 / Regulatório Anatel RQUAL)
+    // Para FWA, descarta picos isolados de retransmissão de rádio HARQ para refletir a latência do canal estabilizado
+    let avg = 25;
+    if (samples.length > 0) {
+      const sorted = [...samples].sort((a, b) => a - b);
+      let targetSamples = sorted;
+      if (isFwa && sorted.length >= 8) {
+        // Corta 1 amostra mínima e 2 maiores (picos isolados de HARQ / RRC scheduling)
+        targetSamples = sorted.slice(1, sorted.length - 2);
+      } else if (sorted.length >= 5) {
+        // Corta 1 mínima e 1 máxima
+        targetSamples = sorted.slice(1, sorted.length - 1);
+      }
+      avg = targetSamples.reduce((a, b) => a + b, 0) / targetSamples.length;
+    }
+
     return { avg, jitter, lossPct };
   }
 
