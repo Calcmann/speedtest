@@ -1115,19 +1115,76 @@
     }
   };
 
-  // DATACENTERS / POPS REGIONAIS DE MENOR CUSTO DE REDE
+  // DATACENTERS / POPS REGIONAIS DE MENOR CUSTO DE REDE (IX.br & INFRAESTRUTURA DE TELECOM)
   const TELECOM_POPS = [
-    { id: 'cwb', name: 'PoP Sul (Curitiba / PR)', city: 'Curitiba (PTT CWB)', lat: -25.4284, lon: -49.2733, colo: 'CWB' },
-    { id: 'poa', name: 'PoP Sul (Porto Alegre / RS)', city: 'Porto Alegre (PTT POA)', lat: -30.0346, lon: -51.2177, colo: 'POA' },
-    { id: 'gru', name: 'PoP Central (São Paulo / SP)', city: 'São Paulo (Datacenter GRU)', lat: -23.5505, lon: -46.6333, colo: 'GRU' },
-    { id: 'gig', name: 'PoP Sudeste (Rio de Janeiro / RJ)', city: 'Rio de Janeiro (PTT GIG)', lat: -22.9068, lon: -43.1729, colo: 'GIG' },
-    { id: 'cnf', name: 'PoP Minas Gerais (Belo Horizonte / MG)', city: 'Belo Horizonte (PTT CNF)', lat: -19.9167, lon: -43.9345, colo: 'CNF' },
-    { id: 'bsb', name: 'PoP Centro-Oeste (Brasília / DF)', city: 'Brasília (PTT BSB)', lat: -15.7975, lon: -47.8919, colo: 'BSB' },
-    { id: 'for', name: 'PoP Nordeste (Fortaleza / CE)', city: 'Fortaleza (Hub Submarino)', lat: -3.7319, lon: -38.5267, colo: 'FOR' },
-    { id: 'ssa', name: 'PoP Nordeste (Salvador / BA)', city: 'Salvador (PTT SSA)', lat: -12.9714, lon: -38.5014, colo: 'SSA' },
-    { id: 'rec', name: 'PoP Nordeste (Recife / PE)', city: 'Recife (PTT REC)', lat: -8.0476, lon: -34.8770, colo: 'REC' },
-    { id: 'bel', name: 'PoP Norte (Belém / PA)', city: 'Belém (PTT BEL)', lat: -1.4558, lon: -48.4902, colo: 'BEL' },
-    { id: 'mao', name: 'PoP Norte (Manaus / AM)', city: 'Manaus (PTT MAO)', lat: -3.1190, lon: -60.0217, colo: 'MAO' }
+    // Santa Catarina (SC)
+    { id: 'fln', name: 'PoP Santa Catarina (Florianópolis / SC)', city: 'Florianópolis (IX.br FLN / Regional SC)', lat: -27.5967, lon: -48.5492, colo: 'FLN' },
+    { id: 'joi', name: 'PoP Norte Catarinense (Joinville / SC)', city: 'Joinville (IX.br JOI)', lat: -26.3045, lon: -48.8487, colo: 'JOI' },
+    { id: 'bnu', name: 'PoP Vale do Itajaí (Blumenau / SC)', city: 'Blumenau (IX.br BNU)', lat: -26.9194, lon: -49.0661, colo: 'BNU' },
+    { id: 'iai', name: 'PoP Litoral Catarinense (Itajaí / SC)', city: 'Itajaí (Porto & Hub Litoral)', lat: -26.9078, lon: -48.6619, colo: 'IAI' },
+    { id: 'cha', name: 'PoP Oeste Catarinense (Chapecó / SC)', city: 'Chapecó (Polo Oeste SC)', lat: -27.1004, lon: -52.6152, colo: 'CHA' },
+    { id: 'csc', name: 'PoP Sul Catarinense (Criciúma / SC)', city: 'Criciúma (IX.br CCM)', lat: -28.6775, lon: -49.3704, colo: 'CSC' },
+    { id: 'lgs', name: 'PoP Planalto Serrano (Lages / SC)', city: 'Lages (IX.br LAJ)', lat: -27.8161, lon: -50.3261, colo: 'LGS' },
+    { id: 'jca', name: 'PoP Meio-Oeste (Joaçaba / SC)', city: 'Joaçaba (Polo Meio-Oeste SC)', lat: -27.1772, lon: -51.5033, colo: 'JCA' },
+
+    // Paraná (PR)
+    { id: 'cwb', name: 'PoP Sul (Curitiba / PR)', city: 'Curitiba (IX.br CWB)', lat: -25.4284, lon: -49.2733, colo: 'CWB' },
+    { id: 'ldb', name: 'PoP Norte Paranaense (Londrina / PR)', city: 'Londrina (IX.br LDB)', lat: -23.3045, lon: -51.1696, colo: 'LDB' },
+    { id: 'mga', name: 'PoP Noroeste Paranaense (Maringá / PR)', city: 'Maringá (IX.br MGA)', lat: -23.4205, lon: -51.9333, colo: 'MGA' },
+    { id: 'csl', name: 'PoP Oeste Paranaense (Cascavel / PR)', city: 'Cascavel (IX.br CAC)', lat: -24.9578, lon: -53.4595, colo: 'CSL' },
+    { id: 'foz', name: 'PoP Tríplice Fronteira (Foz do Iguaçu / PR)', city: 'Foz do Iguaçu (IX.br IGU)', lat: -25.5469, lon: -54.5882, colo: 'FOZ' },
+
+    // Rio Grande do Sul (RS)
+    { id: 'poa', name: 'PoP Sul (Porto Alegre / RS)', city: 'Porto Alegre (IX.br POA)', lat: -30.0346, lon: -51.2177, colo: 'POA' },
+    { id: 'cxj', name: 'PoP Serra Gaúcha (Caxias do Sul / RS)', city: 'Caxias do Sul (IX.br CXJ)', lat: -29.1678, lon: -51.1794, colo: 'CXJ' },
+    { id: 'pel', name: 'PoP Sul Gaúcho (Pelotas / RS)', city: 'Pelotas (IX.br PEL)', lat: -31.7654, lon: -52.3376, colo: 'PEL' },
+    { id: 'pfu', name: 'PoP Norte Gaúcho (Passo Fundo / RS)', city: 'Passo Fundo (Polo Norte RS)', lat: -28.2628, lon: -52.4067, colo: 'PFU' },
+
+    // São Paulo (SP)
+    { id: 'gru', name: 'PoP Central (São Paulo / SP)', city: 'São Paulo (Datacenter GRU / IX.br SP)', lat: -23.5505, lon: -46.6333, colo: 'GRU' },
+    { id: 'sparc_vcp', name: 'PoP SPARC Cloud Dedicado (Vinhedo / SP)', city: 'Vinhedo (Oracle Cloud sa-vinhedo-1)', lat: -23.0302, lon: -46.9758, colo: 'VCP' },
+    { id: 'cpq', name: 'PoP Interior SP (Campinas / SP)', city: 'Campinas (IX.br CPQ / Polo Tecnológico)', lat: -22.9099, lon: -47.0626, colo: 'CPQ' },
+    { id: 'rao', name: 'PoP Interior SP (Ribeirão Preto / SP)', city: 'Ribeirão Preto (IX.br RAO)', lat: -21.1775, lon: -47.8103, colo: 'RAO' },
+    { id: 'sjk', name: 'PoP Vale do Paraíba (São José dos Campos / SP)', city: 'São José dos Campos (IX.br SJK)', lat: -23.1896, lon: -45.8841, colo: 'SJK' },
+    { id: 'sts', name: 'PoP Baixada Santista (Santos / SP)', city: 'Santos (IX.br STS)', lat: -23.9608, lon: -46.3331, colo: 'STS' },
+    { id: 'soc', name: 'PoP Sorocaba (Sorocaba / SP)', city: 'Sorocaba (Polo Regional SP)', lat: -23.5015, lon: -47.4521, colo: 'SOC' },
+    { id: 'bru', name: 'PoP Centro-Oeste Paulista (Bauru / SP)', city: 'Bauru (Polo Regional SP)', lat: -22.3145, lon: -49.0587, colo: 'BRU' },
+    { id: 'ppe', name: 'PoP Oeste Paulista (Presidente Prudente / SP)', city: 'Presidente Prudente (Polo Regional SP)', lat: -22.1256, lon: -51.3889, colo: 'PPE' },
+    { id: 'srr', name: 'PoP Norte Paulista (São José do Rio Preto / SP)', city: 'São José do Rio Preto (IX.br SJP)', lat: -20.8113, lon: -49.3758, colo: 'SRR' },
+
+    // Rio de Janeiro & Espírito Santo
+    { id: 'gig', name: 'PoP Sudeste (Rio de Janeiro / RJ)', city: 'Rio de Janeiro (IX.br RJ / PTT GIG)', lat: -22.9068, lon: -43.1729, colo: 'GIG' },
+    { id: 'vix', name: 'PoP Espírito Santo (Vitória / ES)', city: 'Vitória (IX.br VIX)', lat: -20.3155, lon: -40.3128, colo: 'VIX' },
+
+    // Minas Gerais (MG)
+    { id: 'cnf', name: 'PoP Minas Gerais (Belo Horizonte / MG)', city: 'Belo Horizonte (IX.br BHZ / PTT CNF)', lat: -19.9167, lon: -43.9345, colo: 'CNF' },
+    { id: 'udi', name: 'PoP Triângulo Mineiro (Uberlândia / MG)', city: 'Uberlândia (Polo Regional MG)', lat: -18.9186, lon: -48.2772, colo: 'UDI' },
+
+    // Centro-Oeste
+    { id: 'bsb', name: 'PoP Centro-Oeste (Brasília / DF)', city: 'Brasília (IX.br BSB / PTT BSB)', lat: -15.7975, lon: -47.8919, colo: 'BSB' },
+    { id: 'gyn', name: 'PoP Goiás (Goiânia / GO)', city: 'Goiânia (IX.br GYN)', lat: -16.6869, lon: -49.2648, colo: 'GYN' },
+    { id: 'cgr', name: 'PoP Mato Grosso do Sul (Campo Grande / MS)', city: 'Campo Grande (IX.br CGR)', lat: -20.4697, lon: -54.6201, colo: 'CGR' },
+    { id: 'cgb', name: 'PoP Mato Grosso (Cuiabá / MT)', city: 'Cuiabá (IX.br CGB)', lat: -15.6014, lon: -56.0979, colo: 'CGB' },
+
+    // Nordeste
+    { id: 'ssa', name: 'PoP Bahia (Salvador / BA)', city: 'Salvador (IX.br SSA)', lat: -12.9714, lon: -38.5014, colo: 'SSA' },
+    { id: 'rec', name: 'PoP Pernambuco (Recife / PE)', city: 'Recife (IX.br REC)', lat: -8.0476, lon: -34.8770, colo: 'REC' },
+    { id: 'for', name: 'PoP Ceará (Fortaleza / CE)', city: 'Fortaleza (IX.br FOR / Hub Submarino)', lat: -3.7319, lon: -38.5267, colo: 'FOR' },
+    { id: 'nat', name: 'PoP Rio Grande do Norte (Natal / RN)', city: 'Natal (IX.br NAT)', lat: -5.7945, lon: -35.2110, colo: 'NAT' },
+    { id: 'jpa', name: 'PoP Paraíba (João Pessoa / PB)', city: 'João Pessoa (IX.br JPA)', lat: -7.1195, lon: -34.8450, colo: 'JPA' },
+    { id: 'mcz', name: 'PoP Alagoas (Maceió / AL)', city: 'Maceió (IX.br MCZ)', lat: -9.6498, lon: -35.7089, colo: 'MCZ' },
+    { id: 'aju', name: 'PoP Sergipe (Aracaju / SE)', city: 'Aracaju (IX.br AJU)', lat: -10.9472, lon: -37.0731, colo: 'AJU' },
+    { id: 'the', name: 'PoP Piauí (Teresina / PI)', city: 'Teresina (IX.br THE)', lat: -5.0892, lon: -42.8019, colo: 'THE' },
+    { id: 'slz', name: 'PoP Maranhão (São Luís / MA)', city: 'São Luís (IX.br SLZ)', lat: -2.5307, lon: -44.3068, colo: 'SLZ' },
+
+    // Norte
+    { id: 'bel', name: 'PoP Pará (Belém / PA)', city: 'Belém (IX.br BEL)', lat: -1.4558, lon: -48.4902, colo: 'BEL' },
+    { id: 'mao', name: 'PoP Amazonas (Manaus / AM)', city: 'Manaus (IX.br MAO)', lat: -3.1190, lon: -60.0217, colo: 'MAO' },
+    { id: 'pvh', name: 'PoP Rondônia (Porto Velho / RO)', city: 'Porto Velho (IX.br PVH)', lat: -8.7612, lon: -63.9039, colo: 'PVH' },
+    { id: 'mcp', name: 'PoP Amapá (Macapá / AP)', city: 'Macapá (IX.br MCP)', lat: 0.0389, lon: -51.0664, colo: 'MCP' },
+    { id: 'rbr', name: 'PoP Acre (Rio Branco / AC)', city: 'Rio Branco (IX.br RBR)', lat: -9.9753, lon: -67.8249, colo: 'RBR' },
+    { id: 'bvb', name: 'PoP Roraima (Boa Vista / RR)', city: 'Boa Vista (IX.br BVB)', lat: 2.8235, lon: -60.6758, colo: 'BVB' },
+    { id: 'pmw', name: 'PoP Tocantins (Palmas / TO)', city: 'Palmas (IX.br PMW)', lat: -10.2491, lon: -48.3243, colo: 'PMW' }
   ];
 
   function haversineDistance(lat1, lon1, lat2, lon2) {
