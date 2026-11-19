@@ -2064,7 +2064,8 @@
         pingAvg: pingRes.avg,
         jitter: pingRes.jitter,
         lossPct: pingRes.lossPct,
-        pingEndpoint: pingRes.endpointName
+        pingEndpoint: pingRes.endpointIp || (pingRes.endpointName && (pingRes.endpointName.includes('8.8.8.8') || pingRes.endpointName.includes('Google')) ? '8.8.8.8' : '1.1.1.1'),
+        pingIp: pingRes.endpointIp || (pingRes.endpointName && (pingRes.endpointName.includes('8.8.8.8') || pingRes.endpointName.includes('Google')) ? '8.8.8.8' : '1.1.1.1')
       });
 
       lastCompletedConfig = getCurrentConfig();
@@ -2077,7 +2078,8 @@
         pingAvg: pingRes.avg,
         jitter: pingRes.jitter,
         lossPct: pingRes.lossPct,
-        pingEndpoint: pingRes.endpointName,
+        pingEndpoint: pingRes.endpointIp || (pingRes.endpointName && (pingRes.endpointName.includes('8.8.8.8') || pingRes.endpointName.includes('Google')) ? '8.8.8.8' : '1.1.1.1'),
+        pingIp: pingRes.endpointIp || (pingRes.endpointName && (pingRes.endpointName.includes('8.8.8.8') || pingRes.endpointName.includes('Google')) ? '8.8.8.8' : '1.1.1.1'),
         isApproved,
         fwaClassification,
         reqDlMbps,
@@ -2329,7 +2331,8 @@
 
     // 3. Latência RTT
     document.getElementById('auditRttMeta').innerText = `≤ ${p.maxRtt} ms`;
-    document.getElementById('auditPing').innerText = d.pingEndpoint ? `${d.pingAvg.toFixed(1)} ms (${d.pingEndpoint})` : `${d.pingAvg.toFixed(1)} ms`;
+    const pingTargetIp = d.pingIp || (d.pingEndpoint && (d.pingEndpoint.includes('8.8.8.8') || d.pingEndpoint.includes('Google')) ? '8.8.8.8' : (d.pingEndpoint && d.pingEndpoint.includes('.') && !/[a-zA-Z]/.test(d.pingEndpoint) ? d.pingEndpoint : '1.1.1.1'));
+    document.getElementById('auditPing').innerText = `${d.pingAvg.toFixed(1)} ms (${pingTargetIp})`;
     document.getElementById('auditRttPct').innerText = d.rttPassed ? 'OK' : 'VIOLADO';
     document.getElementById('auditRttStatus').innerText = d.rttPassed ? 'CONFORME' : 'REPROVADO';
     document.getElementById('auditRttStatus').style.color = d.rttPassed ? '#16a34a' : '#dc2626';
@@ -2387,9 +2390,9 @@
     // Candidatos a menor esforço nacional com CORS garantido (Access-Control-Allow-Origin: *)
     // Permite que navegadores realizem telemetria legítima sem bloqueios de opaqueredirect / CORB
     const CANDIDATES = [
-      { id: 'google_edge', name: 'Google Edge Brasil', url: 'https://dns.google/resolve?name=speed.test&type=A', mode: 'cors' },
-      { id: 'cf_speed', name: 'Cloudflare Speed', url: 'https://speed.cloudflare.com/__down?bytes=0', mode: 'cors' },
-      { id: 'cf_edge', name: 'Cloudflare Edge (1.1.1.1)', url: 'https://1.1.1.1/dns-query?name=speed.test&type=A', headers: { 'Accept': 'application/dns-json' }, mode: 'cors' }
+      { id: 'google_edge', name: 'Google Edge Brasil', ip: '8.8.8.8', url: 'https://dns.google/resolve?name=speed.test&type=A', mode: 'cors' },
+      { id: 'cf_speed', name: 'Cloudflare Speed', ip: '1.1.1.1', url: 'https://speed.cloudflare.com/__down?bytes=0', mode: 'cors' },
+      { id: 'cf_edge', name: 'Cloudflare Edge (1.1.1.1)', ip: '1.1.1.1', url: 'https://1.1.1.1/dns-query?name=speed.test&type=A', headers: { 'Accept': 'application/dns-json' }, mode: 'cors' }
     ];
 
     let chosenCandidate = CANDIDATES[0];
@@ -2503,7 +2506,7 @@
       avg = targetSamples.reduce((a, b) => a + b, 0) / targetSamples.length;
     }
 
-    return { avg, jitter, lossPct, endpointName: chosenCandidate.name };
+    return { avg, jitter, lossPct, endpointName: chosenCandidate.name, endpointIp: chosenCandidate.ip || '1.1.1.1' };
   }
 
   
