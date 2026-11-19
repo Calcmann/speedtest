@@ -2222,7 +2222,7 @@
       if (!res.jitterPassed) {
         falhaDesc += `• <strong>Jitter excessivo:</strong> Variação de ${res.jitter.toFixed(1)} ms excedeu o limite máximo de ${res.profile.maxJitter} ms.<br>`;
       }
-      if (!lossPassed) {
+      if (!res.lossPassed) {
         falhaDesc += `• <strong>Perda de pacotes detectada:</strong> Taxa de ${res.lossPct.toFixed(1)}% violou o ANS do edital (&lt; ${res.profile.maxLoss}%).<br>`;
       }
 
@@ -2242,8 +2242,9 @@
   }
 
   function atualizarLaudoPdf(cfg) {
+    if (!cfg || !cfg.auditData) return;
     const d = cfg.auditData;
-    const p = PROJECT_PROFILES[cfg.profileKey];
+    const p = PROJECT_PROFILES[cfg.profileKey] || PROJECT_PROFILES.bandalarga_padrao;
 
     document.getElementById('auditTimestamp').innerText = cfg.timestamp;
     document.getElementById('auditStatusLabel').innerText = d.isApproved ? 'VALIDADO / APROVADO' : 'NÃO CONFORME';
@@ -2380,6 +2381,13 @@
   }
 
   function printReport() {
+    if (lastCompletedConfig) {
+      try {
+        atualizarLaudoPdf(lastCompletedConfig);
+      } catch (err) {
+        console.error('Erro ao atualizar laudo antes da impressao:', err);
+      }
+    }
     window.print();
   }
 
