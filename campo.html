@@ -774,7 +774,9 @@
       <div id="boxAsymmetricUpload" style="display: none;">
         <label class="select-label" for="cbUlCirBanda" style="color: var(--wine-label);">📤 Upload Contratado da OS (Assimétrico):</label>
         <div style="display: flex; gap: 6px; align-items: center;">
-          <select id="cbUlCirBanda" class="select-control" onchange="onUlCirChange()"></select>
+          <select id="cbUlCirBanda" class="select-control" onchange="onUlCirChange()">
+            <option value="default_20" selected>⚡ 20 Mbps (Padrão: 20% do Download — Padrão HFC)</option>
+          </select>
           <div id="boxCustomUlCir" style="display: none; align-items: center; gap: 4px;">
             <input type="number" id="txtCustomUlCir" min="1" max="10000" placeholder="Mbps" style="width: 76px; height: 42px; box-sizing: border-box; background: var(--input-bg); border: 1.5px solid var(--input-border); color: var(--text-main); padding: 0 8px; border-radius: 8px; font-size: 13px; font-weight: bold; text-align: right;" oninput="onCustomUlCirInput()" />
             <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">Mbps</span>
@@ -784,7 +786,7 @@
 
       <!-- LINHA 3 - COLUNA 2: NOTA INFORMATIVA DO UPLOAD ASSIMÉTRICO -->
       <div id="boxAsymmetricInfo" style="display: none; align-self: end; padding: 10px 12px; background: rgba(0,0,0,0.14); border: 1px dashed var(--card-border); border-radius: 8px; font-size: 11px; color: var(--text-muted); line-height: 1.4;">
-        <strong style="color: var(--wine-accent);">💡 Upload do Enlace:</strong> Pré-seleção padrão de <strong>35% do Download</strong> (típico de links assimétricos). Se a OS indicar outra capacidade (ex: 50%, 100% simétrico, Claro 35M), selecione a opção desejada.
+        <strong style="color: var(--wine-accent);">💡 Upload do Enlace:</strong> Pré-seleção padrão de <strong>20% do Download</strong> (padrão HFC / GPON assimétrico). Se a OS indicar outra taxa (ex: 50%, 100% simétrico), selecione a opção desejada.
       </div>
     </div>
 
@@ -792,9 +794,9 @@
     <div class="rule-explanation-box" id="ruleExplanationBox">
       <span style="font-size: 18px;" id="ruleIcon">🌐</span>
       <div>
-        <strong id="ruleTitle">Critério Oficial — Banda Larga Padrão (Regulatório Anatel):</strong>
+        <strong id="ruleTitle">Critério Oficial — Banda Larga Padrão (Regulatório Anatel / HFC):</strong>
         <div id="ruleText" style="color: var(--text-muted); margin-top: 2px;">
-          Validação de acesso <strong>Banda Larga Padrão</strong> em conformidade com as metas da Anatel (RGC): entrega de <strong>no mínimo 80% da velocidade contratada em Download e Upload</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.
+          Validação de acesso <strong>Banda Larga Padrão</strong> em conformidade com as metas da Anatel (RGC): entrega de <strong>no mínimo 80% da velocidade contratada em Download e Upload (Padrão HFC: 20% no Upload)</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.
         </div>
       </div>
     </div>
@@ -863,7 +865,7 @@
     <div class="kpi-card lat">
       <div class="kpi-title">
         <span>⚡ Latência Basal (Ping)</span>
-        <span style="color: var(--cyan);">TEMPO REAL</span>
+        <span style="color: var(--cyan);">FASE 3</span>
       </div>
       <div class="kpi-val" id="txtPing">-- <span style="font-size: 16px; font-weight: 700; color: var(--text-muted);">ms</span></div>
       <div class="kpi-target" id="txtPingTarget">Meta ANS: ≤ 60 ms</div>
@@ -876,7 +878,7 @@
     <div class="kpi-card quality">
       <div class="kpi-title">
         <span>📶 Jitter &amp; Perda</span>
-        <span id="txtQualityBadge" style="color: #a855f7; font-weight: 800;">QUALIDADE ANS</span>
+        <span id="txtQualityBadge" style="color: #a855f7; font-weight: 800;">FASE 3</span>
       </div>
       <div class="kpi-val" id="txtQualityVal">-- <span style="font-size: 16px; font-weight: 700; color: var(--text-muted);">ms</span></div>
       <div class="kpi-target" id="txtQualityLoss">Jitter ≤ 50ms • Perda &lt; 2%</div>
@@ -893,6 +895,9 @@
         <span style="font-size: 32px;" id="verdictIcon">✓</span>
         <div>
           <div style="font-size: 16px; font-weight: 900; letter-spacing: 0.5px;" id="verdictTitle">CIRCUITO VALIDADO COM SUCESSO</div>
+          <div id="verdictFwaBadge" style="display: none; margin: 6px 0 4px 0;">
+            <span id="verdictFwaBadgeLabel" style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid #38BDF8;">Faixa 4G (LTE Convencional)</span>
+          </div>
           <div style="font-size: 12px; margin-top: 4px; line-height: 1.45;" id="verdictDetail">
             Todas as métricas contratuais do projeto foram atendidas integralmente.
           </div>
@@ -939,6 +944,7 @@
         <div><strong>Designação Claro:</strong> <span id="auditOsNumero">--</span></div>
         <div id="rowAuditAgencia"><strong>Agência / Prédio:</strong> <span id="auditAgencia">--</span></div>
         <div><strong>Banda Contratada (CIR):</strong> <span id="auditCir">--</span></div>
+        <div id="rowAuditFwaBand" style="display: none; margin-top: 2px;"><strong>Tecnologia Móvel:</strong> <span id="auditFwaBandBadge" style="display: inline-block; padding: 1px 7px; border-radius: 4px; font-weight: bold; font-size: 10px;">--</span></div>
       </div>
       <div style="border: 1px solid #cbd5e1; padding: 8px 10px; border-radius: 6px;">
         <div><strong>Critério da RFP / ANS:</strong> <span id="auditRfpRegra">--</span></div>
@@ -953,6 +959,11 @@
     <!-- NOTA DE DIVERGÊNCIA GEOIP / ROTEAMENTO -->
     <div id="boxAuditGeoNote" style="display: none; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 6px 10px; border-radius: 6px; font-size: 10.5px; margin-bottom: 10px; line-height: 1.4;">
       <strong>⚠️ Nota Técnica de Auditoria (Roteamento / GeoIP):</strong> <span id="auditGeoNoteText">--</span>
+    </div>
+
+    <!-- ALERTA DE TECNOLOGIA MÓVEL 3G FWA -->
+    <div id="boxAuditFwa3gNote" style="display: none; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 6px 10px; border-radius: 6px; font-size: 10.5px; margin-bottom: 10px; line-height: 1.4;">
+      <strong>⚠️ Alerta de Tecnologia Móvel:</strong> <span id="auditFwa3gNoteText">A taxa de transferência obtida (&lt; 20 Mbps) é compatível com redes móveis legado 3G (HSPA+). Recomendada verificação de visada e alinhamento de antena externa para conexão em portadora 4G/5G.</span>
     </div>
 
     <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
@@ -1218,12 +1229,12 @@
       isAsymmetric: true,  // Assimétrico (Redes móveis 4G/5G)
       dlPctReq: 0.80,      // 80% do Download contratado na OS (Piso Regulatório Anatel RGC/RQUAL)
       ulPctReq: 0.80,      // 80% do Upload contratado na OS (Piso Regulatório Anatel RGC/RQUAL)
-      defaultUlRatio: 0.35,// Padrão 35% do Download (típico FWA 4G/5G)
+      defaultUlRatio: 0.20,// Padrão 20% do Download (padrão HFC / GPON / FWA assimétrico)
       maxRtt: 80,          // Latência RTT ≤ 80 ms (Padrão de referência Anatel para banda larga/FWA)
       maxJitter: 50,       // Jitter ≤ 50 ms (Estabilidade de rádio)
       maxLoss: 2.0,        // Perda de Pacotes < 2,0% (Teto regulatório Anatel)
       title: 'Critério Oficial — FWA 4G/5G (Regulatório Anatel):',
-      desc: 'Validação de acesso fixo sem fio <strong>FWA (4G/5G)</strong> em conformidade com as metas da Anatel (RQUAL/RGC): entrega de <strong>no mínimo 80% da velocidade contratada da OS em Download e Upload</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
+      desc: 'Validação de acesso fixo sem fio <strong>FWA (4G/5G)</strong> em conformidade com as metas da Anatel (RQUAL/RGC): entrega de <strong>no mínimo 80% da velocidade contratada da OS em Download e Upload (Padrão 20% Upload)</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
     },
     bandalarga_padrao: {
       name: 'Banda Larga Padrão',
@@ -1232,12 +1243,12 @@
       isAsymmetric: true,  // Assimétrico
       dlPctReq: 0.80,      // 80% do Download contratado (Piso Anatel)
       ulPctReq: 0.80,      // 80% do Upload contratado na OS (Piso Anatel)
-      defaultUlRatio: 0.35,// Padrão 35% da banda de Download
+      defaultUlRatio: 0.20,// Padrão 20% da banda de Download (padrão HFC / GPON assimétrico)
       maxRtt: 80,          // Latência RTT ≤ 80 ms (Padrão Anatel nacional)
       maxJitter: 50,       // Jitter ≤ 50 ms
       maxLoss: 2.0,        // Perda de Pacotes < 2,0%
-      title: 'Critério Oficial — Banda Larga Padrão (Regulatório Anatel):',
-      desc: 'Validação de acesso <strong>Banda Larga Padrão</strong> em conformidade com as metas da Anatel (RGC): entrega de <strong>no mínimo 80% da velocidade contratada em Download e Upload</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
+      title: 'Critério Oficial — Banda Larga Padrão (Regulatório Anatel / HFC):',
+      desc: 'Validação de acesso <strong>Banda Larga Padrão</strong> em conformidade com as metas da Anatel (RGC): entrega de <strong>no mínimo 80% da velocidade contratada em Download e Upload (Padrão HFC: 20% no Upload)</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
     },
     bradesco_dedicado: {
       name: 'Bradesco Dedicado',
@@ -1259,12 +1270,12 @@
       isAsymmetric: true,  // Assimétrico
       dlPctReq: 0.80,      // 80% do Download contratado na OS (Piso Regulatório Anatel)
       ulPctReq: 0.80,      // 80% do Upload contratado na OS (Piso Regulatório Anatel)
-      defaultUlRatio: 0.35,// Padrão 35% da banda de Download (Assimétrico)
+      defaultUlRatio: 0.20,// Padrão 20% da banda de Download (Padrão Claro / NET HFC)
       maxRtt: 80,          // RFP Bradesco: Latência ≤ 80 ms
       maxJitter: 50,       // RFP Bradesco: Jitter ≤ 50 ms
       maxLoss: 2.0,        // RFP Bradesco: Perda < 2,0%
-      title: 'Critério Oficial Bradesco — Banda Larga Assimétrica (PPB-030-A):',
-      desc: 'Acesso <strong>assimétrico</strong> conforme especificado na OS com garantia de <strong>no mínimo 80% da velocidade contratada de Download e Upload (Piso Regulatório Anatel)</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
+      title: 'Critério Oficial Bradesco — Banda Larga Assimétrica (PPB-030-A / HFC):',
+      desc: 'Acesso <strong>assimétrico</strong> conforme especificado na OS com garantia de <strong>no mínimo 80% da velocidade contratada de Download e Upload (Padrão HFC: 20% no Upload)</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
     },
     boticario: {
       name: 'O Boticário — Banda Larga',
@@ -1273,12 +1284,12 @@
       isAsymmetric: true,
       dlPctReq: 0.80,      // 80% do Download contratado (Piso Anatel)
       ulPctReq: 0.80,      // 80% do Upload contratado na OS (Piso Anatel)
-      defaultUlRatio: 0.35,// Padrão 35% da banda de Download
+      defaultUlRatio: 0.20,// Padrão 20% da banda de Download (padrão HFC / GPON assimétrico)
       maxRtt: 80,          // Latência RTT ≤ 80 ms (Padrão Anatel nacional)
       maxJitter: 50,       // Jitter ≤ 50 ms
       maxLoss: 2.0,        // Perda de Pacotes < 2,0%
-      title: 'Critério Oficial — O Boticário (Banda Larga Regulatório Anatel):',
-      desc: 'Validação de acesso <strong>O Boticário (Banda Larga)</strong> em conformidade com as metas da Anatel (RGC): entrega de <strong>no mínimo 80% da velocidade contratada em Download e Upload</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
+      title: 'Critério Oficial — O Boticário (Banda Larga Regulatório Anatel / HFC):',
+      desc: 'Validação de acesso <strong>O Boticário (Banda Larga)</strong> em conformidade com as metas da Anatel (RGC): entrega de <strong>no mínimo 80% da velocidade contratada em Download e Upload (Padrão HFC: 20% no Upload)</strong>, com <strong>Latência RTT ≤ 80 ms</strong>, <strong>Jitter ≤ 50 ms</strong> e <strong>Perda de Pacotes &lt; 2,0%</strong>.'
     },
     rfc6349: {
       name: 'Link Dedicado Simétrico - RFC 6349',
@@ -1301,6 +1312,11 @@
     toggleAsymmetricControls();
     updateAgenciaFieldVisibility();
     updateTargetsDisplay();
+    const selUlInit = document.getElementById('cbUlCirBanda');
+    if (selUlInit && (selUlInit.value === '35' || selUlInit.value === 'default_35')) {
+      selUlInit.value = 'default_20';
+      updateTargetsDisplay();
+    }
     await discoverGeo();
 
     PARAM_INPUT_IDS.forEach(id => {
@@ -1316,7 +1332,7 @@
 
     if (isAutoFwa()) {
       sel.innerHTML = '<option value="auto_fwa" selected>📡 Automático — Descoberta de Upload FWA</option>' +
-                      '<option value="default_35">⚡ 35% do Download (Padrão)</option>' +
+                      '<option value="default_20">⚡ 20% do Download (Padrão HFC)</option>' +
                       '<option value="50">50 Mbps</option>' +
                       '<option value="35">35 Mbps</option>' +
                       '<option value="20">20 Mbps</option>' +
@@ -1330,7 +1346,10 @@
     const cirDl = (getCirNominal() === 'auto_fwa') ? 100 : getCirNominal();
     const prevVal = preferredVal !== null ? preferredVal : sel.value;
 
-    const def35 = parseFloat((cirDl * 0.35).toFixed(1));
+    const profKey = document.getElementById('cbProjetoPerfil')?.value;
+    const pProfile = PROJECT_PROFILES[profKey] || PROJECT_PROFILES.bandalarga_padrao;
+    const defRatio = pProfile.isAsymmetric ? (pProfile.defaultUlRatio || 0.20) : 0.20;
+    const def20 = parseFloat((cirDl * defRatio).toFixed(1));
     const half = Math.round(cirDl * 0.5);
 
     const candidateTiers = new Set();
@@ -1342,14 +1361,14 @@
 
     const sortedTiers = Array.from(candidateTiers).sort((a, b) => b - a);
 
-    // Pré-seleção padrão: 35% do Download (default_35)
-    const is35DefaultSel = (!prevVal || prevVal === 'default_35' || prevVal === 'auto' || parseFloat(prevVal) === def35);
-    const isDlSel = (!is35DefaultSel && (prevVal === 'same_dl' || parseFloat(prevVal) === cirDl));
+    // Pré-seleção padrão: 20% do Download (default_20)
+    const is20DefaultSel = (!prevVal || prevVal === 'default_20' || prevVal === 'default_35' || prevVal === '35' || prevVal === 'auto' || parseFloat(prevVal) === def20);
+    const isDlSel = (!is20DefaultSel && (prevVal === 'same_dl' || parseFloat(prevVal) === cirDl));
 
     let html = '';
-    // 1. OPÇÃO PADRÃO PRÉ-SELECIONADA: 35% DO DOWNLOAD
-    const label35 = def35 >= 1000 ? (def35 / 1000).toFixed(1) + ' Gbps' : def35 + ' Mbps';
-    html += `<option value="default_35" ${is35DefaultSel ? 'selected' : ''}>⚡ ${label35} (Padrão: 35% do Download — Assimétrico)</option>`;
+    // 1. OPÇÃO PADRÃO PRÉ-SELECIONADA: 20% DO DOWNLOAD
+    const label20 = def20 >= 1000 ? (def20 / 1000).toFixed(1) + ' Gbps' : def20 + ' Mbps';
+    html += `<option value="default_20" ${is20DefaultSel ? 'selected' : ''}>⚡ ${label20} (Padrão: 20% do Download — Padrão HFC)</option>`;
 
     // 2. OPÇÃO 100% SIMÉTRICA (MESMA DO DOWNLOAD)
     const dlLabel = cirDl >= 1000 ? (cirDl / 1000).toFixed(1) + ' Gbps' : cirDl + ' Mbps';
@@ -1357,27 +1376,36 @@
 
     // 3. DEMAIS TIERS ASSIMÉTRICOS DE MERCADO
     sortedTiers.forEach(tier => {
-      // Se coincide com o valor de 35%, já está destacado na opção padrão
-      if (Math.abs(tier - def35) < 0.1) return;
+      // Se coincide com o valor de 20%, já está destacado na opção padrão
+      if (Math.abs(tier - def20) < 0.1) return;
 
       const pct = Math.round((tier / cirDl) * 100);
       let desc = '';
-      if (tier === 35) {
-        desc = `Padrão Claro / NET HFC — ${pct}%`;
-      } else if (tier === half) {
+      if (pct === 20) {
+        desc = `Padrão Claro / NET HFC — 20%`;
+      } else if (tier === half || pct === 50) {
         desc = `50% do Download`;
       } else if (pct >= 5) {
         desc = `${pct}% do Download`;
       }
       const label = `${tier >= 1000 ? (tier / 1000).toFixed(1) + ' Gbps' : tier + ' Mbps'}${desc ? ' (' + desc + ')' : ''}`;
-      const isSel = (!is35DefaultSel && !isDlSel && prevVal && prevVal !== 'default_35' && prevVal !== 'same_dl' && prevVal !== 'auto' && parseFloat(prevVal) === tier);
+      const isSel = (!is20DefaultSel && !isDlSel && prevVal && prevVal !== 'default_20' && prevVal !== 'default_35' && prevVal !== '35' && prevVal !== 'same_dl' && prevVal !== 'auto' && parseFloat(prevVal) === tier);
       html += `<option value="${tier}" ${isSel ? 'selected' : ''}>${label}</option>`;
     });
 
-    const isCustomSel = (!is35DefaultSel && !isDlSel && prevVal === 'custom');
+    const isCustomSel = (!is20DefaultSel && !isDlSel && prevVal === 'custom');
     html += `<option value="custom" ${isCustomSel ? 'selected' : ''}>✏️ Personalizado (Mbps)...</option>`;
 
     sel.innerHTML = html;
+    if (is20DefaultSel) {
+      sel.value = 'default_20';
+    } else if (isDlSel) {
+      sel.value = 'same_dl';
+    } else if (isCustomSel) {
+      sel.value = 'custom';
+    } else if (prevVal) {
+      sel.value = prevVal;
+    }
 
     const boxCustom = document.getElementById('boxCustomUlCir');
     if (boxCustom) {
@@ -1491,6 +1519,10 @@
     }
     if (isAsym) {
       populateAsymmetricUploadOptions();
+      const selUl = document.getElementById('cbUlCirBanda');
+      if (selUl && (selUl.value === '35' || selUl.value === 'default_35' || !selUl.value)) {
+        selUl.value = 'default_20';
+      }
     }
   }
 
@@ -1515,22 +1547,23 @@
   function getUlCirNominal(p, cirDl) {
     if (!p.isAsymmetric) return cirDl; // 1:1 simétrico
     if (cirDl === 'auto_fwa') return 'auto_fwa';
+    const defRatio = p.defaultUlRatio || 0.20;
     const el = document.getElementById('cbUlCirBanda');
-    if (!el) return parseFloat((cirDl * (p.defaultUlRatio || 0.35)).toFixed(1));
+    if (!el) return parseFloat((cirDl * defRatio).toFixed(1));
     const val = el.value;
     if (val === 'auto_fwa') return 'auto_fwa';
-    if (val === 'default_35' || val === 'auto' || !val) {
-      return parseFloat((cirDl * 0.35).toFixed(1));
+    if (val === 'default_20' || val === 'default_35' || val === 'auto' || !val) {
+      return parseFloat((cirDl * defRatio).toFixed(1));
     }
     if (val === 'same_dl') {
       return cirDl;
     }
     if (val === 'custom') {
       const num = parseFloat(document.getElementById('txtCustomUlCir')?.value);
-      return (num && num > 0) ? num : parseFloat((cirDl * 0.35).toFixed(1));
+      return (num && num > 0) ? num : parseFloat((cirDl * defRatio).toFixed(1));
     }
     const parsed = parseFloat(val);
-    return (parsed && parsed > 0) ? parsed : parseFloat((cirDl * 0.35).toFixed(1));
+    return (parsed && parsed > 0) ? parsed : parseFloat((cirDl * defRatio).toFixed(1));
   }
 
   function updateProfileExplaining() {
@@ -1569,8 +1602,9 @@
         ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (${(p.ulPctReq * 100).toFixed(0)}% do CIR)`;
       } else if (p.isAsymmetric) {
         const ulFormatted = cirUl >= 1000 ? (cirUl / 1000).toFixed(1) + 'G' : cirUl.toFixed(1).replace(/\.0$/, '') + 'M';
-        if (Math.abs(cirUl - (cirDl * 0.35)) < 0.1) {
-          ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Upload OS: ${ulFormatted} • Padrão 35%)`;
+        const defRatio = p.defaultUlRatio || 0.20;
+        if (Math.abs(cirUl - (cirDl * defRatio)) < 0.1) {
+          ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Upload OS: ${ulFormatted} • Padrão ${(defRatio * 100).toFixed(0)}%)`;
         } else if (cirUl === cirDl) {
           ulTargetEl.innerText = `Meta ${p.name}: ≥ ${ulMin} Mbps (Upload OS: ${ulFormatted} • Simétrico 100%)`;
         } else {
@@ -1594,7 +1628,7 @@
       cirUlVal: cirUl,
       cirPreset: document.getElementById('cbCirBanda').value,
       customCir: document.getElementById('txtCustomCir')?.value || '',
-      ulPreset: document.getElementById('cbUlCirBanda')?.value || 'default_35',
+      ulPreset: document.getElementById('cbUlCirBanda')?.value || 'default_20',
       customUlCir: document.getElementById('txtCustomUlCir')?.value || '',
       profileKey: profKey,
       profileName: p.name,
@@ -1940,8 +1974,25 @@
     redrawCanvas();
 
     try {
-      // 1. LATÊNCIA, JITTER E PERDA DE PACOTES (ANS) COM FEEDBACK DINÂMICO
-      setStatus('running', isFwa ? '📡 IDENTIFICANDO ROTA DE MENOR ESFORÇO...' : 'ANALISANDO LATÊNCIA E JITTER...');
+      // 1. DOWNLOAD (15 segundos) - FASE 1 (Saturação multi-stream desperta rádio FWA, ativa Carrier Aggregation e modulação ótima)
+      setStatus('running', isFwa ? 'TESTANDO DOWNLOAD FWA (ATIVANDO PORTADORAS)...' : 'TESTANDO DOWNLOAD (FASE 1)...');
+      let dlRes = { avg: 0, peak: 0 };
+      dlRes = await runDownloadTest(signal, 15);
+      signal.throwIfAborted();
+
+      // 2. UPLOAD (15 segundos) - FASE 2 (Saturação de uplink)
+      setStatus('running', isFwa ? 'TESTANDO UPLOAD FWA...' : 'TESTANDO UPLOAD (FASE 2)...');
+      let ulRes = { avg: 0, peak: 0 };
+      ulRes = await runUploadTest(signal, 15);
+      signal.throwIfAborted();
+
+      // ESTABILIZAÇÃO & DRENAGEM DE BUFFERS (1.2s - Previne interferência de bufferbloat na latência basal)
+      setStatus('running', 'ESTABILIZANDO ENLACE & DRENANDO BUFFERS...');
+      await new Promise(r => setTimeout(r, 1200));
+      signal.throwIfAborted();
+
+      // 3. LATÊNCIA, JITTER E PERDA DE PACOTES (ANS) - FASE 3 (Canal RF aquecido em RRC_CONNECTED)
+      setStatus('running', isFwa ? '📡 IDENTIFICANDO ROTA DE MENOR ESFORÇO...' : 'ANALISANDO LATÊNCIA E JITTER (FASE 3)...');
       const pingRes = await measurePing(signal, (curAvg, curJitter, curLoss, curIdx, total, phase) => {
         if (phase === 'discovery') {
           setStatus('running', isFwa ? '📡 SONDANDO ROTA DE MENOR ESFORÇO NACIONAL...' : 'IDENTIFICANDO ROTA DE MENOR CUSTO...');
@@ -1960,18 +2011,6 @@
       document.getElementById('txtPing').innerText = pingRes.avg.toFixed(1);
       document.getElementById('txtQualityVal').innerHTML = `${pingRes.jitter.toFixed(1)} <span style="font-size: 14px; color: var(--text-muted);">ms</span>`;
       document.getElementById('txtQualityLoss').innerText = `Perda: ${pingRes.lossPct.toFixed(1)}% (Meta: < ${p.maxLoss}%)`;
-      signal.throwIfAborted();
-
-      // 2. DOWNLOAD (15 segundos)
-      setStatus('running', 'TESTANDO DOWNLOAD...');
-      let dlRes = { avg: 0, peak: 0 };
-      dlRes = await runDownloadTest(signal, 15);
-      signal.throwIfAborted();
-
-      // 3. UPLOAD (15 segundos)
-      setStatus('running', 'TESTANDO UPLOAD...');
-      let ulRes = { avg: 0, peak: 0 };
-      ulRes = await runUploadTest(signal, 15);
       signal.throwIfAborted();
 
       // 4. AUDITORIA CONTRATUAL DO PROJETO (5 PILARES DO ANS)
@@ -2003,11 +2042,17 @@
 
       const isApproved = dlPassed && ulPassed && rttPassed && jitterPassed && lossPassed;
 
+      const isFwaProfile = (profKey === 'fwa_anatel' || isAuto);
+      const fwaClassification = isFwaProfile ? classifyFwaBand(dlRes.avg) : null;
+
       // EXIBE O VEREDITO DO PROJETO
       exibirVereditoProjeto({
         isApproved,
         isAuto,
+        isFwa: isFwaProfile,
+        fwaClassification,
         profile: p,
+        profileKey: profKey,
         cirDl,
         cirUl,
         effectiveCirDl,
@@ -2039,6 +2084,7 @@
         lossPct: pingRes.lossPct,
         pingEndpoint: pingRes.endpointName,
         isApproved,
+        fwaClassification,
         reqDlMbps,
         reqUlMbps,
         dlPassed,
@@ -2075,13 +2121,67 @@
     if (abortController) abortController.abort();
   }
 
+  function classifyFwaBand(dlMbps) {
+    if (dlMbps < 20.0) {
+      return {
+        tierId: '3g',
+        label: 'Faixa 3G (HSPA+)',
+        shortLabel: '3G',
+        badgeColor: '#F59E0B',
+        is3gFallback: true,
+        warning: 'Atenção: Throughput compatível com tecnologia móvel legado 3G (HSPA+). Recomendada verificação de visada, nível de sinal RSRP/SINR e reorientação de antena para captação de portadora 4G/5G.'
+      };
+    }
+    if (dlMbps < 60.0) {
+      return {
+        tierId: '4g',
+        label: 'Faixa 4G (LTE Convencional)',
+        shortLabel: '4G',
+        badgeColor: '#38BDF8',
+        is3gFallback: false,
+        warning: 'Desempenho compatível com cobertura móvel 4G LTE convencional (SISO/MIMO padrão).'
+      };
+    }
+    if (dlMbps < 180.0) {
+      return {
+        tierId: '4g_plus',
+        label: 'Faixa 4G+ (LTE-Advanced / 4.5G)',
+        shortLabel: '4G+',
+        badgeColor: '#A855F7',
+        is3gFallback: false,
+        warning: 'Desempenho compatível com 4G+ / 4.5G LTE-Advanced com agregação de portadoras (Carrier Aggregation).'
+      };
+    }
+    return {
+      tierId: '5g',
+      label: 'Faixa 5G (Ultra Banda Larga)',
+      shortLabel: '5G',
+      badgeColor: '#10B981',
+      is3gFallback: false,
+      warning: 'Desempenho de altíssima velocidade característico de redes 5G (NSA/SA) em faixas médias (3.5 GHz) ou ondas milimétricas.'
+    };
+  }
+
   function exibirVereditoProjeto(res) {
     const card = document.getElementById('verdictCard');
     const icon = document.getElementById('verdictIcon');
     const title = document.getElementById('verdictTitle');
     const detail = document.getElementById('verdictDetail');
+    const fwaBadge = document.getElementById('verdictFwaBadge');
+    const fwaLabel = document.getElementById('verdictFwaBadgeLabel');
 
     card.style.display = 'block';
+
+    const fwaClass = res.fwaClassification;
+    if (fwaClass && fwaBadge && fwaLabel) {
+      fwaBadge.style.display = 'block';
+      fwaLabel.innerText = `📡 ${fwaClass.label}`;
+      fwaLabel.style.color = fwaClass.badgeColor;
+      fwaLabel.style.borderColor = fwaClass.badgeColor;
+      fwaLabel.style.background = `${fwaClass.badgeColor}22`;
+    } else if (fwaBadge) {
+      fwaBadge.style.display = 'none';
+    }
 
     if (res.isApproved) {
       card.className = 'verdict-card approved';
@@ -2096,6 +2196,13 @@
         • <strong>Jitter:</strong> ${res.jitter.toFixed(1)} ms (Teto ANS: ≤ ${res.profile.maxJitter} ms) — <span style="color: var(--green); font-weight: bold;">CONFORME</span><br>
         • <strong>Perda de Pacotes:</strong> ${res.lossPct.toFixed(1)}% (Teto ANS: &lt; ${res.profile.maxLoss}%) — <span style="color: var(--green); font-weight: bold;">CONFORME</span>
       `;
+      if (fwaClass && fwaClass.is3gFallback) {
+        detail.innerHTML += `
+          <div style="margin-top: 8px; padding: 6px 10px; background: rgba(245, 158, 11, 0.15); border-left: 3px solid #F59E0B; border-radius: 4px; font-size: 11.5px; color: #FCD34D;">
+            ⚠️ <strong>Alerta de Tecnologia Móvel:</strong> Circuito operando na <strong>${fwaClass.label}</strong> (${res.dlAvg.toFixed(1)} Mbps). Embora atenda ao piso regulatório de estabilidade, a taxa indica fallback para rede 3G ou sinal atenuado. Recomenda-se alinhamento de antena para captação de portadora 4G/5G.
+          </div>
+        `;
+      }
     } else {
       card.className = 'verdict-card rejected';
       icon.innerText = '✗';
@@ -2115,7 +2222,7 @@
       if (!res.jitterPassed) {
         falhaDesc += `• <strong>Jitter excessivo:</strong> Variação de ${res.jitter.toFixed(1)} ms excedeu o limite máximo de ${res.profile.maxJitter} ms.<br>`;
       }
-      if (!res.lossPassed) {
+      if (!lossPassed) {
         falhaDesc += `• <strong>Perda de pacotes detectada:</strong> Taxa de ${res.lossPct.toFixed(1)}% violou o ANS do edital (&lt; ${res.profile.maxLoss}%).<br>`;
       }
 
@@ -2124,6 +2231,13 @@
         ${falhaDesc}
         <span style="color: #fca5a5; font-size: 11px;">Corrija a rota ou policer com a operadora antes de emitir o termo de aceite definitivo.</span>
       `;
+      if (fwaClass && fwaClass.is3gFallback) {
+        detail.innerHTML += `
+          <div style="margin-top: 8px; padding: 6px 10px; background: rgba(245, 158, 11, 0.15); border-left: 3px solid #F59E0B; border-radius: 4px; font-size: 11.5px; color: #FCD34D;">
+            ⚠️ <strong>Alerta de Tecnologia Móvel:</strong> Circuito operando na <strong>${fwaClass.label}</strong> (${res.dlAvg.toFixed(1)} Mbps). Throughput característico de rede móvel legado 3G. Recomendada reorientação de antena ou verificação de cobertura 4G/5G da operadora.
+          </div>
+        `;
+      }
     }
   }
 
@@ -2150,10 +2264,31 @@
       document.getElementById('auditRfpRegra').innerText = `Estabilidade ≥ 70% do Pico (Anatel FWA) • RTT ≤ ${p.maxRtt}ms`;
     } else if (p.isAsymmetric) {
       document.getElementById('auditCir').innerText = `${cfg.cirVal}M Down / ${cfg.cirUlVal}M Up (Assimétrico)`;
-      document.getElementById('auditRfpRegra').innerText = `DL ≥ ${(p.dlPctReq * 100).toFixed(0)}% • UL ≥ ${(p.ulPctReq * 100).toFixed(0)}% (Anatel) • RTT ≤ ${p.maxRtt}ms`;
+      document.getElementById('auditRfpRegra').innerText = `DL ≥ ${(p.dlPctReq * 100).toFixed(0)}% • UL ≥ ${(p.ulPctReq * 100).toFixed(0)}% (Anatel HFC 20%) • RTT ≤ ${p.maxRtt}ms`;
     } else {
       document.getElementById('auditCir').innerText = `${cfg.cirVal} Mbps (Simétrico 1:1)`;
       document.getElementById('auditRfpRegra').innerText = `L4 ≥ ${(p.dlPctReq * 100).toFixed(0)}% (RFC 6349 Simétrico) • RTT ≤ ${p.maxRtt}ms`;
+    }
+
+    const rowFwa = document.getElementById('rowAuditFwaBand');
+    const badgeFwa = document.getElementById('auditFwaBandBadge');
+    const boxFwa3g = document.getElementById('boxAuditFwa3gNote');
+    if (rowFwa && badgeFwa && d.fwaClassification) {
+      rowFwa.style.display = 'block';
+      badgeFwa.innerText = d.fwaClassification.label;
+      badgeFwa.style.color = d.fwaClassification.badgeColor;
+      badgeFwa.style.borderColor = d.fwaClassification.badgeColor;
+      badgeFwa.style.background = `${d.fwaClassification.badgeColor}22`;
+      badgeFwa.style.border = `1px solid ${d.fwaClassification.badgeColor}`;
+    } else if (rowFwa) {
+      rowFwa.style.display = 'none';
+    }
+    if (boxFwa3g) {
+      if (d.fwaClassification && d.fwaClassification.is3gFallback) {
+        boxFwa3g.style.display = 'block';
+      } else {
+        boxFwa3g.style.display = 'none';
+      }
     }
 
     document.getElementById('auditIp').innerText = clientGeo?.ip || 'Detectado';
@@ -2239,6 +2374,9 @@
       boxTitle.style.color = '#dc2626';
       boxText.innerHTML = `O circuito auditado violou um ou mais parâmetros mínimos estabelecidos no Acordo de Nível de Serviço (ANS) do projeto <strong>${p.fullName}</strong>. É mandatório o rebalanceamento de rota, policer ou reparo junto à operadora antes da assinatura do termo de entrega da OS.`;
     }
+    if (d.fwaClassification && d.fwaClassification.is3gFallback) {
+      boxText.innerHTML += `<br><span style="color: #d97706; font-weight: bold;">[ALERTA DE COBERTURA]:</span> Circuito operando na <strong>${d.fwaClassification.label}</strong> (< 20 Mbps). Recomendada verificação do apontamento de antena externa e níveis RSRP/SINR junto à operadora.`;
+    }
   }
 
   function printReport() {
@@ -2247,9 +2385,11 @@
 
   // MOTOR DE MEDIÇÃO MULTI-STREAM COM SELEÇÃO DE MENOR ESFORÇO MULTI-ENDPOINT (CORS NATIVO)
   async function measurePing(signal, onProbe, isFwa = false) {
-    const warmupProbes = isFwa ? 2 : 1;
-    const totalProbes = isFwa ? 12 : 6;
-    const probeIntervalMs = isFwa ? 28 : 8;
+    // Padrão Unificado de Alta Fidelidade (ITU-T Y.1540 / RFC 2681 / Anatel RQUAL) para todos os perfis
+    // 2 probes de aquecimento, 12 amostras com pacing de 28ms e média aparada
+    const warmupProbes = 2;
+    const totalProbes = 12;
+    const probeIntervalMs = 28;
 
     // Candidatos a menor esforço nacional com CORS garantido (Access-Control-Allow-Origin: *)
     // Permite que navegadores realizem telemetria legítima sem bloqueios de opaqueredirect / CORB
@@ -2360,8 +2500,8 @@
     if (samples.length > 0) {
       const sorted = [...samples].sort((a, b) => a - b);
       let targetSamples = sorted;
-      if (isFwa && sorted.length >= 8) {
-        // Corta 1 amostra mínima e 2 maiores (picos isolados de HARQ / RRC scheduling)
+      if (sorted.length >= 8) {
+        // Corta 1 amostra mínima e 2 maiores (picos isolados de enfileiramento / scheduling / HARQ)
         targetSamples = sorted.slice(1, sorted.length - 2);
       } else if (sorted.length >= 5) {
         // Corta 1 mínima e 1 máxima
