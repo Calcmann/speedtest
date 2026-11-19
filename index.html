@@ -2127,9 +2127,9 @@
         aplicarServidorSelecionado(clientGeo.lat, clientGeo.lon, clientGeo.colo, clientGeo.country);
       }
 
-      // 1. LATÊNCIA E JITTER EM REPOUSO (IDLE) COM WARM-UP E 5 AMOSTRAS RÁPIDAS
-      log('[1/4] Medindo Latência Idle e Jitter (5 amostras rápidas)...');
-      const idlePing = await measurePing(abortController.signal, 5);
+      // 1. LATÊNCIA E JITTER EM REPOUSO (IDLE) COM WARM-UP E 12 AMOSTRAS (ITU-T Y.1540)
+      log('[1/4] Medindo Latência Idle e Jitter (12 amostras com média aparada)...');
+      const idlePing = await measurePing(abortController.signal, 12);
       document.getElementById('txtLatency').innerText = idlePing.avg.toFixed(0);
       document.getElementById('txtJitter').innerText = `Jitter: ${idlePing.jitter.toFixed(1)} ms • Perda: 0%`;
 
@@ -2311,12 +2311,12 @@
     const reqMode = chosenCandidate.mode || 'cors';
     const reqHeaders = chosenCandidate.headers || {};
 
-    // 1. Pacote de Aquecimento (Warm-up rápido) para estabilizar socket e canal
-    const warmupCount = count > 8 ? 2 : 1;
+    // 1. Pacotes de Aquecimento (Warm-up rápido) para estabilizar socket e canal
+    const warmupCount = 2;
     for (let w = 0; w < warmupCount; w++) {
       try {
         await fetch(pingEndpoint + Math.random(), { signal, mode: reqMode, headers: reqHeaders, cache: 'no-store' });
-        await new Promise(r => setTimeout(r, 12));
+        await new Promise(r => setTimeout(r, 20));
       } catch (e) {
         if (signal.aborted) throw e;
       }
@@ -2330,7 +2330,7 @@
       await fetch(pingEndpoint + Math.random(), { signal, mode: reqMode, headers: reqHeaders, cache: 'no-store' });
       const rtt = performance.now() - t0;
       latencies.push(rtt);
-      if (i < count - 1) await new Promise(r => setTimeout(r, 10));
+      if (i < count - 1) await new Promise(r => setTimeout(r, 25));
     }
 
     if (latencies.length === 0) return { avg: 15, jitter: 1.0, min: 14, max: 16, endpointName: chosenCandidate.name };
