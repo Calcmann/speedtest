@@ -956,11 +956,6 @@
       </div>
     </div>
 
-    <!-- NOTA DE DIVERGÊNCIA GEOIP / ROTEAMENTO -->
-    <div id="boxAuditGeoNote" style="display: none; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 6px 10px; border-radius: 6px; font-size: 10.5px; margin-bottom: 10px; line-height: 1.4;">
-      <strong>⚠️ Nota Técnica de Auditoria (Roteamento / GeoIP):</strong> <span id="auditGeoNoteText">--</span>
-    </div>
-
     <!-- ALERTA DE TECNOLOGIA MÓVEL 3G FWA -->
     <div id="boxAuditFwa3gNote" style="display: none; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 6px 10px; border-radius: 6px; font-size: 10.5px; margin-bottom: 10px; line-height: 1.4;">
       <strong>⚠️ Alerta de Tecnologia Móvel:</strong> <span id="auditFwa3gNoteText">A taxa de transferência obtida (&lt; 20 Mbps) é compatível com redes móveis legado 3G (HSPA+). Recomendada verificação de visada e alinhamento de antena externa para conexão em portadora 4G/5G.</span>
@@ -2304,16 +2299,6 @@
     const popText = rota?.popAlvo ? `${rota.popAlvo.name} (~${rota.distKm.toFixed(0)} km • Menor Custo)` : `${clientGeo?.city || 'Brasil'} (Anycast Edge)`;
     document.getElementById('auditPop').innerText = popText;
 
-    const boxNote = document.getElementById('boxAuditGeoNote');
-    const txtNote = document.getElementById('auditGeoNoteText');
-    if (boxNote && txtNote) {
-      if (rota?.isMismatch && clientGeo?.city) {
-        boxNote.style.display = 'block';
-        txtNote.innerText = `Circuito entregue fisicamente em ${rota.origemNome}, porém o bloco de IP público alocado pela operadora (${clientGeo.isp}) possui registro GeoIP centralizado em ${clientGeo.city}. A medição foi vinculada e orientada ao servidor de Menor Custo Regional (${rota.popAlvo?.name || 'PoP Regional'}).`;
-      } else {
-        boxNote.style.display = 'none';
-      }
-    }
     if (document.getElementById('auditTecnico')) {
       document.getElementById('auditTecnico').innerText = cfg.tecnico || document.getElementById('txtTecnicoNome')?.value.trim() || localStorage.getItem('sparc_tecnico_nome') || 'Técnico de Campo';
     }
